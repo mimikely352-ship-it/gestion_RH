@@ -1,0 +1,64 @@
+<ivy-module version="2.0" xmlns:m="http://ant.apache.org/ivy/maven">
+    <info organisation="com.sirh" module="sirh" status="integration"/>
+
+    <configurations>
+        <!-- Fournies par le Tomcat externe au déploiement, ou outillage compile-only (Lombok) :
+             nécessaires pour compiler / exécuter en local, jamais copiées dans WEB-INF/lib du WAR. -->
+        <conf name="provided" visibility="private"/>
+        <!-- Dépendances applicatives : copiées dans WEB-INF/lib du WAR. -->
+        <conf name="runtime" visibility="private"/>
+        <!-- Classpath complet (compilation + exécution locale en Tomcat embarqué). -->
+        <conf name="compile" extends="provided,runtime" visibility="private"/>
+        <!-- Dépendances de test uniquement. -->
+        <conf name="test" extends="compile" visibility="private"/>
+    </configurations>
+
+    <dependencies>
+        <!-- Spring MVC + auto-configuration Spring Boot (sans le Tomcat embarqué, géré à part ci-dessous) -->
+        <dependency org="org.springframework.boot" name="spring-boot-starter-web" rev="3.5.16" conf="runtime->default">
+            <exclude org="org.springframework.boot" module="spring-boot-starter-tomcat"/>
+        </dependency>
+
+        <!-- Validation Bean (@Valid sur les DTO) -->
+        <dependency org="org.springframework.boot" name="spring-boot-starter-validation" rev="3.5.16" conf="runtime->default"/>
+
+        <!-- Spring Data JPA / Hibernate / HikariCP -->
+        <dependency org="org.springframework.boot" name="spring-boot-starter-data-jpa" rev="3.5.16" conf="runtime->default"/>
+
+        <!-- Spring Security -->
+        <dependency org="org.springframework.boot" name="spring-boot-starter-security" rev="3.5.16" conf="runtime->default"/>
+
+        <!-- Tomcat embarqué + Jasper (moteur JSP) : nécessaires pour compiler et pour le run local,
+             MAIS fournis par le Tomcat externe en production -> conf "provided", exclus du WAR. -->
+        <dependency org="org.springframework.boot" name="spring-boot-starter-tomcat" rev="3.5.16" conf="provided->default"/>
+        <dependency org="org.apache.tomcat.embed" name="tomcat-embed-jasper" rev="10.1.55" conf="provided->default"/>
+
+        <!-- JSTL : ni l'API ni l'implémentation ne sont fournies par Tomcat, les deux doivent être packagées
+             dans le WAR (l'implémentation déclare l'API en scope "provided", donc Ivy ne la tire pas
+             automatiquement : on la déclare nous-mêmes). -->
+        <dependency org="org.glassfish.web" name="jakarta.servlet.jsp.jstl" rev="3.0.1" conf="runtime->default"/>
+        <dependency org="jakarta.servlet.jsp.jstl" name="jakarta.servlet.jsp.jstl-api" rev="3.0.2" conf="runtime->default"/>
+
+        <!-- Taglib JSP de Spring Security (sec:authorize, sec:authentication) -->
+        <dependency org="org.springframework.security" name="spring-security-taglibs" rev="6.5.11" conf="runtime->default"/>
+
+        <!-- Pilote PostgreSQL -->
+        <dependency org="org.postgresql" name="postgresql" rev="42.7.14" conf="runtime->default"/>
+
+        <!-- JWT -->
+        <dependency org="io.jsonwebtoken" name="jjwt-api" rev="0.12.6" conf="runtime->default"/>
+        <dependency org="io.jsonwebtoken" name="jjwt-impl" rev="0.12.6" conf="runtime->default"/>
+        <dependency org="io.jsonwebtoken" name="jjwt-jackson" rev="0.12.6" conf="runtime->default"/>
+
+        <!-- Lombok : traitement d'annotations à la compilation uniquement, jamais au runtime -->
+        <dependency org="org.projectlombok" name="lombok" rev="1.18.48" conf="provided->default"/>
+
+        <!-- Tests -->
+        <dependency org="org.springframework.boot" name="spring-boot-starter-test" rev="3.5.16" conf="test->default">
+            <exclude org="org.springframework.boot" module="spring-boot-starter-tomcat"/>
+        </dependency>
+        <dependency org="org.springframework.security" name="spring-security-test" rev="6.5.11" conf="test->default"/>
+        <!-- requis par la tâche Ant <junitlauncher> pour exécuter les tests JUnit 5 -->
+        <dependency org="org.junit.platform" name="junit-platform-launcher" rev="1.12.2" conf="test->default"/>
+    </dependencies>
+</ivy-module>

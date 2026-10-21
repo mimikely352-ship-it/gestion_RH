@@ -1,0 +1,11 @@
+<ivysettings>
+    <!-- Résolution des dépendances contre Maven Central, en lisant les POM (y compris la chaîne de parents
+         spring-boot-starter-parent -> spring-boot-dependencies) pour hériter les versions gérées par Spring Boot. -->
+    <settings defaultResolver="central"/>
+
+    <caches defaultCacheDir="${ivy.settings.dir}/.ivy-cache"/>
+
+    <resolvers>
+        <ibiblio name="central" m2compatible="true" root="https://repo1.maven.org/maven2/"/>
+    </resolvers>
+</ivysettings>

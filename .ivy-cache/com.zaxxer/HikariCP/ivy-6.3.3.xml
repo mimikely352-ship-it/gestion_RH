@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivy-module version="2.0" xmlns:m="http://ant.apache.org/ivy/maven">
+	<info organisation="com.zaxxer"
+		module="HikariCP"
+		revision="6.3.3"
+		status="release"
+		publication="20250912212542"
+	>
+		<license name="The Apache Software License, Version 2.0" url="https://www.apache.org/licenses/LICENSE-2.0.txt" />
+		<description homepage="https://github.com/brettwooldridge/HikariCP">
+		Ultimate JDBC Connection Pool
+		</description>
+		<m:properties__felix.version>7.0.5</m:properties__felix.version>
+		<m:properties__sureFireForks11>false</m:properties__sureFireForks11>
+		<m:properties__pax.exam.version>4.14.0</m:properties__pax.exam.version>
+		<m:properties__slf4j.version>2.0.17</m:properties__slf4j.version>
+		<m:properties__project.build.sourceEncoding>UTF-8</m:properties__project.build.sourceEncoding>
+		<m:properties__log4j.version>2.25.1</m:properties__log4j.version>
+		<m:properties__commons.csv.version>1.12.0</m:properties__commons.csv.version>
+		<m:properties__junit.version>4.13.2</m:properties__junit.version>
+		<m:properties__metrics5.version>5.0.0-rc17</m:properties__metrics5.version>
+		<m:properties__simpleclient.version>0.16.0</m:properties__simpleclient.version>
+		<m:properties__javassist.version>3.29.2-GA</m:properties__javassist.version>
+		<m:properties__micrometer.version>1.5.4</m:properties__micrometer.version>
+		<m:properties__hibernate.version>5.4.24.Final</m:properties__hibernate.version>
+		<m:properties__metrics.version>3.2.5</m:properties__metrics.version>
+		<m:properties__h2.version>2.3.232</m:properties__h2.version>
+		<m:properties__mockito.version>3.7.7</m:properties__mockito.version>
+		<m:properties__autoReleaseStagedArtifacts>true</m:properties__autoReleaseStagedArtifacts>
+		<m:properties__maven.release.version>3.0.1</m:properties__maven.release.version>
+		<m:properties__pax.url.version>2.5.4</m:properties__pax.url.version>
+		<m:properties__sureFireOptions11>--add-modules=ALL-MODULE-PATH</m:properties__sureFireOptions11>
+		<m:properties__felix.bundle.plugin.version>5.1.9</m:properties__felix.bundle.plugin.version>
+		<m:properties__jndi.version>0.11.4.1</m:properties__jndi.version>
+		<m:properties__testcontainers.version>1.20.3</m:properties__testcontainers.version>
+		<m:properties__postgresql.version>42.7.7</m:properties__postgresql.version>
+		<m:properties__docker.maven.plugin.fabric8.version>0.45.0</m:properties__docker.maven.plugin.fabric8.version>
+		<m:properties__artifact.classifier/>
+		<m:properties__pax.exam.logging>none</m:properties__pax.exam.logging>
+		<m:properties__pax.exam.framework>felix</m:properties__pax.exam.framework>
+		<m:maven.plugins>org.apache.maven.plugins__maven-enforcer-plugin__3.4.1|null__maven-dependency-plugin__2.8|org.apache.maven.plugins__maven-javadoc-plugin__null|org.codehaus.mojo__exec-maven-plugin__1.6.0|io.fabric8__docker-maven-plugin__0.45.0|org.jacoco__jacoco-maven-plugin__0.8.8|org.apache.maven.plugins__maven-failsafe-plugin__3.0.0-M3|org.apache.felix__maven-bundle-plugin__5.1.9</m:maven.plugins>
+	</info>
+	<configurations>
+		<conf name="default" visibility="public" description="runtime dependencies and master artifact can be used with this conf" extends="runtime,master"/>
+		<conf name="master" visibility="public" description="contains only the artifact published by this module itself, with no transitive dependencies"/>
+		<conf name="compile" visibility="public" description="this is the default scope, used if none is specified. Compile dependencies are available in all classpaths."/>
+		<conf name="provided" visibility="public" description="this is much like compile, but indicates you expect the JDK or a container to provide it. It is only available on the compilation classpath, and is not transitive."/>
+		<conf name="runtime" visibility="public" description="this scope indicates that the dependency is not required for compilation, but is for execution. It is in the runtime and test classpaths, but not the compile classpath." extends="compile"/>
+		<conf name="test" visibility="public" description="this scope indicates that the dependency is not required for normal use of the application, and is only available for the test compilation and execution phases." extends="runtime"/>
+		<conf name="system" visibility="public" description="this scope is similar to provided except that you have to provide the JAR which contains it explicitly. The artifact is always available and is not looked up in a repository."/>
+		<conf name="sources" visibility="public" description="this configuration contains the source artifact of this module, if any."/>
+		<conf name="javadoc" visibility="public" description="this configuration contains the javadoc artifact of this module, if any."/>
+		<conf name="optional" visibility="public" description="contains all optional dependencies"/>
+	</configurations>
+	<publications>
+		<artifact name="HikariCP" type="bundle" ext="jar" conf="master"/>
+		<artifact name="HikariCP" type="source" ext="jar" conf="sources" m:classifier="sources"/>
+		<artifact name="HikariCP" type="javadoc" ext="jar" conf="javadoc" m:classifier="javadoc"/>
+	</publications>
+	<dependencies>
+		<dependency org="org.slf4j" name="slf4j-api" rev="2.0.17" force="true" conf="compile->compile(*),master(*);runtime->runtime(*)"/>
+		<dependency org="org.apache.logging.log4j" name="log4j-api" rev="2.25.1" force="true" conf="test->runtime(*),master(*)"/>
+		<dependency org="org.apache.logging.log4j" name="log4j-core" rev="2.25.1" force="true" conf="test->runtime(*),master(*)"/>
+		<dependency org="org.testcontainers" name="postgresql" rev="1.20.3" force="true" conf="test->runtime(*),master(*)"/>
+		<dependency org="org.apache.commons" name="commons-compress" rev="1.27.1" force="true" conf="test->runtime(*),master(*)"/>
+		<dependency org="org.apache.commons" name="commons-lang3" rev="3.18.0" force="true" conf="test->runtime(*),master(*)"/>
+		<dependency org="org.apache.commons" name="commons-csv" rev="1.12.0" force="true" conf="test->runtime(*),master(*)"/>
+		<dependency org="org.mockito" name="mockito-core" rev="3.7.7" force="true" conf="test->runtime(*),master(*)">
+			<exclude org="org.hamcrest" module="hamcrest-core" name="*" type="*" ext="*" conf="" matcher="exact"/>
+		</dependency>
+		<dependency org="junit" name="junit" rev="4.13.2" force="true" conf="test->runtime(*),master(*)"/>
+		<dependency org="org.javassist" name="javassist" rev="3.29.2-GA" force="true" conf="optional->compile(*),master(*)"/>
+		<dependency org="io.micrometer" name="micrometer-core" rev="1.5.4" force="true" conf="optional->compile(*),master(*)"/>
+		<dependency org="org.postgresql" name="postgresql" rev="42.7.7" force="true" conf="test->runtime(*),master(*)"/>
+		<dependency org="org.hibernate" name="hibernate-core" rev="5.4.24.Final" force="true" conf="optional->compile(*),provided(*),runtime(*),master(*)">
+			<exclude org="org.jboss.logging" module="jboss-logging" name="*" type="*" ext="*" conf="" matcher="exact"/>
+			<exclude org="org.jboss.logging" module="jboss-logging-annotations" name="*" type="*" ext="*" conf="" matcher="exact"/>
+		</dependency>
+		<dependency org="io.dropwizard.metrics" name="metrics-core" rev="3.2.5" force="true" conf="optional->compile(*),provided(*),runtime(*),master(*)"/>
+		<dependency org="io.dropwizard.metrics" name="metrics-healthchecks" rev="3.2.5" force="true" conf="optional->compile(*),provided(*),runtime(*),master(*)"/>
+		<dependency org="io.dropwizard.metrics5" name="metrics-core" rev="5.0.0-rc17" force="true" conf="optional->compile(*),provided(*),runtime(*),master(*)"/>
+		<dependency org="io.prometheus" name="simpleclient" rev="0.16.0" force="true" conf="optional->compile(*),provided(*),runtime(*),master(*)"/>
+		<dependency org="simple-jndi" name="simple-jndi" rev="0.11.4.1" force="true" conf="test->runtime(*),master(*)"/>
+		<dependency org="org.apache.logging.log4j" name="log4j-slf4j2-impl" rev="2.25.1" force="true" conf="test->runtime(*),master(*)"/>
+		<dependency org="javax.inject" name="javax.inject" rev="1" force="true" conf="test->runtime(*),master(*)"/>
+		<dependency org="org.apache.felix" name="org.apache.felix.framework" rev="7.0.5" force="true" conf="test->runtime(*),master(*)">
+			<artifact name="org.apache.felix.framework" type="jar" ext="jar"/>
+		</dependency>
+		<dependency org="org.ops4j.pax.exam" name="pax-exam-container-native" rev="4.14.0" force="true" conf="test->runtime(*),master(*)"/>
+		<dependency org="org.ops4j.pax.exam" name="pax-exam-junit4" rev="4.14.0" force="true" conf="test->runtime(*),master(*)"/>
+		<dependency org="org.ops4j.pax.exam" name="pax-exam-link-assembly" rev="4.14.0" force="true" conf="test->runtime(*),master(*)"/>
+		<dependency org="org.ops4j.pax.exam" name="pax-exam-link-mvn" rev="4.14.0" force="true" conf="test->runtime(*),master(*)"/>
+		<dependency org="org.ops4j.pax.url" name="pax-url-aether" rev="2.5.4" force="true" conf="test->runtime(*),master(*)"/>
+		<dependency org="org.ops4j.pax.url" name="pax-url-reference" rev="2.5.4" force="true" conf="test->runtime(*),master(*)"/>
+		<dependency org="com.h2database" name="h2" rev="2.3.232" force="true" conf="test->runtime(*),master(*)"/>
+	</dependencies>
+</ivy-module>

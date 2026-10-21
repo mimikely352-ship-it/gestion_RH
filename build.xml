@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="sirh" default="war" basedir=".">
+
+    <description>
+        SIRH — Gestion RH. Build Ant : résolution des dépendances via Apache Ivy (lib/tools/ivy-2.5.2.jar),
+        compilation Java 17, packaging WAR (JSP compilées à la volée par le Jasper du Tomcat externe).
+    </description>
+
+    <!-- ===================== Propriétés ===================== -->
+    <property name="src.dir" location="src/main/java"/>
+    <property name="resources.dir" location="src/main/resources"/>
+    <property name="webapp.dir" location="src/main/webapp"/>
+    <property name="test.src.dir" location="src/test/java"/>
+
+    <property name="build.dir" location="build"/>
+    <property name="classes.dir" location="${build.dir}/classes"/>
+    <property name="test.classes.dir" location="${build.dir}/test-classes"/>
+    <property name="test.reports.dir" location="${build.dir}/test-reports"/>
+    <property name="war.staging.dir" location="${build.dir}/war-staging"/>
+    <property name="dist.dir" location="${build.dir}/dist"/>
+    <property name="war.name" value="sirh.war"/>
+
+    <!-- jars récupérés par Ivy, classés par portée -->
+    <property name="lib.compile.dir" location="lib/compile"/>   <!-- classpath complet : compile + provided + runtime -->
+    <property name="lib.runtime.dir" location="lib/runtime"/>   <!-- va dans WEB-INF/lib du WAR -->
+    <property name="lib.test.dir" location="lib/test"/>         <!-- dépendances de test uniquement -->
+
+    <property name="tools.dir" location="tools"/>
+    <property name="ivy.jar" location="${tools.dir}/ivy-2.5.2.jar"/>
+    <property name="ivy.jar.url" value="https://repo1.maven.org/maven2/org/apache/ivy/ivy/2.5.2/ivy-2.5.2.jar"/>
+
+    <path id="compile.classpath">
+        <fileset dir="${lib.compile.dir}" includes="*.jar" erroronmissingdir="false"/>
+    </path>
+    <path id="test.classpath">
+        <path refid="compile.classpath"/>
+        <fileset dir="${lib.test.dir}" includes="*.jar" erroronmissingdir="false"/>
+        <pathelement location="${classes.dir}"/>
+        <pathelement location="${test.classes.dir}"/>
+        <pathelement location="${resources.dir}"/>
+    </path>
+
+    <!-- ===================== Bootstrap Ivy ===================== -->
+    <target name="bootstrap-ivy" description="Télécharge Apache Ivy si absent de tools/">
+        <mkdir dir="${tools.dir}"/>
+        <get src="${ivy.jar.url}" dest="${ivy.jar}" usetimestamp="true" skipexisting="true"/>
+        <taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant">
+            <classpath>
+                <pathelement location="${ivy.jar}"/>
+            </classpath>
+        </taskdef>
+    </target>
+
+    <target name="resolve" depends="bootstrap-ivy" description="Résout et récupère les dépendances (Maven Central) via Ivy">
+        <ivy:resolve xmlns:ivy="antlib:org.apache.ivy.ant" file="ivy.xml"/>
+        <ivy:retrieve xmlns:ivy="antlib:org.apache.ivy.ant" conf="compile" pattern="${lib.compile.dir}/[artifact]-[revision].[ext]"/>
+        <ivy:retrieve xmlns:ivy="antlib:org.apache.ivy.ant" conf="runtime" pattern="${lib.runtime.dir}/[artifact]-[revision].[ext]"/>
+        <ivy:retrieve xmlns:ivy="antlib:org.apache.ivy.ant" conf="test" pattern="${lib.test.dir}/[artifact]-[revision].[ext]"/>
+    </target>
+
+    <!-- ===================== Compilation ===================== -->
+    <target name="compile" depends="resolve" description="Compile les sources Java 17">
+        <mkdir dir="${classes.dir}"/>
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" includeantruntime="false"
+               source="17" target="17" encoding="UTF-8" debug="true">
+            <classpath refid="compile.classpath"/>
+            <compilerarg value="-parameters"/>
+        </javac>
+        <copy todir="${classes.dir}">
+            <fileset dir="${resources.dir}" erroronmissingdir="false"/>
+        </copy>
+    </target>
+
+    <target name="compile-tests" depends="compile" description="Compile les tests">
+        <mkdir dir="${test.classes.dir}"/>
+        <javac srcdir="${test.src.dir}" destdir="${test.classes.dir}" includeantruntime="false"
+               source="17" target="17" encoding="UTF-8" debug="true">
+            <classpath refid="test.classpath"/>
+        </javac>
+    </target>
+
+    <target name="test" depends="compile-tests" description="Exécute les tests unitaires (JUnit 5)">
+        <mkdir dir="${test.reports.dir}"/>
+        <junitlauncher haltonfailure="true" printsummary="true">
+            <classpath refid="test.classpath"/>
+            <testclasses outputdir="${test.reports.dir}">
+                <fileset dir="${test.classes.dir}" includes="**/*Test.class"/>
+                <listener type="legacy-plain" sendSysOut="true"/>
+            </testclasses>
+        </junitlauncher>
+    </target>
+
+    <!-- ===================== Packaging WAR ===================== -->
+    <target name="war" depends="compile" description="Assemble le WAR (déployable sur Tomcat 10.1+ externe)">
+        <mkdir dir="${war.staging.dir}"/>
+        <copy todir="${war.staging.dir}">
+            <fileset dir="${webapp.dir}"/>
+        </copy>
+        <mkdir dir="${war.staging.dir}/WEB-INF/classes"/>
+        <copy todir="${war.staging.dir}/WEB-INF/classes">
+            <fileset dir="${classes.dir}"/>
+        </copy>
+        <mkdir dir="${war.staging.dir}/WEB-INF/lib"/>
+        <copy todir="${war.staging.dir}/WEB-INF/lib" flatten="true">
+            <fileset dir="${lib.runtime.dir}" includes="*.jar"/>
+        </copy>
+        <mkdir dir="${dist.dir}"/>
+        <zip destfile="${dist.dir}/${war.name}" basedir="${war.staging.dir}"/>
+        <echo message="WAR généré : ${dist.dir}/${war.name}"/>
+    </target>
+
+    <!-- ===================== Exécution locale (Tomcat embarqué, pratique en dev) ===================== -->
+    <target name="run" depends="compile" description="Lance l'application en Tomcat embarqué (dev local, pas pour la prod)">
+        <java classname="com.sirh.Application" fork="true" failonerror="true">
+            <classpath refid="compile.classpath"/>
+            <classpath>
+                <pathelement location="${classes.dir}"/>
+            </classpath>
+        </java>
+    </target>
+
+    <!-- ===================== Nettoyage ===================== -->
+    <target name="clean" description="Supprime les artefacts compilés (conserve les dépendances déjà résolues)">
+        <delete dir="${build.dir}"/>
+    </target>
+
+    <target name="clean-all" depends="clean" description="Supprime en plus les dépendances résolues et le cache Ivy">
+        <delete dir="lib"/>
+        <delete dir="${basedir}/.ivy-cache"/>
+    </target>
+
+</project>

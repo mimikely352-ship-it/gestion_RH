@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivy-module version="2.0" xmlns:m="http://ant.apache.org/ivy/maven">
+	<info organisation="ch.qos.logback"
+		module="logback-parent"
+		revision="1.5.34"
+		status="release"
+		publication="20260601115246"
+	>
+		<license name="EPL-2.0" url="https://www.eclipse.org/legal/epl-v20.html" />
+		<license name="LGPL-2.1-only" url="https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html" />
+		<description homepage="http://logback.qos.ch">
+		logback project pom.xml file
+		</description>
+		<m:properties__maven.compiler.release>${jdk.version}</m:properties__maven.compiler.release>
+		<m:properties__byte-buddy.version>1.12.14</m:properties__byte-buddy.version>
+		<m:properties__maven-install-plugin.version>3.0.0-M1</m:properties__maven-install-plugin.version>
+		<m:properties__central-publishing-maven-plugin.version>0.9.0</m:properties__central-publishing-maven-plugin.version>
+		<m:properties__jakarta.servlet.version>5.0.0</m:properties__jakarta.servlet.version>
+		<m:properties__maven-bundle-plugin.version>5.1.9</m:properties__maven-bundle-plugin.version>
+		<m:properties__maven-source-plugin.version>3.2.0</m:properties__maven-source-plugin.version>
+		<m:properties__maven-release-plugin.version>3.0.0-M4</m:properties__maven-release-plugin.version>
+		<m:properties__cobertura.maven.plugin.version>2.7</m:properties__cobertura.maven.plugin.version>
+		<m:properties__jetty.version>12.0.13</m:properties__jetty.version>
+		<m:properties__jackson.version>2.15.0</m:properties__jackson.version>
+		<m:properties__hamcrest.version>2.2</m:properties__hamcrest.version>
+		<m:properties__jakarta.mail.version>2.1.5</m:properties__jakarta.mail.version>
+		<m:properties__maven-dependency-plugin.version>3.2.0</m:properties__maven-dependency-plugin.version>
+		<m:properties__jakarta.activation.version>2.1.4</m:properties__jakarta.activation.version>
+		<m:properties__junit-vintage-engine.version>5.9.1</m:properties__junit-vintage-engine.version>
+		<m:properties__maven-javadoc-plugin.version>3.3.0</m:properties__maven-javadoc-plugin.version>
+		<m:properties__slf4j.version>2.0.17</m:properties__slf4j.version>
+		<m:properties__maven-antrun-plugin.version>3.1.0</m:properties__maven-antrun-plugin.version>
+		<m:properties__project.build.sourceEncoding>UTF-8</m:properties__project.build.sourceEncoding>
+		<m:properties__jansi.version>2.4.0</m:properties__jansi.version>
+		<m:properties__xz.version>1.10</m:properties__xz.version>
+		<m:properties__maven-jxr-plugin.version>3.6.0</m:properties__maven-jxr-plugin.version>
+		<m:properties__consolePlugin.version>1.1.0</m:properties__consolePlugin.version>
+		<m:properties__janino.version>3.1.8</m:properties__janino.version>
+		<m:properties__maven-deploy-plugin.version>3.0.0-M1</m:properties__maven-deploy-plugin.version>
+		<m:properties__maven-jar-plugin.version>3.2.2</m:properties__maven-jar-plugin.version>
+		<m:properties__maven-compiler-plugin.version>3.10.1</m:properties__maven-compiler-plugin.version>
+		<m:properties__junit-jupiter-params.version>5.9.1</m:properties__junit-jupiter-params.version>
+		<m:properties__junit-jupiter-api.version>5.9.1</m:properties__junit-jupiter-api.version>
+		<m:properties__assertj-core.version>3.27.7</m:properties__assertj-core.version>
+		<m:properties__cal10n.version>0.8.1</m:properties__cal10n.version>
+		<m:properties__ant.version>1.10.13</m:properties__ant.version>
+		<m:properties__jakarta.angus-mail.version>2.0.3</m:properties__jakarta.angus-mail.version>
+		<m:properties__logback-access-project.version>2.0.12</m:properties__logback-access-project.version>
+		<m:properties__junit-platform.version>1.10.5</m:properties__junit-platform.version>
+		<m:properties__maven-surefire-plugin.version>3.5.4</m:properties__maven-surefire-plugin.version>
+		<m:properties__project.build.outputTimestamp>2026-06-01T08:46:00Z</m:properties__project.build.outputTimestamp>
+		<m:properties__greenmail.version>2.1.7</m:properties__greenmail.version>
+		<m:properties__license-maven-plugin.version>3.0</m:properties__license-maven-plugin.version>
+		<m:properties__jdk.version>11</m:properties__jdk.version>
+		<m:properties__mockito-core.version>4.8.0</m:properties__mockito-core.version>
+		<m:properties__maven-resources-plugin.version>3.1.0</m:properties__maven-resources-plugin.version>
+		<m:properties__maven-site-plugin.version>3.7.1</m:properties__maven-site-plugin.version>
+		<m:dependency.management__ch.qos.logback__logback-core__version>1.5.34</m:dependency.management__ch.qos.logback__logback-core__version>
+		<m:dependency.management__ch.qos.logback__logback-classic__version>1.5.34</m:dependency.management__ch.qos.logback__logback-classic__version>
+		<m:dependency.management__ch.qos.logback__logback-classic-misc__version>1.5.34</m:dependency.management__ch.qos.logback__logback-classic-misc__version>
+		<m:dependency.management__org.slf4j__slf4j-api__version>2.0.17</m:dependency.management__org.slf4j__slf4j-api__version>
+		<m:dependency.management__ch.qos.logback__logback-access__version>1.5.34</m:dependency.management__ch.qos.logback__logback-access__version>
+		<m:dependency.management__org.tukaani__xz__version>1.10</m:dependency.management__org.tukaani__xz__version>
+		<m:dependency.management__org.codehaus.janino__janino__version>3.1.8</m:dependency.management__org.codehaus.janino__janino__version>
+		<m:dependency.management__org.codehaus.janino__commons-compiler__version>3.1.8</m:dependency.management__org.codehaus.janino__commons-compiler__version>
+		<m:dependency.management__org.fusesource.jansi__jansi__version>2.4.0</m:dependency.management__org.fusesource.jansi__jansi__version>
+		<m:dependency.management__jakarta.mail__jakarta.mail-api__version>2.1.5</m:dependency.management__jakarta.mail__jakarta.mail-api__version>
+		<m:dependency.management__jakarta.activation__jakarta.activation-api__version>2.1.4</m:dependency.management__jakarta.activation__jakarta.activation-api__version>
+		<m:dependency.management__org.eclipse.angus__angus-mail__version>2.0.3</m:dependency.management__org.eclipse.angus__angus-mail__version>
+		<m:dependency.management__jakarta.servlet__jakarta.servlet-api__version>5.0.0</m:dependency.management__jakarta.servlet__jakarta.servlet-api__version>
+		<m:dependency.management__com.icegreen__greenmail__version>2.1.7</m:dependency.management__com.icegreen__greenmail__version>
+		<m:dependency.management__org.dom4j__dom4j__version>2.2.0</m:dependency.management__org.dom4j__dom4j__version>
+		<m:dependency.management__org.mockito__mockito-core__version>4.8.0</m:dependency.management__org.mockito__mockito-core__version>
+		<m:dependency.management__net.bytebuddy__byte-buddy__version>1.12.14</m:dependency.management__net.bytebuddy__byte-buddy__version>
+		<m:maven.plugins>org.apache.maven.plugins__maven-compiler-plugin__null|org.apache.maven.plugins__maven-source-plugin__null|org.apache.maven.plugins__maven-javadoc-plugin__null|org.apache.maven.plugins__maven-jxr-plugin__3.6.0|org.sonatype.central__central-publishing-maven-plugin__0.9.0</m:maven.plugins>
+	</info>
+	<configurations>
+		<conf name="default" visibility="public" description="runtime dependencies and master artifact can be used with this conf" extends="runtime,master"/>
+		<conf name="master" visibility="public" description="contains only the artifact published by this module itself, with no transitive dependencies"/>
+		<conf name="compile" visibility="public" description="this is the default scope, used if none is specified. Compile dependencies are available in all classpaths."/>
+		<conf name="provided" visibility="public" description="this is much like compile, but indicates you expect the JDK or a container to provide it. It is only available on the compilation classpath, and is not transitive."/>
+		<conf name="runtime" visibility="public" description="this scope indicates that the dependency is not required for compilation, but is for execution. It is in the runtime and test classpaths, but not the compile classpath." extends="compile"/>
+		<conf name="test" visibility="public" description="this scope indicates that the dependency is not required for normal use of the application, and is only available for the test compilation and execution phases." extends="runtime"/>
+		<conf name="system" visibility="public" description="this scope is similar to provided except that you have to provide the JAR which contains it explicitly. The artifact is always available and is not looked up in a repository."/>
+		<conf name="sources" visibility="public" description="this configuration contains the source artifact of this module, if any."/>
+		<conf name="javadoc" visibility="public" description="this configuration contains the javadoc artifact of this module, if any."/>
+		<conf name="optional" visibility="public" description="contains all optional dependencies"/>
+	</configurations>
+	<publications>
+	</publications>
+	<dependencies>
+		<dependency org="org.assertj" name="assertj-core" rev="3.27.7" force="true" conf="test->runtime(*),master(*)"/>
+		<dependency org="org.junit.jupiter" name="junit-jupiter-api" rev="5.9.1" force="true" conf="test->runtime(*),master(*)"/>
+		<dependency org="org.junit.jupiter" name="junit-jupiter-engine" rev="5.9.1" force="true" conf="test->runtime(*),master(*)"/>
+		<dependency org="org.junit.jupiter" name="junit-jupiter-params" rev="5.9.1" force="true" conf="test->runtime(*),master(*)"/>
+		<dependency org="org.hamcrest" name="hamcrest-library" rev="2.2" force="true" conf="test->runtime(*),master(*)"/>
+		<override org="ch.qos.logback" module="logback-core" matcher="exact" rev="1.5.34"/>
+		<override org="ch.qos.logback" module="logback-classic" matcher="exact" rev="1.5.34"/>
+		<override org="ch.qos.logback" module="logback-classic-misc" matcher="exact" rev="1.5.34"/>
+		<override org="org.slf4j" module="slf4j-api" matcher="exact" rev="2.0.17"/>
+		<override org="ch.qos.logback" module="logback-access" matcher="exact" rev="1.5.34"/>
+		<override org="ch.qos.logback" module="logback-core" matcher="exact" rev="1.5.34"/>
+		<override org="org.tukaani" module="xz" matcher="exact" rev="1.10"/>
+		<override org="org.codehaus.janino" module="janino" matcher="exact" rev="3.1.8"/>
+		<override org="org.codehaus.janino" module="commons-compiler" matcher="exact" rev="3.1.8"/>
+		<override org="org.fusesource.jansi" module="jansi" matcher="exact" rev="2.4.0"/>
+		<override org="jakarta.mail" module="jakarta.mail-api" matcher="exact" rev="2.1.5"/>
+		<override org="jakarta.activation" module="jakarta.activation-api" matcher="exact" rev="2.1.4"/>
+		<override org="org.eclipse.angus" module="angus-mail" matcher="exact" rev="2.0.3"/>
+		<override org="jakarta.servlet" module="jakarta.servlet-api" matcher="exact" rev="5.0.0"/>
+		<override org="com.icegreen" module="greenmail" matcher="exact" rev="2.1.7"/>
+		<override org="org.dom4j" module="dom4j" matcher="exact" rev="2.2.0"/>
+		<override org="org.mockito" module="mockito-core" matcher="exact" rev="4.8.0"/>
+		<override org="net.bytebuddy" module="byte-buddy" matcher="exact" rev="1.12.14"/>
+	</dependencies>
+</ivy-module>

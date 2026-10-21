@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivy-module version="2.0" xmlns:m="http://ant.apache.org/ivy/maven">
+	<info organisation="io.micrometer"
+		module="micrometer-tracing-bom"
+		revision="1.5.12"
+		status="release"
+		publication="20260608093609"
+	>
+		<license name="The Apache Software License, Version 2.0" url="http://www.apache.org/licenses/LICENSE-2.0.txt" />
+		<description homepage="https://github.com/micrometer-metrics/tracing">
+		Micrometer Tracing BOM (Bill of Materials) for managing Micrometer Tracing artifact versions
+		</description>
+		<m:properties__nebula_Module_Owner>tludwig@vmware.com,jivanov@vmware.com,mgrzejszczak@vmware.com</m:properties__nebula_Module_Owner>
+		<m:properties__nebula_Build_Timezone>Etc/UTC</m:properties__nebula_Build_Timezone>
+		<m:properties__nebula_Created_By>21.0.8+9-LTS (Eclipse Adoptium)</m:properties__nebula_Created_By>
+		<m:properties__nebula_Module_Origin>git@github.com:micrometer-metrics/tracing.git</m:properties__nebula_Module_Origin>
+		<m:properties__nebula_Build_Id>15327</m:properties__nebula_Build_Id>
+		<m:properties__nebula_Module_Source>/micrometer-tracing-bom</m:properties__nebula_Module_Source>
+		<m:properties__nebula_Module_Email>tludwig@vmware.com,jivanov@vmware.com,mgrzejszczak@vmware.com</m:properties__nebula_Module_Email>
+		<m:properties__nebula_Built_By>circleci</m:properties__nebula_Built_By>
+		<m:properties__nebula_Build_Url>https://circleci.com/gh/micrometer-metrics/tracing/15327</m:properties__nebula_Build_Url>
+		<m:properties__nebula_Change>3160b19</m:properties__nebula_Change>
+		<m:properties__nebula_Gradle_Version>8.14.5</m:properties__nebula_Gradle_Version>
+		<m:properties__nebula_Build_Date_UTC>2026-06-08T06:34:54.635132720Z</m:properties__nebula_Build_Date_UTC>
+		<m:properties__nebula_Build_Date>2026-06-08_06:34:54</m:properties__nebula_Build_Date>
+		<m:properties__nebula_Built_OS>Linux</m:properties__nebula_Built_OS>
+		<m:properties__nebula_Implementation_Version>1.5.12</m:properties__nebula_Implementation_Version>
+		<m:properties__nebula_Branch>HEAD</m:properties__nebula_Branch>
+		<m:properties__nebula_Build_Host>aad420ea6407</m:properties__nebula_Build_Host>
+		<m:properties__nebula_Implementation_Title>io.micrometer#micrometer-tracing-bom;1.5.12</m:properties__nebula_Implementation_Title>
+		<m:properties__nebula_Full_Change>3160b19bcd7438e7176537998275f6fbbe427f3c</m:properties__nebula_Full_Change>
+		<m:properties__nebula_Built_Status>release</m:properties__nebula_Built_Status>
+		<m:properties__nebula_Build_Number>15327</m:properties__nebula_Build_Number>
+		<m:properties__nebula_Build_Job>deploy</m:properties__nebula_Build_Job>
+		<m:properties__nebula_Manifest_Version>1.0</m:properties__nebula_Manifest_Version>
+		<m:dependency.management__io.micrometer__micrometer-tracing__version>1.5.12</m:dependency.management__io.micrometer__micrometer-tracing__version>
+		<m:dependency.management__io.micrometer__micrometer-tracing-bridge-brave__version>1.5.12</m:dependency.management__io.micrometer__micrometer-tracing-bridge-brave__version>
+		<m:dependency.management__io.micrometer__micrometer-tracing-bridge-otel__version>1.5.12</m:dependency.management__io.micrometer__micrometer-tracing-bridge-otel__version>
+		<m:dependency.management__io.micrometer__micrometer-tracing-integration-test__version>1.5.12</m:dependency.management__io.micrometer__micrometer-tracing-integration-test__version>
+		<m:dependency.management__io.micrometer__micrometer-tracing-reporter-wavefront__version>1.5.12</m:dependency.management__io.micrometer__micrometer-tracing-reporter-wavefront__version>
+		<m:dependency.management__io.micrometer__micrometer-tracing-test__version>1.5.12</m:dependency.management__io.micrometer__micrometer-tracing-test__version>
+		<m:dependency.management__io.micrometer__micrometer-commons__version>1.15.12</m:dependency.management__io.micrometer__micrometer-commons__version>
+		<m:dependency.management__io.micrometer__micrometer-core__version>1.15.12</m:dependency.management__io.micrometer__micrometer-core__version>
+		<m:dependency.management__io.micrometer__micrometer-jakarta9__version>1.15.12</m:dependency.management__io.micrometer__micrometer-jakarta9__version>
+		<m:dependency.management__io.micrometer__micrometer-java11__version>1.15.12</m:dependency.management__io.micrometer__micrometer-java11__version>
+		<m:dependency.management__io.micrometer__micrometer-java21__version>1.15.12</m:dependency.management__io.micrometer__micrometer-java21__version>
+		<m:dependency.management__io.micrometer__micrometer-jetty11__version>1.15.12</m:dependency.management__io.micrometer__micrometer-jetty11__version>
+		<m:dependency.management__io.micrometer__micrometer-jetty12__version>1.15.12</m:dependency.management__io.micrometer__micrometer-jetty12__version>
+		<m:dependency.management__io.micrometer__micrometer-observation__version>1.15.12</m:dependency.management__io.micrometer__micrometer-observation__version>
+		<m:dependency.management__io.micrometer__micrometer-observation-test__version>1.15.12</m:dependency.management__io.micrometer__micrometer-observation-test__version>
+		<m:dependency.management__io.micrometer__micrometer-registry-appoptics__version>1.15.12</m:dependency.management__io.micrometer__micrometer-registry-appoptics__version>
+		<m:dependency.management__io.micrometer__micrometer-registry-atlas__version>1.15.12</m:dependency.management__io.micrometer__micrometer-registry-atlas__version>
+		<m:dependency.management__io.micrometer__micrometer-registry-azure-monitor__version>1.15.12</m:dependency.management__io.micrometer__micrometer-registry-azure-monitor__version>
+		<m:dependency.management__io.micrometer__micrometer-registry-cloudwatch2__version>1.15.12</m:dependency.management__io.micrometer__micrometer-registry-cloudwatch2__version>
+		<m:dependency.management__io.micrometer__micrometer-registry-datadog__version>1.15.12</m:dependency.management__io.micrometer__micrometer-registry-datadog__version>
+		<m:dependency.management__io.micrometer__micrometer-registry-dynatrace__version>1.15.12</m:dependency.management__io.micrometer__micrometer-registry-dynatrace__version>
+		<m:dependency.management__io.micrometer__micrometer-registry-elastic__version>1.15.12</m:dependency.management__io.micrometer__micrometer-registry-elastic__version>
+		<m:dependency.management__io.micrometer__micrometer-registry-ganglia__version>1.15.12</m:dependency.management__io.micrometer__micrometer-registry-ganglia__version>
+		<m:dependency.management__io.micrometer__micrometer-registry-graphite__version>1.15.12</m:dependency.management__io.micrometer__micrometer-registry-graphite__version>
+		<m:dependency.management__io.micrometer__micrometer-registry-health__version>1.15.12</m:dependency.management__io.micrometer__micrometer-registry-health__version>
+		<m:dependency.management__io.micrometer__micrometer-registry-humio__version>1.15.12</m:dependency.management__io.micrometer__micrometer-registry-humio__version>
+		<m:dependency.management__io.micrometer__micrometer-registry-influx__version>1.15.12</m:dependency.management__io.micrometer__micrometer-registry-influx__version>
+		<m:dependency.management__io.micrometer__micrometer-registry-jmx__version>1.15.12</m:dependency.management__io.micrometer__micrometer-registry-jmx__version>
+		<m:dependency.management__io.micrometer__micrometer-registry-kairos__version>1.15.12</m:dependency.management__io.micrometer__micrometer-registry-kairos__version>
+		<m:dependency.management__io.micrometer__micrometer-registry-new-relic__version>1.15.12</m:dependency.management__io.micrometer__micrometer-registry-new-relic__version>
+		<m:dependency.management__io.micrometer__micrometer-registry-opentsdb__version>1.15.12</m:dependency.management__io.micrometer__micrometer-registry-opentsdb__version>
+		<m:dependency.management__io.micrometer__micrometer-registry-otlp__version>1.15.12</m:dependency.management__io.micrometer__micrometer-registry-otlp__version>
+		<m:dependency.management__io.micrometer__micrometer-registry-prometheus__version>1.15.12</m:dependency.management__io.micrometer__micrometer-registry-prometheus__version>
+		<m:dependency.management__io.micrometer__micrometer-registry-prometheus-simpleclient__version>1.15.12</m:dependency.management__io.micrometer__micrometer-registry-prometheus-simpleclient__version>
+		<m:dependency.management__io.micrometer__micrometer-registry-signalfx__version>1.15.12</m:dependency.management__io.micrometer__micrometer-registry-signalfx__version>
+		<m:dependency.management__io.micrometer__micrometer-registry-stackdriver__version>1.15.12</m:dependency.management__io.micrometer__micrometer-registry-stackdriver__version>
+		<m:dependency.management__io.micrometer__micrometer-registry-statsd__version>1.15.12</m:dependency.management__io.micrometer__micrometer-registry-statsd__version>
+		<m:dependency.management__io.micrometer__micrometer-registry-wavefront__version>1.15.12</m:dependency.management__io.micrometer__micrometer-registry-wavefront__version>
+		<m:dependency.management__io.micrometer__micrometer-test__version>1.15.12</m:dependency.management__io.micrometer__micrometer-test__version>
+		<m:dependency.management__io.micrometer__context-propagation__version>1.1.4</m:dependency.management__io.micrometer__context-propagation__version>
+	</info>
+	<configurations>
+		<conf name="default" visibility="public" description="runtime dependencies and master artifact can be used with this conf" extends="runtime,master"/>
+		<conf name="master" visibility="public" description="contains only the artifact published by this module itself, with no transitive dependencies"/>
+		<conf name="compile" visibility="public" description="this is the default scope, used if none is specified. Compile dependencies are available in all classpaths."/>
+		<conf name="provided" visibility="public" description="this is much like compile, but indicates you expect the JDK or a container to provide it. It is only available on the compilation classpath, and is not transitive."/>
+		<conf name="runtime" visibility="public" description="this scope indicates that the dependency is not required for compilation, but is for execution. It is in the runtime and test classpaths, but not the compile classpath." extends="compile"/>
+		<conf name="test" visibility="public" description="this scope indicates that the dependency is not required for normal use of the application, and is only available for the test compilation and execution phases." extends="runtime"/>
+		<conf name="system" visibility="public" description="this scope is similar to provided except that you have to provide the JAR which contains it explicitly. The artifact is always available and is not looked up in a repository."/>
+		<conf name="sources" visibility="public" description="this configuration contains the source artifact of this module, if any."/>
+		<conf name="javadoc" visibility="public" description="this configuration contains the javadoc artifact of this module, if any."/>
+		<conf name="optional" visibility="public" description="contains all optional dependencies"/>
+	</configurations>
+	<publications>
+	</publications>
+</ivy-module>

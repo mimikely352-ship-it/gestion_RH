@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mes candidatures — TalentHub</title>
+  <link rel="stylesheet" href="charte.css">
+  <link rel="stylesheet" href="candidat.css">
+
+  <!-- Styles propres à la page "Mes candidatures" -->
+  <style>
+    /* --- Intro de page --- */
+    .page-titre {
+      padding: var(--e-8) 0 var(--e-6);
+      border-bottom: 1px solid var(--trait);
+    }
+    .page-titre h1 { font-size: var(--t-32); margin-bottom: var(--e-2); }
+    .page-titre p { color: var(--encre-douce); }
+
+    /* --- Profil résumé --- */
+    .profil-resume {
+      display: flex; align-items: center; gap: var(--e-4);
+      background: var(--surface); border: 1px solid var(--trait);
+      border-radius: var(--r-fiche); box-shadow: var(--ombre-fiche);
+      padding: var(--e-5); margin: var(--e-6) 0;
+      flex-wrap: wrap;
+    }
+    .profil-resume .avatar { width: 56px; height: 56px; font-size: var(--t-19); }
+    .profil-resume__infos { flex: 1; min-width: 200px; }
+    .profil-resume__infos h3 { margin-bottom: var(--e-1); }
+    .profil-resume__infos p { color: var(--encre-douce); font-size: var(--t-14); margin: 0; }
+    .profil-resume__stats { display: flex; gap: var(--e-6); }
+    .profil-resume__stats div { text-align: right; }
+    .profil-resume__stats b { display: block; font-size: var(--t-24); color: var(--indigo); font-weight: 750; }
+    .profil-resume__stats span { font-size: var(--t-12); color: var(--encre-douce); }
+
+    /* --- Filtres par statut --- */
+    .filtres-statut {
+      display: flex; gap: var(--e-2); flex-wrap: wrap;
+      margin: var(--e-6) 0 var(--e-5);
+    }
+    .filtres-statut button {
+      font: inherit; font-size: var(--t-14); font-weight: 600;
+      padding: 8px var(--e-4); border-radius: 999px;
+      background: var(--surface); color: var(--encre-douce);
+      border: 1px solid var(--trait-fort); cursor: pointer;
+      transition: all var(--duree);
+    }
+    .filtres-statut button:hover { border-color: var(--indigo); color: var(--indigo); }
+    .filtres-statut button.actif { background: var(--indigo); color: #fff; border-color: var(--indigo); }
+
+    /* --- Carte de candidature --- */
+    .candidature-liste { display: flex; flex-direction: column; gap: var(--e-4); }
+
+    .candidature {
+      background: var(--surface); border: 1px solid var(--trait);
+      border-radius: var(--r-fiche); box-shadow: var(--ombre-fiche);
+      overflow: hidden;
+    }
+    .candidature__entete {
+      display: flex; align-items: flex-start; gap: var(--e-4);
+      padding: var(--e-5);
+      border-bottom: 1px solid var(--trait);
+      flex-wrap: wrap;
+    }
+    .candidature__infos { flex: 1; min-width: 220px; }
+    .candidature__infos h3 { margin-bottom: var(--e-1); }
+    .candidature__infos .meta {
+      font-size: var(--t-14); color: var(--encre-douce);
+      display: flex; gap: var(--e-3); flex-wrap: wrap;
+    }
+    .candidature__actions {
+      display: flex; align-items: center; gap: var(--e-2); flex-wrap: wrap;
+      margin-left: auto;
+    }
+
+    /* --- Timeline de suivi --- */
+    .suivi {
+      display: flex; padding: var(--e-5);
+      gap: var(--e-1); overflow-x: auto;
+      border-bottom: 1px solid var(--trait);
+      background: var(--surface-2);
+    }
+    .suivi-etape {
+      flex: 1; min-width: 110px;
+      display: flex; flex-direction: column; align-items: center;
+      text-align: center; gap: var(--e-1);
+      font-size: var(--t-12); color: var(--encre-pale);
+      position: relative;
+    }
+    .suivi-etape::before {
+      content: ""; width: 12px; height: 12px; border-radius: 50%;
+      background: var(--surface); border: 2px solid var(--trait-fort);
+      margin-bottom: var(--e-1);
+      z-index: 1;
+    }
+    .suivi-etape::after {
+      content: ""; position: absolute; top: 5px; left: 50%;
+      width: 100%; height: 2px; background: var(--trait);
+      z-index: 0;
+    }
+    .suivi-etape:last-child::after { display: none; }
+    .suivi-etape.fait { color: var(--encre); font-weight: 600; }
+    .suivi-etape.fait::before { background: var(--indigo); border-color: var(--indigo); }
+    .suivi-etape.fait + .suivi-etape::after,
+    .suivi-etape.fait::after { background: var(--indigo); }
+    .suivi-etape.refus::before { background: var(--rouge); border-color: var(--rouge); }
+    .suivi-etape.refus { color: var(--rouge); font-weight: 600; }
+    .suivi-etape small { font-size: 10px; color: var(--encre-pale); font-weight: 400; }
+
+    /* --- Pied : dernière activité --- */
+    .candidature__pied {
+      padding: var(--e-3) var(--e-5);
+      font-size: var(--t-12); color: var(--encre-douce);
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: var(--e-2);
+    }
+    .candidature__pied .derniere {
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .candidature__pied .derniere::before {
+      content: ""; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--indigo);
+    }
+
+    /* --- État vide --- */
+    .vide-candidatures {
+      text-align: center; padding: var(--e-12) var(--e-6);
+      border: 1px dashed var(--trait-fort); border-radius: var(--r-fiche);
+      background: var(--surface);
+    }
+    .vide-candidatures h3 { margin-bottom: var(--e-2); }
+    .vide-candidatures p { color: var(--encre-douce); margin: 0 auto var(--e-5); }
+
+    @media (max-width: 640px) {
+      .profil-resume { flex-direction: column; text-align: center; }
+      .profil-resume__stats { justify-content: center; }
+      .candidature__actions { margin-left: 0; width: 100%; }
+      .suivi { padding: var(--e-3); }
+      .suivi-etape { min-width: 90px; font-size: 11px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== HEADER PUBLIC (identique à l'accueil) ===== -->
+<header class="site-entete">
+  <div class="site-conteneur site-entete__inner">
+    <a href="index.html" class="site-marque">
+      <span class="site-marque__logo">T</span>
+      <strong>TalentHub</strong>
+    </a>
+
+    <nav class="site-nav" aria-label="Navigation principale">
+      <a href="candidat.html">Offres d'emploi</a>
+      <a href="mes-candidatures.html" class="actif">Mes candidatures</a>
+    </nav>
+
+    <div class="site-actions">
+      <a href="#" class="btn btn-secondaire">Se connecter</a>
+      <a href="#" class="btn btn-principal">Devenir candidat</a>
+    </div>
+  </div>
+</header>
+
+<!-- ===== CONTENU ===== -->
+<main class="site-conteneur" style="padding-bottom: var(--e-12);">
+
+  <!-- Titre de page -->
+  <div class="page-titre">
+    <h1>Mes candidatures</h1>
+    <p>Suivez l'avancement de chaque candidature, étape par étape.</p>
+  </div>
+
+  <!-- Résumé du profil -->
+  <section class="profil-resume" aria-label="Résumé du profil">
+    <span class="avatar">MR</span>
+    <div class="profil-resume__infos">
+      <h3>Mamy Randriamanana</h3>
+      <p>mamy.r@gmail.com · Candidat depuis mars 2026</p>
+    </div>
+    <div class="profil-resume__stats">
+      <div><b>4</b><span>Candidatures</span></div>
+      <div><b>1</b><span>Entretien</span></div>
+      <div><b>0</b><span>Offre reçue</span></div>
+    </div>
+  </section>
+
+  <!-- Filtres -->
+  <div class="filtres-statut" role="tablist" aria-label="Filtrer par statut">
+    <button class="actif" data-statut="tous">Toutes <span class="texte-mini texte-doux">(4)</span></button>
+    <button data-statut="en-cours">En cours <span class="texte-mini texte-doux">(3)</span></button>
+    <button data-statut="entretien">Entretien <span class="texte-mini texte-doux">(1)</span></button>
+    <button data-statut="refuse">Refusées <span class="texte-mini texte-doux">(1)</span></button>
+  </div>
+
+  <!-- Liste des candidatures -->
+  <div class="candidature-liste" id="liste-candidatures">
+
+    <!-- Candidature 1 — Entretien -->
+    <article class="candidature" data-statut="entretien">
+      <div class="candidature__entete">
+        <div class="offre-logo offre-logo--purple">S</div>
+        <div class="candidature__infos">
+          <h3>Développeur Front-End React</h3>
+          <p class="meta">
+            <span>SopraTech · Paris</span>
+            <span>·</span>
+            <span>CDI · 45–55 k€</span>
+          </p>
+        </div>
+        <div class="candidature__actions">
+          <span class="statut statut--entretien">Entretien</span>
+          <a href="offre.html?id=1" class="btn btn-secondaire btn-petit">Voir l'offre</a>
+        </div>
+      </div>
+
+      <div class="suivi" aria-label="Progression de la candidature">
+        <div class="suivi-etape fait">Reçue<small>14/10/2026</small></div>
+        <div class="suivi-etape fait">Présélection<small>16/10/2026</small></div>
+        <div class="suivi-etape fait">Test technique<small>18/10/2026 · 17/20</small></div>
+        <div class="suivi-etape fait">Entretien<small>22/10/2026 · 10h00</small></div>
+        <div class="suivi-etape">Proposition</div>
+      </div>
+
+      <div class="candidature__pied">
+        <span class="derniere">Entretien planifié le jeudi 22 octobre à 10h00 (visio)</span>
+        <span>Déposée le 14/10/2026</span>
+      </div>
+    </article>
+
+    <!-- Candidature 2 — Test technique -->
+    <article class="candidature" data-statut="en-cours">
+      <div class="candidature__entete">
+        <div class="offre-logo offre-logo--blue">D</div>
+        <div class="candidature__infos">
+          <h3>Data Analyst</h3>
+          <p class="meta">
+            <span>DataVision · Lyon</span>
+            <span>·</span>
+            <span>CDI · 40–50 k€</span>
+          </p>
+        </div>
+        <div class="candidature__actions">
+          <span class="statut statut--test">Test en cours</span>
+          <a href="offre.html?id=2" class="btn btn-secondaire btn-petit">Voir l'offre</a>
+        </div>
+      </div>
+
+      <div class="suivi">
+        <div class="suivi-etape fait">Reçue<small>15/10/2026</small></div>
+        <div class="suivi-etape fait">Présélection<small>17/10/2026</small></div>
+        <div class="suivi-etape fait">Test technique<small>À rendre avant le 25/10</small></div>
+        <div class="suivi-etape">Entretien</div>
+        <div class="suivi-etape">Proposition</div>
+      </div>
+
+      <div class="candidature__pied">
+        <span class="derniere">Test SQL à réaliser — lien envoyé par e-mail</span>
+        <span>Déposée le 15/10/2026</span>
+      </div>
+    </article>
+
+    <!-- Candidature 3 — Présélection -->
+    <article class="candidature" data-statut="en-cours">
+      <div class="candidature__entete">
+        <div class="offre-logo offre-logo--green">G</div>
+        <div class="candidature__infos">
+          <h3>Chef de Projet Digital</h3>
+          <p class="meta">
+            <span>GreenWave · Bordeaux</span>
+            <span>·</span>
+            <span>CDD 12 mois · 38–45 k€</span>
+          </p>
+        </div>
+        <div class="candidature__actions">
+          <span class="statut statut--preselection">Présélectionnée</span>
+          <a href="offre.html?id=3" class="btn btn-secondaire btn-petit">Voir l'offre</a>
+        </div>
+      </div>
+
+      <div class="suivi">
+        <div class="suivi-etape fait">Reçue<small>17/10/2026</small></div>
+        <div class="suivi-etape fait">Présélection<small>19/10/2026</small></div>
+        <div class="suivi-etape">Test technique</div>
+        <div class="suivi-etape">Entretien</div>
+        <div class="suivi-etape">Proposition</div>
+      </div>
+
+      <div class="candidature__pied">
+        <span class="derniere">CV retenu par l'équipe RH — en attente de planification</span>
+        <span>Déposée le 17/10/2026</span>
+      </div>
+    </article>
+
+    <!-- Candidature 4 — Refusée -->
+    <article class="candidature" data-statut="refuse">
+      <div class="candidature__entete">
+        <div class="offre-logo offre-logo--pink">M</div>
+        <div class="candidature__infos">
+          <h3>Ingénieur DevOps</h3>
+          <p class="meta">
+            <span>MindCloud · Nantes</span>
+            <span>·</span>
+            <span>CDI · 55–65 k€</span>
+          </p>
+        </div>
+        <div class="candidature__actions">
+          <span class="statut statut--refuse">Refusée</span>
+          <a href="offre.html?id=5" class="btn btn-secondaire btn-petit">Voir l'offre</a>
+        </div>
+      </div>
+
+      <div class="suivi">
+        <div class="suivi-etape fait">Reçue<small>09/10/2026</small></div>
+        <div class="suivi-etape fait">Présélection<small>11/10/2026</small></div>
+        <div class="suivi-etape refus">Non retenue<small>13/10/2026</small></div>
+        <div class="suivi-etape">Entretien</div>
+        <div class="suivi-etape">Proposition</div>
+      </div>
+
+      <div class="candidature__pied">
+        <span class="derniere">Profil retenu : expérience AWS plus approfondie requise</span>
+        <span>Déposée le 09/10/2026</span>
+      </div>
+    </article>
+
+  </div>
+
+  <!-- État vide (caché par défaut) -->
+  <div class="vide-candidatures" id="vide-candidatures" hidden>
+    <h3>Aucune candidature dans cette catégorie</h3>
+    <p>Essayez un autre filtre ou parcourez les offres disponibles.</p>
+    <a href="index.html#offres" class="btn btn-principal">Voir les offres</a>
+  </div>
+
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer class="site-pied">
+  <div class="site-conteneur">
+    <div class="site-pied__liens">
+      <a href="#">À propos</a><a href="index.html#offres">Offres</a>
+      <a href="#">Contact</a><a href="#">Mentions légales</a>
+    </div>
+    <p class="texte-petit">© 2026 TalentHub — Tous droits réservés.</p>
+  </div>
+</footer>
+
+<script>
+  // Filtre par statut
+  const boutons = document.querySelectorAll('.filtres-statut button');
+  const candidatures = document.querySelectorAll('.candidature');
+  const vide = document.getElementById('vide-candidatures');
+  const liste = document.getElementById('liste-candidatures');
+
+  boutons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      boutons.forEach(b => b.classList.remove('actif'));
+      btn.classList.add('actif');
+
+      const statut = btn.dataset.statut;
+      let visibles = 0;
+
+      candidatures.forEach(c => {
+        const ok = statut === 'tous'
+          || (statut === 'en-cours' && ['entretien', 'en-cours'].includes(c.dataset.statut))
+          || c.dataset.statut === statut;
+        c.style.display = ok ? '' : 'none';
+        if (ok) visibles++;
+      });
+
+      vide.hidden = visibles > 0;
+      liste.style.display = visibles > 0 ? '' : 'none';
+    });
+  });
+</script>
+</body>
+</html>

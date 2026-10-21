@@ -1,0 +1,10 @@
+package com.sirh.candidat.repository;
+
+import com.sirh.candidat.entity.Experience;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface ExperienceRepository extends JpaRepository<Experience, Long> {
+    List<Experience> findByCandidatId(Long candidatId);
+}

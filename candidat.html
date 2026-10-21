@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TalentHub — Trouvez votre prochain emploi</title>
+  <link rel="stylesheet" href="charte.css">
+  <link rel="stylesheet" href="candidat.css">
+</head>
+<body>
+
+<!-- ===== HEADER PUBLIC ===== -->
+<header class="site-entete">
+  <div class="site-conteneur site-entete__inner">
+    <a href="index.html" class="site-marque">
+      <span class="site-marque__logo">T</span>
+      <strong>TalentHub</strong>
+    </a>
+
+    <nav class="site-nav" aria-label="Navigation principale">
+      <a href="#offres" class="actif">Offres d'emploi</a>
+      <a href="mes-candidatures.html">Mes candidatures</a>
+    </nav>
+
+    <div class="site-actions">
+      <a href="#" class="btn btn-secondaire">Se connecter</a>
+      <a href="#" class="btn btn-principal">Devenir candidat</a>
+    </div>
+  </div>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="site-hero">
+  <div class="site-conteneur">
+    <h1>Le poste qui vous <span>ressemble</span></h1>
+    <p>Des offres sélectionnées, un dossier de candidature simple, un suivi transparent à chaque étape.</p>
+
+    <form class="site-recherche" onsubmit="event.preventDefault(); filtrerOffres();">
+      <input id="recherche" type="search" placeholder="🔍 Poste, mot-clé, département…" aria-label="Rechercher">
+      <button type="submit" class="btn btn-principal">Rechercher</button>
+    </form>
+  </div>
+</section>
+
+<!-- ===== LISTE DES OFFRES ===== -->
+<main class="site-conteneur site-main" id="offres">
+  <div class="site-section-titre">
+    <h2>Offres d'emploi</h2>
+    <span class="texte-petit texte-doux" id="compteur-offres">6 offres disponibles</span>
+  </div>
+
+  <div class="site-filtres">
+    <button class="filtre actif" data-filtre="tous">Toutes</button>
+    <button class="filtre" data-filtre="CDI">CDI</button>
+    <button class="filtre" data-filtre="CDD">CDD</button>
+    <button class="filtre" data-filtre="Stage">Stage</button>
+    <button class="filtre" data-filtre="Télétravail">Télétravail</button>
+  </div>
+
+  <div class="offres-grille" id="grille-offres">
+
+    <article class="offre-carte" data-contrat="CDI" data-tags="CDI React Front-end Télétravail">
+      <div class="offre-carte__top">
+        <div class="offre-logo offre-logo--purple">S</div>
+        <div>
+          <h3>Développeur Front-End React</h3>
+          <p class="texte-petit texte-doux">SopraTech · Paris · il y a 2h</p>
+        </div>
+      </div>
+      <p class="offre-carte__desc">Rejoignez une équipe produit de 12 personnes pour construire l'interface de notre SaaS B2B.</p>
+      <div class="offre-carte__tags">
+        <span class="tag">CDI</span>
+        <span class="tag tag--vert">Télétravail</span>
+        <span class="tag">React</span>
+      </div>
+      <div class="offre-carte__pied">
+        <span class="donnee">45–55 k€</span>
+        <a href="offre.html?id=1" class="btn btn-principal btn-petit">Voir l'offre</a>
+      </div>
+    </article>
+
+    <article class="offre-carte" data-contrat="CDI" data-tags="CDI Data SQL Hybride">
+      <div class="offre-carte__top">
+        <div class="offre-logo offre-logo--blue">D</div>
+        <div>
+          <h3>Data Analyst</h3>
+          <p class="texte-petit texte-doux">DataVision · Lyon · hier</p>
+        </div>
+      </div>
+      <p class="offre-carte__desc">Analysez les données produit pour guider les décisions stratégiques de nos équipes.</p>
+      <div class="offre-carte__tags">
+        <span class="tag">CDI</span>
+        <span class="tag tag--kraft">Hybride</span>
+        <span class="tag">SQL</span>
+      </div>
+      <div class="offre-carte__pied">
+        <span class="donnee">40–50 k€</span>
+        <a href="offre.html?id=2" class="btn btn-principal btn-petit">Voir l'offre</a>
+      </div>
+    </article>
+
+    <article class="offre-carte" data-contrat="CDD" data-tags="CDD Marketing Télétravail">
+      <div class="offre-carte__top">
+        <div class="offre-logo offre-logo--green">G</div>
+        <div>
+          <h3>Chef de Projet Digital</h3>
+          <p class="texte-petit texte-doux">GreenWave · Bordeaux · il y a 2 jours</p>
+        </div>
+      </div>
+      <p class="offre-carte__desc">Pilotez la refonte du site institutionnel et la stratégie de contenu sur 12 mois.</p>
+      <div class="offre-carte__tags">
+        <span class="tag">CDD</span>
+        <span class="tag">Marketing</span>
+        <span class="tag tag--vert">Télétravail</span>
+      </div>
+      <div class="offre-carte__pied">
+        <span class="donnee">38–45 k€</span>
+        <a href="offre.html?id=3" class="btn btn-principal btn-petit">Voir l'offre</a>
+      </div>
+    </article>
+
+    <article class="offre-carte" data-contrat="CDI" data-tags="CDI Figma UX Hybride">
+      <div class="offre-carte__top">
+        <div class="offre-logo offre-logo--orange">N</div>
+        <div>
+          <h3>UX/UI Designer</h3>
+          <p class="texte-petit texte-doux">NovaStudio · Lille · il y a 3 jours</p>
+        </div>
+      </div>
+      <p class="offre-carte__desc">Concevez des expériences élégantes pour nos clients grands comptes, de la recherche au prototype.</p>
+      <div class="offre-carte__tags">
+        <span class="tag">CDI</span>
+        <span class="tag">Figma</span>
+        <span class="tag tag--kraft">Hybride</span>
+      </div>
+      <div class="offre-carte__pied">
+        <span class="donnee">42–52 k€</span>
+        <a href="offre.html?id=4" class="btn btn-principal btn-petit">Voir l'offre</a>
+      </div>
+    </article>
+
+    <article class="offre-carte" data-contrat="CDI" data-tags="CDI DevOps AWS Télétravail">
+      <div class="offre-carte__top">
+        <div class="offre-logo offre-logo--pink">M</div>
+        <div>
+          <h3>Ingénieur DevOps</h3>
+          <p class="texte-petit texte-doux">MindCloud · Nantes · il y a 4 jours</p>
+        </div>
+      </div>
+      <p class="offre-carte__desc">Automatisez le déploiement de nos microservices et fiabilisez notre infrastructure cloud.</p>
+      <div class="offre-carte__tags">
+        <span class="tag">CDI</span>
+        <span class="tag tag--vert">Télétravail</span>
+        <span class="tag">AWS</span>
+      </div>
+      <div class="offre-carte__pied">
+        <span class="donnee">55–65 k€</span>
+        <a href="offre.html?id=5" class="btn btn-principal btn-petit">Voir l'offre</a>
+      </div>
+    </article>
+
+    <article class="offre-carte" data-contrat="Stage" data-tags="Stage Marketing Communication">
+      <div class="offre-carte__top">
+        <div class="offre-logo offre-logo--teal">A</div>
+        <div>
+          <h3>Assistant Communication</h3>
+          <p class="texte-petit texte-doux">AltaVente · Marseille · il y a 5 jours</p>
+        </div>
+      </div>
+      <p class="offre-carte__desc">Participez à la création de contenus et à l'animation de nos réseaux sociaux (6 mois).</p>
+      <div class="offre-carte__tags">
+        <span class="tag">Stage</span>
+        <span class="tag">Communication</span>
+      </div>
+      <div class="offre-carte__pied">
+        <span class="donnee">900 € / mois</span>
+        <a href="offre.html?id=6" class="btn btn-principal btn-petit">Voir l'offre</a>
+      </div>
+    </article>
+
+  </div>
+
+  <div class="site-vide" id="site-vide" hidden>
+    <h3>Aucune offre ne correspond à votre recherche</h3>
+    <p>Essayez un autre mot-clé, ou affichez toutes les offres.</p>
+    <button class="btn btn-secondaire" onclick="reinitialiserFiltres()">Afficher toutes les offres</button>
+  </div>
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer class="site-pied">
+  <div class="site-conteneur">
+    <div class="site-pied__liens">
+      <a href="#">À propos</a><a href="#offres">Offres</a>
+      <a href="#">Contact</a><a href="#">Mentions légales</a>
+    </div>
+    <p class="texte-petit">© 2026 TalentHub — Tous droits réservés.</p>
+  </div>
+</footer>
+
+<script src="candidat.js"></script>
+</body>
+</html>

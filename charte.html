@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Charte graphique — Dossier RH</title>
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Styles réservés à cette page de présentation : ne pas copier dans le projet -->
+  <style>
+    .bloc { padding: var(--e-12) 0; border-top: 1px solid var(--trait); }
+    .bloc:first-of-type { border-top: none; padding-top: var(--e-6); }
+    .bloc > h2 { margin-bottom: var(--e-2); }
+    .bloc > p { color: var(--encre-douce); margin-bottom: var(--e-8); }
+    .sous-titre { margin: var(--e-8) 0 var(--e-4); }
+    .intro { display: grid; grid-template-columns: 1fr auto; gap: var(--e-8); align-items: center; padding-bottom: var(--e-8); }
+    .intro h1 { font-size: var(--t-44); max-width: 16ch; margin-bottom: var(--e-4); }
+    .intro p { color: var(--encre-douce); font-size: var(--t-19); }
+    .intro .tampon { justify-self: start; font-size: var(--t-24); padding: 10px 22px 8px; transform: rotate(-7deg); }
+    .intro .tampon small { font-size: var(--t-12); }
+    .sommaire { display: flex; flex-wrap: wrap; gap: var(--e-2) var(--e-5); font-size: var(--t-14); }
+
+    .nuancier { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: var(--e-3); }
+    .nuance { background: var(--surface); border: 1px solid var(--trait); border-radius: var(--r-fiche); overflow: hidden; }
+    .nuance-couleur { height: 72px; border-bottom: 1px solid var(--trait); }
+    .nuance-texte { padding: var(--e-3); font-size: var(--t-12); color: var(--encre-douce); line-height: 1.45; }
+    .nuance-texte strong { display: block; font-size: var(--t-14); color: var(--encre); }
+    code { font-family: inherit; font-stretch: var(--serre); font-size: 0.92em; background: var(--surface-2); border: 1px solid var(--trait); padding: 0 5px; border-radius: 3px; color: var(--indigo-fonce); }
+
+    .echelle { background: var(--surface); border: 1px solid var(--trait); border-radius: var(--r-fiche); }
+    .echelle-ligne { display: grid; grid-template-columns: 150px 1fr; gap: var(--e-6); align-items: baseline; padding: var(--e-4) var(--e-5); border-bottom: 1px solid var(--trait); }
+    .echelle-ligne:last-child { border-bottom: none; }
+    .echelle-ligne > span { font-size: var(--t-12); color: var(--encre-douce); }
+    .largeurs { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--e-3); margin-top: var(--e-4); }
+    .largeurs div { background: var(--surface); border: 1px solid var(--trait); border-radius: var(--r-fiche); padding: var(--e-4); }
+    .largeurs b { display: block; font-size: var(--t-24); margin-bottom: var(--e-1); }
+
+    .formes { display: flex; gap: var(--e-6); flex-wrap: wrap; align-items: flex-end; }
+    .forme { display: flex; flex-direction: column; gap: var(--e-2); font-size: var(--t-12); color: var(--encre-douce); }
+    .forme div { background: var(--surface); border: 1.5px solid var(--indigo); }
+
+    .regles { display: grid; grid-template-columns: 1fr 1fr; gap: var(--e-4); }
+    .regle { background: var(--surface); border: 1px solid var(--trait); border-radius: var(--r-fiche); padding: var(--e-5); font-size: var(--t-14); }
+    .regle h4 { margin-bottom: var(--e-2); }
+    .regle--oui { border-left: 4px solid var(--vert); }
+    .regle--non { border-left: 4px solid var(--rouge); }
+    .regle ul { padding-left: var(--e-5); color: var(--encre-douce); }
+    .regle li + li { margin-top: var(--e-1); }
+    @media (max-width: 640px) { .intro { grid-template-columns: 1fr; } .regles, .largeurs { grid-template-columns: 1fr; } .echelle-ligne { grid-template-columns: 1fr; gap: var(--e-1); } }
+  </style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ===== BARRE LATÉRALE (modèle pour toutes les pages de l'appli) ===== -->
+  <aside class="lateral">
+    <a href="#" class="lateral-marque">
+      <span class="lateral-logo">RH</span>
+      <strong>Dossier RH</strong>
+    </a>
+
+    <div class="lateral-role">
+      <label for="role">Connecté en tant que</label>
+      <select id="role">
+        <option>Responsable RH</option>
+        <option>Directeur général</option>
+        <option>Manager</option>
+        <option>Employé</option>
+      </select>
+    </div>
+
+    <nav class="lateral-groupe" aria-label="Pilotage">
+      <span class="lateral-titre">Pilotage</span>
+      <a class="lateral-lien" href="#">Tableau de bord</a>
+      <a class="lateral-lien" href="#circuit">À valider <span class="lateral-compteur">4</span></a>
+    </nav>
+
+    <nav class="lateral-groupe" aria-label="Recrutement">
+      <span class="lateral-titre">Recrutement</span>
+      <a class="lateral-lien" href="#formulaires">Demandes de poste</a>
+      <a class="lateral-lien" href="#offres">Offres d'emploi</a>
+      <a class="lateral-lien actif" href="#candidatures">Candidatures <span class="lateral-compteur">26</span></a>
+      <a class="lateral-lien" href="#pipeline">Entretiens</a>
+    </nav>
+
+    <nav class="lateral-groupe" aria-label="Personnel">
+      <span class="lateral-titre">Personnel</span>
+      <a class="lateral-lien" href="#dossier">Employés</a>
+      <a class="lateral-lien" href="#">Absences</a>
+      <a class="lateral-lien" href="#">Sorties</a>
+    </nav>
+
+    <div class="lateral-utilisateur">
+      <span class="avatar avatar--petit">FR</span>
+      <div>Fanja Rasoanaivo<small>Responsable RH</small></div>
+    </div>
+  </aside>
+
+  <!-- ===== CONTENU ===== -->
+  <div class="principal">
+
+    <header class="entete">
+      <nav class="fil" aria-label="Fil d'Ariane">
+        <a href="#">Projet</a><span>/</span>Charte graphique
+      </nav>
+      <div class="rangee">
+        <a href="style.css" class="btn btn-secondaire btn-petit">Ouvrir style.css</a>
+      </div>
+    </header>
+
+    <main class="page">
+
+      <section class="bloc">
+        <div class="intro">
+          <div>
+            <h1>La charte commune de Dossier RH</h1>
+            <p>Chaque page de l'application reprend ces couleurs, ces composants et ce vocabulaire. Liez <code>style.css</code> et utilisez les classes présentées ici, sans styles en dur.</p>
+          </div>
+          <span class="tampon" aria-hidden="true">Validé<small>v1 · 20/10/2026</small></span>
+        </div>
+        <nav class="sommaire" aria-label="Sommaire">
+          <a href="#couleurs">Couleurs</a>
+          <a href="#typo">Typographie</a>
+          <a href="#formes">Formes</a>
+          <a href="#boutons">Boutons</a>
+          <a href="#statuts">Statuts</a>
+          <a href="#circuit">Circuit de validation</a>
+          <a href="#formulaires">Formulaires</a>
+          <a href="#offres">Offres</a>
+          <a href="#candidatures">Tableau</a>
+          <a href="#pipeline">Pipeline</a>
+          <a href="#dossier">Dossier employé</a>
+          <a href="#messages">Messages</a>
+          <a href="#regles">Règles d'équipe</a>
+        </nav>
+      </section>
+
+      <!-- ===== COULEURS ===== -->
+      <section class="bloc" id="couleurs">
+        <h2>Couleurs</h2>
+        <p>L'indigo reprend l'encre des tampons administratifs ; il marque les actions et les décisions. Le kraft rappelle les chemises du dossier du personnel ; il reste discret et sert de repère.</p>
+
+        <div class="nuancier">
+          <div class="nuance"><div class="nuance-couleur" style="background:var(--indigo)"></div><div class="nuance-texte"><strong>Indigo</strong>#3b3f99 · actions principales, liens<br><code>--indigo</code></div></div>
+          <div class="nuance"><div class="nuance-couleur" style="background:var(--indigo-nuit)"></div><div class="nuance-texte"><strong>Indigo nuit</strong>#22264f · barre latérale<br><code>--indigo-nuit</code></div></div>
+          <div class="nuance"><div class="nuance-couleur" style="background:var(--indigo-pale)"></div><div class="nuance-texte"><strong>Indigo pâle</strong>#e6e7f5 · fonds sélectionnés<br><code>--indigo-pale</code></div></div>
+          <div class="nuance"><div class="nuance-couleur" style="background:var(--kraft)"></div><div class="nuance-texte"><strong>Kraft</strong>#d9b26a · onglets, compteurs<br><code>--kraft</code></div></div>
+          <div class="nuance"><div class="nuance-couleur" style="background:var(--kraft-pale)"></div><div class="nuance-texte"><strong>Kraft pâle</strong>#f4e9d2 · onglets inactifs<br><code>--kraft-pale</code></div></div>
+        </div>
+
+        <h3 class="sous-titre">États</h3>
+        <div class="nuancier">
+          <div class="nuance"><div class="nuance-couleur" style="background:var(--vert)"></div><div class="nuance-texte"><strong>Vert</strong>validé, embauché<br><code>--vert</code></div></div>
+          <div class="nuance"><div class="nuance-couleur" style="background:var(--ambre)"></div><div class="nuance-texte"><strong>Ambre</strong>en attente, en test<br><code>--ambre</code></div></div>
+          <div class="nuance"><div class="nuance-couleur" style="background:var(--rouge)"></div><div class="nuance-texte"><strong>Rouge</strong>refusé, erreur<br><code>--rouge</code></div></div>
+        </div>
+
+        <h3 class="sous-titre">Fonds et texte</h3>
+        <div class="nuancier">
+          <div class="nuance"><div class="nuance-couleur" style="background:var(--papier)"></div><div class="nuance-texte"><strong>Papier</strong>fond de l'application<br><code>--papier</code></div></div>
+          <div class="nuance"><div class="nuance-couleur" style="background:var(--surface)"></div><div class="nuance-texte"><strong>Surface</strong>fiches et tableaux<br><code>--surface</code></div></div>
+          <div class="nuance"><div class="nuance-couleur" style="background:var(--trait)"></div><div class="nuance-texte"><strong>Trait</strong>bordures<br><code>--trait</code></div></div>
+          <div class="nuance"><div class="nuance-couleur" style="background:var(--encre-douce)"></div><div class="nuance-texte"><strong>Encre douce</strong>texte secondaire<br><code>--encre-douce</code></div></div>
+          <div class="nuance"><div class="nuance-couleur" style="background:var(--encre)"></div><div class="nuance-texte"><strong>Encre</strong>texte principal<br><code>--encre</code></div></div>
+        </div>
+      </section>
+
+      <!-- ===== TYPOGRAPHIE ===== -->
+      <section class="bloc" id="typo">
+        <h2>Typographie</h2>
+        <p>Une seule police, Archivo, utilisée à trois largeurs : élargie pour les titres, normale pour le texte, resserrée pour les données comme les matricules et les montants.</p>
+
+        <div class="echelle">
+          <div class="echelle-ligne"><span>h1 · 32 px · 750</span><h1>Candidatures — Développeur back-end</h1></div>
+          <div class="echelle-ligne"><span>h2 · 24 px · 700</span><h2>Demandes à valider</h2></div>
+          <div class="echelle-ligne"><span>h3 · 19 px · 650</span><h3>Historique de carrière</h3></div>
+          <div class="echelle-ligne"><span>h4 · 16 px · 650</span><h4>Pièces du dossier</h4></div>
+          <div class="echelle-ligne"><span>texte · 16 px</span><p>La candidature a été transmise au manager du département Développement pour l'entretien technique.</p></div>
+          <div class="echelle-ligne"><span>.texte-petit · 14 px</span><p class="texte-petit texte-doux">Déposée le 14/10/2026 via le portail candidat.</p></div>
+          <div class="echelle-ligne"><span>.donnee</span><p class="donnee">EMP-2024-0137 · CIN 101 211 045 678 · 2 450 000 Ar</p></div>
+        </div>
+
+        <div class="largeurs">
+          <div><b style="font-stretch:var(--large)">Titres</b><span class="texte-petit texte-doux"><code>--large</code> 118 %</span></div>
+          <div><b>Texte</b><span class="texte-petit texte-doux"><code>--normal</code> 100 %</span></div>
+          <div><b style="font-stretch:var(--serre)">Données</b><span class="texte-petit texte-doux"><code>--serre</code> 82 %</span></div>
+        </div>
+      </section>
+
+      <!-- ===== FORMES ===== -->
+      <section class="bloc" id="formes">
+        <h2>Formes et espacements</h2>
+        <p>Plus l'élément est grand, plus son arrondi est marqué. Les espacements suivent une base de 4 px : <code>--e-1</code> à <code>--e-16</code>.</p>
+        <div class="formes">
+          <div class="forme"><div style="width:84px;height:26px;border-radius:var(--r-etiquette)"></div>Étiquette · 3 px</div>
+          <div class="forme"><div style="width:150px;height:42px;border-radius:var(--r-champ)"></div>Champ, bouton · 5 px</div>
+          <div class="forme"><div style="width:200px;height:110px;border-radius:var(--r-fiche)"></div>Fiche, tableau · 8 px</div>
+        </div>
+      </section>
+
+      <!-- ===== BOUTONS ===== -->
+      <section class="bloc" id="boutons">
+        <h2>Boutons</h2>
+        <p>Un seul bouton principal par écran. Le libellé dit exactement ce qui va se passer.</p>
+        <div class="rangee">
+          <button class="btn btn-principal">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>
+            Publier l'offre
+          </button>
+          <button class="btn btn-secondaire">Enregistrer le brouillon</button>
+          <button class="btn btn-valider">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 8.5l3 3 7-7"/></svg>
+            Valider la demande
+          </button>
+          <button class="btn btn-refuser">Refuser</button>
+          <button class="btn btn-discret">Annuler</button>
+          <button class="btn btn-principal" disabled>Envoyer la proposition</button>
+        </div>
+        <div class="rangee" style="margin-top:var(--e-4)">
+          <button class="btn btn-principal btn-petit">Planifier l'entretien</button>
+          <button class="btn btn-secondaire btn-petit">Voir le CV</button>
+        </div>
+      </section>
+
+      <!-- ===== STATUTS ===== -->
+      <section class="bloc" id="statuts">
+        <h2>Statuts d'une candidature</h2>
+        <p>Chaque étape du recrutement a sa couleur. Ces étiquettes s'utilisent partout : tableaux, pipeline, fiche candidat.</p>
+        <div class="rangee">
+          <span class="statut statut--recue">Reçue</span>
+          <span class="statut statut--preselection">Présélectionnée</span>
+          <span class="statut statut--test">Test niveau 2</span>
+          <span class="statut statut--entretien">Entretien</span>
+          <span class="statut statut--proposition">Proposition envoyée</span>
+          <span class="statut statut--embauche">Embauché</span>
+          <span class="statut statut--refuse">Refusée</span>
+          <span class="statut statut--retire">Retirée</span>
+        </div>
+      </section>
+
+      <!-- ===== CIRCUIT DE VALIDATION ===== -->
+      <section class="bloc" id="circuit">
+        <h2>Circuit de validation</h2>
+        <p>Demandes de recrutement, propositions d'embauche, demandes d'employés et sorties passent par le même circuit. Chaque décision laisse un tampon, comme sur le formulaire papier.</p>
+
+        <h3 class="sous-titre" style="margin-top:0">Demande DR-2026-031 · Développeur back-end, 2 postes</h3>
+        <div class="circuit">
+          <div class="circuit-etape fait">
+            <span class="circuit-ordre">1</span>
+            <span class="circuit-role">Manager</span>
+            <span class="circuit-nom">Toky Andrianina, Développement</span>
+            <div class="circuit-signature">
+              <span class="texte-mini">Avis favorable</span>
+              <span class="tampon">Validé<small>12/10/2026</small></span>
+            </div>
+          </div>
+          <div class="circuit-etape fait">
+            <span class="circuit-ordre">2</span>
+            <span class="circuit-role">Ressources humaines</span>
+            <span class="circuit-nom">Fanja Rasoanaivo</span>
+            <div class="circuit-signature">
+              <span class="texte-mini">Budget vérifié</span>
+              <span class="tampon">Validé<small>15/10/2026</small></span>
+            </div>
+          </div>
+          <div class="circuit-etape">
+            <span class="circuit-ordre">3</span>
+            <span class="circuit-role">Direction générale</span>
+            <span class="circuit-nom">Hery Rakotomalala</span>
+            <div class="circuit-signature">
+              <span class="texte-mini">Depuis 5 jours</span>
+              <span class="tampon tampon--attente">En attente</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="sous-titre">Cas d'un refus</h3>
+        <div class="circuit">
+          <div class="circuit-etape fait">
+            <span class="circuit-ordre">1</span>
+            <span class="circuit-role">Manager</span>
+            <span class="circuit-nom">Nirina Rabe, Support</span>
+            <div class="circuit-signature"><span class="texte-mini"></span><span class="tampon">Validé<small>02/10/2026</small></span></div>
+          </div>
+          <div class="circuit-etape bloque">
+            <span class="circuit-ordre">2</span>
+            <span class="circuit-role">Ressources humaines</span>
+            <span class="circuit-nom">Fanja Rasoanaivo</span>
+            <div class="circuit-signature"><span class="texte-mini">Poste déjà pourvu en interne</span><span class="tampon tampon--refus">Refusé<small>04/10/2026</small></span></div>
+          </div>
+          <div class="circuit-etape">
+            <span class="circuit-ordre">3</span>
+            <span class="circuit-role">Direction générale</span>
+            <span class="circuit-nom texte-doux">Non transmise</span>
+          </div>
+        </div>
+
+        <div class="rangee" style="margin-top:var(--e-5); justify-content:flex-end">
+          <button class="btn btn-refuser">Refuser la demande</button>
+          <button class="btn btn-valider">Valider la demande</button>
+        </div>
+      </section>
+
+      <!-- ===== FORMULAIRE ===== -->
+      <section class="bloc" id="formulaires">
+        <h2>Formulaires</h2>
+        <p>Libellé au-dessus du champ, aide en dessous, erreur en rouge qui explique comment corriger. Les champs facultatifs sont signalés, pas les obligatoires.</p>
+
+        <form class="fiche" onsubmit="return false;">
+          <div class="fiche-entete">
+            <h3>Nouvelle demande de recrutement</h3>
+            <span class="statut statut--recue">Brouillon</span>
+          </div>
+          <div class="fiche-corps">
+            <div class="formulaire-grille">
+              <div class="champ">
+                <label class="champ-libelle" for="poste">Intitulé du poste</label>
+                <input class="saisie" id="poste" value="Développeur back-end">
+              </div>
+              <div class="champ">
+                <label class="champ-libelle" for="dep">Département</label>
+                <select class="saisie" id="dep">
+                  <option>Développement</option>
+                  <option>Infrastructure et réseaux</option>
+                  <option>Support client</option>
+                  <option>Administration</option>
+                </select>
+              </div>
+              <div class="champ">
+                <span class="champ-libelle" id="contrat-lib">Type de contrat</span>
+                <div class="choix" role="radiogroup" aria-labelledby="contrat-lib">
+                  <input type="radio" name="contrat" id="c1" checked><label for="c1">CDI</label>
+                  <input type="radio" name="contrat" id="c2"><label for="c2">CDD</label>
+                  <input type="radio" name="contrat" id="c3"><label for="c3">Stage</label>
+                </div>
+              </div>
+              <div class="champ">
+                <label class="champ-libelle" for="nb">Nombre de postes</label>
+                <input class="saisie invalide" id="nb" type="number" value="0" aria-describedby="nb-err">
+                <span class="champ-erreur" id="nb-err">Indiquez au moins 1 poste.</span>
+              </div>
+              <div class="champ">
+                <label class="champ-libelle" for="date">Arrivée souhaitée</label>
+                <input class="saisie" id="date" type="date" value="2027-01-05">
+              </div>
+              <div class="champ">
+                <label class="champ-libelle" for="salaire">Salaire mensuel brut <span class="facultatif">(facultatif)</span></label>
+                <input class="saisie donnee" id="salaire" placeholder="Ex. 2 000 000 Ar">
+                <span class="champ-aide">Les RH proposeront une fourchette si le champ est vide.</span>
+              </div>
+              <div class="champ plein">
+                <label class="champ-libelle" for="motif">Motif de la demande</label>
+                <textarea class="saisie" id="motif">Lancement du module paiement mobile prévu au premier trimestre 2027. L'équipe actuelle ne peut pas absorber la charge.</textarea>
+              </div>
+              <label class="case plein"><input type="checkbox" checked> M'avertir à chaque étape de validation</label>
+            </div>
+          </div>
+          <div class="fiche-corps formulaire-actions" style="padding-top:var(--e-5)">
+            <button class="btn btn-discret" type="button">Annuler</button>
+            <button class="btn btn-secondaire" type="button">Enregistrer le brouillon</button>
+            <button class="btn btn-principal">Envoyer au circuit de validation</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- ===== OFFRES ===== -->
+      <section class="bloc" id="offres">
+        <h2>Offres d'emploi</h2>
+        <p>La bande kraft signale une offre ouverte. Une offre close passe en gris.</p>
+        <div class="grille-3">
+          <article class="offre">
+            <span class="offre-ref donnee">OFF-2026-018</span>
+            <h3>Développeur back-end</h3>
+            <div class="offre-infos"><span><b>CDI</b></span><span>Développement</span><span>2 postes</span></div>
+            <div class="offre-pied"><span class="texte-petit"><b>14</b> candidatures</span><a href="#" class="btn btn-secondaire btn-petit">Voir</a></div>
+          </article>
+          <article class="offre">
+            <span class="offre-ref donnee">OFF-2026-021</span>
+            <h3>Technicien réseau</h3>
+            <div class="offre-infos"><span><b>CDD 12 mois</b></span><span>Infrastructure</span><span>1 poste</span></div>
+            <div class="offre-pied"><span class="texte-petit"><b>9</b> candidatures</span><a href="#" class="btn btn-secondaire btn-petit">Voir</a></div>
+          </article>
+          <article class="offre offre--close">
+            <span class="offre-ref donnee">OFF-2026-009</span>
+            <h3>Assistant comptable</h3>
+            <div class="offre-infos"><span><b>CDI</b></span><span>Administration</span><span>Pourvu</span></div>
+            <div class="offre-pied"><span class="statut statut--embauche">Close</span><a href="#" class="btn btn-discret btn-petit">Archives</a></div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ===== TABLEAU ===== -->
+      <section class="bloc" id="candidatures">
+        <h2>Tableau de candidatures</h2>
+        <p>En-têtes discrets, données alignées, une action par ligne. Les scores s'alignent à droite.</p>
+        <div class="tableau-cadre">
+          <div class="tableau-outils">
+            <input class="saisie" style="max-width:280px;min-height:36px" placeholder="Nom, CIN ou e-mail" aria-label="Rechercher un candidat">
+            <select class="saisie" style="max-width:200px;min-height:36px" aria-label="Filtrer par statut"><option>Tous les statuts</option><option>Entretien</option><option>Test</option></select>
+          </div>
+          <table class="tableau">
+            <thead>
+              <tr><th>Candidat</th><th>Offre</th><th>Déposée le</th><th class="nombre">Score test</th><th>Statut</th><th></th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="personne-cellule"><span class="avatar avatar--petit">MR</span><div>Mamy Randriamanana<small>mamy.r@gmail.com</small></div></div></td>
+                <td>Développeur back-end</td>
+                <td class="donnee">14/10/2026</td>
+                <td class="nombre"><span class="score"><span class="score-barre"><i style="width:84%"></i></span>17/20</span></td>
+                <td><span class="statut statut--entretien">Entretien</span></td>
+                <td><a href="#" class="btn btn-discret btn-petit">Ouvrir</a></td>
+              </tr>
+              <tr>
+                <td><div class="personne-cellule"><span class="avatar avatar--petit">SA</span><div>Sitraka Andriamihaja<small>sitraka.a@yahoo.fr</small></div></div></td>
+                <td>Développeur back-end</td>
+                <td class="donnee">15/10/2026</td>
+                <td class="nombre"><span class="score"><span class="score-barre"><i style="width:62%"></i></span>12/20</span></td>
+                <td><span class="statut statut--test">Test niveau 2</span></td>
+                <td><a href="#" class="btn btn-discret btn-petit">Ouvrir</a></td>
+              </tr>
+              <tr>
+                <td><div class="personne-cellule"><span class="avatar avatar--petit">LR</span><div>Lalaina Razafy<small>lalaina.razafy@gmail.com</small></div></div></td>
+                <td>Technicien réseau</td>
+                <td class="donnee">16/10/2026</td>
+                <td class="nombre texte-doux">—</td>
+                <td><span class="statut statut--preselection">Présélectionnée</span></td>
+                <td><a href="#" class="btn btn-discret btn-petit">Ouvrir</a></td>
+              </tr>
+              <tr>
+                <td><div class="personne-cellule"><span class="avatar avatar--petit">TR</span><div>Tiana Rakoto<small>tiana.rakoto@gmail.com</small></div></div></td>
+                <td>Technicien réseau</td>
+                <td class="donnee">09/10/2026</td>
+                <td class="nombre"><span class="score"><span class="score-barre"><i style="width:35%"></i></span>7/20</span></td>
+                <td><span class="statut statut--refuse">Refusée</span></td>
+                <td><a href="#" class="btn btn-discret btn-petit">Ouvrir</a></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="tableau-pied">
+            <span>4 sur 26 candidatures</span>
+            <div class="rangee"><button class="btn btn-secondaire btn-petit" disabled>Précédent</button><button class="btn btn-secondaire btn-petit">Suivant</button></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== PIPELINE ===== -->
+      <section class="bloc" id="pipeline">
+        <h2>Pipeline de recrutement</h2>
+        <p>Vue par offre. Une colonne par étape, dans l'ordre du processus ; on déplace un candidat d'une colonne à l'autre.</p>
+        <div class="pipeline">
+          <div class="colonne">
+            <div class="colonne-titre">Reçues <span>6</span></div>
+            <div class="carte-candidat"><strong>Hasina Ravelo</strong><small>Déposée hier</small></div>
+            <div class="carte-candidat"><strong>Rivo Rabearisoa</strong><small>Il y a 3 jours</small></div>
+          </div>
+          <div class="colonne">
+            <div class="colonne-titre">Présélection <span>4</span></div>
+            <div class="carte-candidat"><strong>Lalaina Razafy</strong><small>CV retenu par le RH</small></div>
+          </div>
+          <div class="colonne">
+            <div class="colonne-titre">Tests <span>2</span></div>
+            <div class="carte-candidat"><strong>Sitraka Andriamihaja</strong><div class="ligne"><span class="statut statut--test">Niveau 2</span><small class="donnee">12/20</small></div></div>
+          </div>
+          <div class="colonne">
+            <div class="colonne-titre">Entretien <span>1</span></div>
+            <div class="carte-candidat"><strong>Mamy Randriamanana</strong><div class="ligne"><small>Jeu. 22/10 à 10 h</small></div></div>
+          </div>
+          <div class="colonne">
+            <div class="colonne-titre">Proposition <span>0</span></div>
+            <p class="texte-mini texte-doux" style="padding:var(--e-2)">Aucun candidat à cette étape.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== DOSSIER EMPLOYÉ ===== -->
+      <section class="bloc" id="dossier">
+        <h2>Dossier employé</h2>
+        <p>Les onglets reprennent la forme des intercalaires d'une chemise. La période d'emploi en cours est toujours visible en tête.</p>
+
+        <div class="dossier-onglets" role="tablist">
+          <button class="dossier-onglet" role="tab" aria-selected="false" data-panneau="p-identite">Identité</button>
+          <button class="dossier-onglet" role="tab" aria-selected="false" data-panneau="p-contrat">Contrat</button>
+          <button class="dossier-onglet" role="tab" aria-selected="true" data-panneau="p-carriere">Carrière</button>
+          <button class="dossier-onglet" role="tab" aria-selected="false" data-panneau="p-absences">Absences</button>
+        </div>
+        <div class="dossier">
+          <div class="dossier-identite">
+            <span class="avatar">NA</span>
+            <div style="flex:1;min-width:200px">
+              <h3>Nomena Andrianarivo</h3>
+              <p class="texte-petit texte-doux">Développeuse senior, Développement</p>
+            </div>
+            <dl class="infos" style="flex:2;min-width:280px">
+              <div><dt>Matricule</dt><dd class="donnee">EMP-2024-0137</dd></div>
+              <div><dt>En poste depuis</dt><dd class="donnee">03/06/2024</dd></div>
+              <div><dt>Statut</dt><dd><span class="statut statut--embauche">En activité</span></dd></div>
+            </dl>
+          </div>
+
+          <div class="dossier-panneau" id="p-identite" hidden>
+            <dl class="infos">
+              <div><dt>CIN</dt><dd class="donnee">101 211 045 678</dd></div>
+              <div><dt>Date de naissance</dt><dd class="donnee">17/03/1996</dd></div>
+              <div><dt>Téléphone</dt><dd class="donnee">034 12 345 67</dd></div>
+              <div><dt>E-mail</dt><dd>nomena.a@entreprise.mg</dd></div>
+            </dl>
+          </div>
+          <div class="dossier-panneau" id="p-contrat" hidden>
+            <dl class="infos">
+              <div><dt>Type</dt><dd>CDI</dd></div>
+              <div><dt>Début</dt><dd class="donnee">03/06/2024</dd></div>
+              <div><dt>Salaire actuel</dt><dd class="donnee">2 450 000 Ar</dd></div>
+              <div><dt>Avenants</dt><dd>1</dd></div>
+            </dl>
+          </div>
+          <div class="dossier-panneau" id="p-carriere">
+            <ol class="historique">
+              <li class="courant">
+                <span class="historique-date donnee">01/09/2026</span>
+                <div class="historique-titre">Promotion : développeuse senior</div>
+                <p class="texte-petit texte-doux">Avenant n° 1. Salaire porté de 1 900 000 à 2 450 000 Ar.</p>
+              </li>
+              <li>
+                <span class="historique-date donnee">03/12/2024</span>
+                <div class="historique-titre">Fin de la période d'essai</div>
+                <p class="texte-petit texte-doux">Confirmée par Toky Andrianina.</p>
+              </li>
+              <li>
+                <span class="historique-date donnee">03/06/2024</span>
+                <div class="historique-titre">Embauche : développeuse</div>
+                <p class="texte-petit texte-doux">CDI, issue de l'offre OFF-2024-006.</p>
+              </li>
+            </ol>
+          </div>
+          <div class="dossier-panneau" id="p-absences" hidden>
+            <div class="vide" style="border:none;padding:var(--e-6)">
+              <p style="margin:0 auto">Aucune absence enregistrée cette année.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== MESSAGES ===== -->
+      <section class="bloc" id="messages">
+        <h2>Messages</h2>
+        <p>Un message dit ce qui s'est passé et ce qu'il faut faire ensuite. Pas d'excuses, pas de formule vague.</p>
+        <div class="pile">
+          <div class="message message--succes">
+            <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 9.5l3 3 7-7"/></svg>
+            <p>Demande envoyée. Toky Andrianina est averti et doit donner son avis.</p>
+          </div>
+          <div class="message message--info">
+            <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="9" cy="9" r="7"/><path d="M9 8v4M9 5.5v.5"/></svg>
+            <p>4 demandes attendent votre validation. <a href="#circuit">Les voir</a></p>
+          </div>
+          <div class="message message--alerte">
+            <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 2l7.5 13h-15z"/><path d="M9 7v3.5M9 12.5v.5"/></svg>
+            <p>Le CDD de Rado Rasolofo se termine le 30/11/2026. Décidez du renouvellement avant le 15/11.</p>
+          </div>
+          <div class="message message--erreur">
+            <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="9" cy="9" r="7"/><path d="M6.5 6.5l5 5M11.5 6.5l-5 5"/></svg>
+            <p>Ce CIN appartient déjà à un ancien employé, Lova Ramanantsoa. <a href="#dossier">Ouvrir son dossier pour une réembauche</a></p>
+          </div>
+        </div>
+
+        <h3 class="sous-titre">État vide</h3>
+        <div class="vide">
+          <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 11a3 3 0 013-3h9l4 4h13a3 3 0 013 3v15a3 3 0 01-3 3H7a3 3 0 01-3-3z"/></svg>
+          <h3>Aucune candidature pour cette offre</h3>
+          <p>L'offre est publiée depuis 2 jours. Partagez son lien ou ajoutez un candidat reçu par e-mail.</p>
+          <div class="rangee" style="justify-content:center">
+            <button class="btn btn-secondaire">Copier le lien de l'offre</button>
+            <button class="btn btn-principal">Ajouter un candidat</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== RÈGLES ===== -->
+      <section class="bloc" id="regles">
+        <h2>Règles d'équipe</h2>
+        <p>À relire avant de créer une nouvelle page.</p>
+        <div class="regles">
+          <div class="regle regle--oui">
+            <h4>À faire</h4>
+            <ul>
+              <li>Lier <code>style.css</code> et partir de la structure <code>.app</code> + <code>.lateral</code> + <code>.principal</code>.</li>
+              <li>Utiliser les variables pour toute couleur, taille ou espacement.</li>
+              <li>Mettre les matricules, CIN, dates et montants en <code>.donnee</code>.</li>
+              <li>Écrire les boutons avec un verbe : « Valider la demande », « Planifier l'entretien ».</li>
+              <li>Réserver le tampon aux décisions du circuit de validation.</li>
+            </ul>
+          </div>
+          <div class="regle regle--non">
+            <h4>À éviter</h4>
+            <ul>
+              <li>Ajouter une police ou une couleur qui n'est pas dans la section 1 du CSS.</li>
+              <li>Mettre deux boutons principaux sur un même écran.</li>
+              <li>Écrire « OK », « Valider » ou « Soumettre » sans dire quoi.</li>
+              <li>Utiliser le kraft pour du texte : il sert de repère, pas d'information.</li>
+              <li>Modifier <code>style.css</code> sans prévenir le groupe.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<script>
+  // Onglets du dossier employé (réutilisable tel quel dans le projet)
+  document.querySelectorAll('.dossier-onglet').forEach(function (onglet) {
+    onglet.addEventListener('click', function () {
+      var groupe = onglet.parentElement;
+      groupe.querySelectorAll('.dossier-onglet').forEach(function (o) {
+        o.setAttribute('aria-selected', 'false');
+        document.getElementById(o.dataset.panneau).hidden = true;
+      });
+      onglet.setAttribute('aria-selected', 'true');
+      document.getElementById(onglet.dataset.panneau).hidden = false;
+    });
+  });
+</script>
+
+</body>
+</html>
