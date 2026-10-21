@@ -8,7 +8,7 @@
 
 		conf="runtime"
 		confs="provided, runtime, compile, test"
-		date="20261021225516"/>
+		date="20261021232512"/>
 	<dependencies>
 		<module organisation="io.jsonwebtoken" name="jjwt-impl">
 			<revision name="0.12.6" status="release" pubdate="20240621225304" resolver="central" artresolver="central" homepage="" downloaded="false" searched="false" default="false" conf="default, compile, runtime, master" position="75">

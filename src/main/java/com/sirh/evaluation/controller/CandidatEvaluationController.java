@@ -2,6 +2,8 @@ package com.sirh.evaluation.controller;
 
 import com.sirh.evaluation.entity.Evaluation;
 import com.sirh.evaluation.service.EvaluationService;
+import com.sirh.recrutement.entity.Candidature;
+import com.sirh.recrutement.service.CandidatureService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
@@ -23,6 +25,18 @@ public class CandidatEvaluationController {
     private static final String PREFIXE_TEXTE = "texte_";
 
     private final EvaluationService evaluationService;
+    private final CandidatureService candidatureService;
+
+    @GetMapping("/candidat/candidatures/{candidatureId}/evaluations")
+    public String liste(@PathVariable Long candidatureId, Authentication authentication, Model model) {
+        Candidature candidature = candidatureService.obtenir(candidatureId);
+        if (!candidature.getCandidat().getUtilisateur().getEmail().equals(authentication.getName())) {
+            throw new AccessDeniedException("Cette candidature ne vous appartient pas.");
+        }
+        model.addAttribute("candidature", candidature);
+        model.addAttribute("evaluations", evaluationService.listerPourCandidature(candidatureId));
+        return "candidat/evaluations-liste";
+    }
 
     @GetMapping("/candidat/evaluations/{id}/repondre")
     public String formulaire(@PathVariable Long id, Authentication authentication, Model model) {

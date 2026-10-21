@@ -8,7 +8,7 @@
 
 		conf="provided"
 		confs="provided, runtime, compile, test"
-		date="20261021225516"/>
+		date="20261021232512"/>
 	<dependencies>
 		<module organisation="org.projectlombok" name="lombok">
 			<revision name="1.18.48" status="release" pubdate="20260901234056" resolver="central" artresolver="central" homepage="https://projectlombok.org" downloaded="false" searched="false" default="false" conf="default, compile, runtime, master" position="7">

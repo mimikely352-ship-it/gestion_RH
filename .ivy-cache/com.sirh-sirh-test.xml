@@ -8,7 +8,7 @@
 
 		conf="test"
 		confs="provided, runtime, compile, test"
-		date="20261021225516"/>
+		date="20261021232512"/>
 	<dependencies>
 		<module organisation="org.springframework.security" name="spring-security-test">
 			<revision name="6.5.11" status="release" pubdate="20260609185305" resolver="central" artresolver="central" homepage="https://spring.io/projects/spring-security" downloaded="false" searched="false" default="false" conf="default, compile, runtime, master" position="109">

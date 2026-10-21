@@ -39,7 +39,15 @@
                     <span>Candidature déposée le <c:out value="${c.dateCandidature}"/></span>
                   </div>
                 </div>
-                <div class="candidature__actions"><ui:statut valeur="${c.statut}"/></div>
+                <div class="candidature__actions">
+                  <c:if test="${c.statut == 'EN_TEST'}">
+                    <a class="btn btn-principal btn-petit" href="${pageContext.request.contextPath}/candidat/candidatures/${c.id}/tests">Passer mes tests</a>
+                  </c:if>
+                  <c:if test="${c.statut == 'EN_EVALUATION'}">
+                    <a class="btn btn-principal btn-petit" href="${pageContext.request.contextPath}/candidat/candidatures/${c.id}/evaluations">Mes évaluations</a>
+                  </c:if>
+                  <ui:statut valeur="${c.statut}"/>
+                </div>
               </div>
               <div class="suivi">
                 <c:forEach var="i" begin="0" end="4" varStatus="st">

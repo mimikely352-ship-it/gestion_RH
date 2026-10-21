@@ -46,4 +46,19 @@ public class Entretien {
 
     @Column(columnDefinition = "TEXT")
     private String commentaire;
+
+    @Transient
+    public Long getCandidatureId() {
+        return candidature == null ? null : candidature.getId();
+    }
+
+    @Transient
+    public String getCandidatNomComplet() {
+        return candidature == null ? "" : candidature.getCandidatNomComplet();
+    }
+
+    @Transient
+    public String getOffreTitre() {
+        return candidature == null ? "" : candidature.getOffreTitre();
+    }
 }
