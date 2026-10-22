@@ -1,6 +1,0 @@
-Testcase: com.sirh.demande.service.DemandeServiceTest
-Test: circuitCompletJusquaValidationDG() took 4 sec(s)
-Test: validationParUnNonHabiliteEstRefusee() took 33 milli sec(s)
-Test: rejetAUneEtapeClotLeCircuit() took 4 milli sec(s)
-Test: creerEchoueSiAucunServiceDeRattachement() took 8 milli sec(s)
-Tests run: 4, Failures: 0, Skipped: 0, Aborted: 0, Time elapsed: 4 sec(s)
