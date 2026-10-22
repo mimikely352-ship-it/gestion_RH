@@ -1,6 +1,7 @@
-<%@ tag description="Lien d'action pour une ligne de <ui:list>. 'url' peut contenir {id}, remplacé par row.id (ou row[idProperty] si idProperty est fourni, ex. 'candidature.id') de la ligne courante." pageEncoding="UTF-8" trimDirectiveWhitespaces="true" %>
+<%@ tag description="Lien d'action pour une ligne de <ui:list>. 'url' peut contenir {id}, remplacé par row.id (ou row[idProperty] si idProperty est fourni, ex. 'candidatureId'). 'row' doit être passé explicitement (ex. row='${row}') : les fichiers .tag isolent leurs variables de script, donc le 'row' exposé par <c:forEach> dans list.tag n'est pas visible ici autrement." pageEncoding="UTF-8" trimDirectiveWhitespaces="true" %>
 <%@ attribute name="label" required="true" %>
 <%@ attribute name="url" required="true" %>
+<%@ attribute name="row" required="true" type="java.lang.Object" %>
 <%@ attribute name="style" required="false" %>
 <%@ attribute name="confirmation" required="false" %>
 <%@ attribute name="idProperty" required="false" %>

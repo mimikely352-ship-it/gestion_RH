@@ -4,6 +4,6 @@
   <h1>Entretiens</h1>
   <ui:list data="${entretiens}" columns="candidatNomComplet,offreTitre,dateHeure,lieu,statut,decisionRh"
            columnLabels="Candidat,Offre,Date,Lieu,Statut,Décision" messageVide="Aucun entretien planifié.">
-    <ui:action label="Voir la candidature" url="/rh/candidatures/{id}" idProperty="candidatureId"/>
+    <ui:action label="Voir la candidature" url="/rh/candidatures/{id}" idProperty="candidatureId" row="${row}"/>
   </ui:list>
 </ui:layout>

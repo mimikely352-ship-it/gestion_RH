@@ -165,4 +165,8 @@ public class EvaluationService {
     public List<QuestionEvaluation> questionsDe(Long evaluationId) {
         return questionEvaluationRepository.findByEvaluationIdOrderByOrdreAsc(evaluationId);
     }
+
+    public List<ReponseEvaluation> reponsesDe(Long evaluationId) {
+        return reponseEvaluationRepository.findByEvaluationId(evaluationId);
+    }
 }

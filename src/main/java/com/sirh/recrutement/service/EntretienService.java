@@ -71,6 +71,6 @@ public class EntretienService {
     }
 
     public List<Entretien> listerPourCandidature(Long candidatureId) {
-        return entretienRepository.findByCandidatureId(candidatureId);
+        return entretienRepository.findByCandidature_Id(candidatureId);
     }
 }

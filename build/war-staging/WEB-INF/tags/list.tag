@@ -4,6 +4,10 @@
 <%@ attribute name="columns" required="true" %>
 <%@ attribute name="columnLabels" required="false" %>
 <%@ attribute name="messageVide" required="false" %>
+<%-- Sans cette déclaration, 'row' posé par <c:forEach> ci-dessous n'est visible que dans CE
+     fichier .tag : <jsp:doBody/> invoque le contenu fourni par l'appelant (les <ui:action/>) dans
+     un contexte isolé par la JSP, où 'row' resterait invisible sans cet export explicite. --%>
+<%@ variable name-given="row" scope="NESTED" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <div class="tableau-cadre">

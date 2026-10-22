@@ -7,6 +7,6 @@
   </div>
   <ui:list data="${offres}" columns="titre,posteIntitule,statut,nbPostes,dateLimite"
            columnLabels="Titre,Poste,Statut,Postes,Date limite" messageVide="Aucune offre créée.">
-    <ui:action label="Voir" url="/rh/offres/{id}"/>
+    <ui:action label="Voir" url="/rh/offres/{id}" row="${row}"/>
   </ui:list>
 </ui:layout>

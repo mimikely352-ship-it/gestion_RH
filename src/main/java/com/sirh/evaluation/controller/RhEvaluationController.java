@@ -31,6 +31,8 @@ public class RhEvaluationController {
     public String detail(@PathVariable Long id, Model model) {
         Evaluation evaluation = evaluationService.obtenir(id);
         model.addAttribute("evaluation", evaluation);
+        model.addAttribute("questions", evaluationService.questionsDe(id));
+        model.addAttribute("reponses", evaluationService.reponsesDe(id));
         return "rh/evaluation-detail";
     }
 

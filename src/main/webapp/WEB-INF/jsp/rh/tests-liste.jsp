@@ -4,7 +4,7 @@
 <ui:layout title="Tests de l'offre" activeMenu="offres">
   <h1>Tests (QCM par niveau)</h1>
   <ui:list data="${tests}" columns="niveau,titre" columnLabels="Niveau,Titre" messageVide="Aucun test créé pour cette offre.">
-    <ui:action label="Gérer" url="/rh/tests/{id}"/>
+    <ui:action label="Gérer" url="/rh/tests/{id}" row="${row}"/>
   </ui:list>
 
   <div class="fiche" style="margin-top:var(--e-6);max-width:480px;"><div class="fiche-corps">

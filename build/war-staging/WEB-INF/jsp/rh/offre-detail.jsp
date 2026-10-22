@@ -23,6 +23,6 @@
   <h2 style="margin-top:var(--e-8);">Candidatures (${candidatures.size()})</h2>
   <ui:list data="${candidatures}" columns="candidatNomComplet,scoreMatching,statut,dateCandidature"
            columnLabels="Candidat,Score,Statut,Date" messageVide="Aucune candidature pour cette offre.">
-    <ui:action label="Voir" url="/rh/candidatures/{id}"/>
+    <ui:action label="Voir" url="/rh/candidatures/{id}" row="${row}"/>
   </ui:list>
 </ui:layout>
