@@ -26,15 +26,28 @@ public class CandidatureService {
 
     private final CandidatureRepository candidatureRepository;
     private final CandidatRepository candidatRepository;
+    private final com.sirh.candidat.repository.DocumentRepository documentRepository;
     private final OffreEmploiService offreEmploiService;
     private final MatchingService matchingService;
     private final NotificationService notificationService;
 
     @Transactional
     public Candidature postuler(Long candidatId, Long offreId) {
-        Candidat candidat = candidatRepository.findById(candidatId)
+        return postulerAvecPieces(candidatId, offreId, java.util.Set.of());
+    }
+
+    @Transactional
+    public Candidature postulerAvecPieces(Long candidatId, Long offreId,
+            java.util.Set<com.sirh.candidat.entity.Document> pieces) {
+        // Sérialise les dépôts du même candidat, y compris sur deux offres différentes.
+        Candidat candidat = candidatRepository.verrouiller(candidatId)
                 .orElseThrow(() -> new ResourceNotFoundException("Candidat introuvable : " + candidatId));
         OffreEmploi offre = offreEmploiService.obtenir(offreId);
+
+        if (candidat.getUtilisateur().getRole() != com.sirh.commun.enums.Role.CANDIDAT)
+            throw new BusinessException("Un employé doit utiliser une demande de promotion ou de transfert.");
+        if (offre.getEntreprise() == null)
+            throw new BusinessException("L’entreprise de cette offre doit être renseignée par les RH avant le dépôt.");
 
         if (offre.getStatut() != StatutOffre.PUBLIEE) {
             throw new BusinessException("Cette offre n'est pas ouverte aux candidatures.");
@@ -45,10 +58,23 @@ public class CandidatureService {
         if (candidatureRepository.existsByOffreIdAndCandidatId(offreId, candidatId)) {
             throw new BusinessException("Vous avez déjà postulé à cette offre.");
         }
+        if (candidatureRepository.existsByCandidatIdAndOffreEntrepriseId(candidatId, offre.getEntreprise().getId()))
+            throw new BusinessException("Vous avez déjà candidaté auprès de cette entreprise. Un seul poste par entreprise est autorisé.");
+        var libelles = new java.util.HashSet<String>();
+        for (var piece : pieces) {
+            if (piece.getCandidat() == null || !candidatId.equals(piece.getCandidat().getId()))
+                throw new BusinessException("Une pièce jointe n'appartient pas à votre dossier.");
+            libelles.add(piece.getLibelle());
+        }
+        if (!libelles.containsAll(offre.getPiecesRequises()))
+            throw new BusinessException("Joignez toutes les pièces demandées depuis la page de l'offre.");
 
         Candidature candidature = Candidature.builder()
                 .offre(offre)
                 .candidat(candidat)
+                .cvDocument(documentRepository.findFirstByCandidatIdAndTypeOrderByDateUploadDesc(candidatId, "CV").orElse(null))
+                .diplomes(new java.util.HashSet<>(candidat.getDiplomes()))
+                .piecesComplementaires(new java.util.HashSet<>(pieces))
                 .statut(StatutCandidature.RECUE)
                 .build();
         candidature = candidatureRepository.save(candidature);
@@ -56,18 +82,12 @@ public class CandidatureService {
         BigDecimal score = matchingService.calculerScore(candidat, offre);
         candidature.setScoreMatching(score);
 
-        Long utilisateurId = candidat.getUtilisateur().getId();
-        if (matchingService.estAccepteAutomatiquement(score, offre)) {
-            candidature.setStatut(StatutCandidature.ACCEPTEE_ENTRETIEN);
-            notificationService.notifier(utilisateurId,
-                    "Votre candidature pour \"" + offre.getTitre() + "\" est acceptée pour l'entretien.",
-                    TypeNotification.CANDIDATURE, "/candidat/mes-candidatures");
-        } else {
-            candidature.setStatut(StatutCandidature.NON_RETENUE);
-            notificationService.notifier(utilisateurId,
-                    "Votre candidature pour \"" + offre.getTitre() + "\" n'a pas été retenue.",
-                    TypeNotification.CANDIDATURE, "/candidat/mes-candidatures");
-        }
+        notificationService.notifier(candidat.getUtilisateur().getId(),
+                "Votre candidature a été reçue et sera examinée par les RH.",
+                TypeNotification.CANDIDATURE, "/candidat/mes-candidatures");
+        String titreCourt = offre.getTitre().substring(0, Math.min(120, offre.getTitre().length()));
+        notificationService.notifierRh("Nouvelle candidature pour « " + titreCourt + " ». Dossier à examiner.",
+                TypeNotification.CANDIDATURE, "/rh/candidatures/" + candidature.getId());
         return candidatureRepository.save(candidature);
     }
 
@@ -87,7 +107,25 @@ public class CandidatureService {
     @Transactional
     public Candidature changerStatut(Long candidatureId, StatutCandidature statut) {
         Candidature candidature = obtenir(candidatureId);
+        boolean autorise = switch (candidature.getStatut()) {
+            case RECUE -> statut == StatutCandidature.ACCEPTEE_ENTRETIEN || statut == StatutCandidature.NON_RETENUE;
+            case ACCEPTEE_ENTRETIEN -> statut == StatutCandidature.EN_ENTRETIEN;
+            case EN_ENTRETIEN -> statut == StatutCandidature.EN_TEST || statut == StatutCandidature.REFUSEE_ENTRETIEN;
+            case EN_TEST -> statut == StatutCandidature.EN_EVALUATION || statut == StatutCandidature.REFUSEE;
+            case EN_EVALUATION -> statut == StatutCandidature.RETENUE || statut == StatutCandidature.REFUSEE;
+            case RETENUE -> statut == StatutCandidature.EMBAUCHE;
+            default -> false;
+        };
+        if (!autorise) throw new BusinessException("Transition de candidature non autorisée.");
+        boolean preselection = candidature.getStatut() == StatutCandidature.RECUE;
         candidature.setStatut(statut);
+        if (preselection) {
+            String decision = statut == StatutCandidature.ACCEPTEE_ENTRETIEN
+                    ? "retenue pour un entretien" : "non retenue";
+            notificationService.notifier(candidature.getCandidat().getUtilisateur().getId(),
+                    "Votre candidature pour \"" + candidature.getOffre().getTitre() + "\" est " + decision + ".",
+                    TypeNotification.CANDIDATURE, "/candidat/mes-candidatures");
+        }
         return candidatureRepository.save(candidature);
     }
 }

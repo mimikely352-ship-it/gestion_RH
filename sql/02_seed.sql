@@ -5,6 +5,9 @@
 -- car le hash BCrypt doit être généré par l'encodeur de l'application.
 -- ============================================================================
 
+-- psql : ce fichier est en UTF-8, quel que soit l'encodage du terminal Windows.
+SET client_encoding = 'UTF8';
+
 -- ========== RÉFÉRENTIEL DIPLÔME ==========
 INSERT INTO niveau_diplome (niveau) VALUES
   ('Baccalauréat'), ('Licence'), ('Master'), ('Doctorat'), ('BTS/DUT');

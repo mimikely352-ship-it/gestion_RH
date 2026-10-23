@@ -23,8 +23,9 @@ public class DgOrdreController {
     private final UtilisateurRepository utilisateurRepository;
 
     @GetMapping
-    public String liste(Model model) {
-        model.addAttribute("ordres", ordreRepository.findAll());
+    public String liste(Model model, Authentication authentication) {
+        model.addAttribute("ordres", ordreRepository.findAll().stream()
+                .filter(o -> o.getDg().getEmail().equals(authentication.getName())).toList());
         model.addAttribute("rhs", utilisateurRepository.findByRole(Role.RH));
         return "dg/ordres-liste";
     }
@@ -36,5 +37,16 @@ public class DgOrdreController {
                 .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable.")).getId();
         ordreService.emettre(dgId, rhId, description, delaiJours);
         return "redirect:/dg/ordres";
+    }
+
+    @GetMapping("/{id}")
+    public String detail(@PathVariable Long id, Authentication authentication, Model model) {
+        var ordre = ordreService.obtenir(id);
+        if (!ordre.getDg().getEmail().equals(authentication.getName())) {
+            throw new org.springframework.security.access.AccessDeniedException("Cet ordre appartient à un autre directeur général.");
+        }
+        model.addAttribute("ordre", ordre);
+        model.addAttribute("espaceRh", false);
+        return "commun/ordre-detail";
     }
 }

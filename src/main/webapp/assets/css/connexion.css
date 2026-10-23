@@ -1,0 +1,39 @@
+/* Page de connexion : styles limites au composant pour conserver la charte publique. */
+.connexion{display:grid;grid-template-columns:1fr 1.05fr;width:calc(100% - 48px);max-width:1100px;margin:48px auto 0;min-height:570px;border:1px solid var(--trait);border-radius:28px;overflow:hidden;background:var(--surface);box-shadow:0 20px 60px rgba(36,63,45,.06)}
+.connexion .connexion-identite{position:relative;isolation:isolate;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;gap:56px;padding:44px;background:var(--foret);color:var(--surface)}
+.connexion-signature{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:650;letter-spacing:.17em}
+.connexion-point{width:8px;height:8px;border-radius:50%;background:var(--sauge);box-shadow:0 0 0 5px rgba(220,231,199,.1)}
+.connexion-edition{display:block;color:var(--sauge);font-size:13px;margin-bottom:22px}
+.connexion .connexion-message h2{font-size:clamp(30px,3.2vw,43px);line-height:1.13;letter-spacing:-.045em;color:var(--surface);font-weight:650;margin-bottom:24px}
+.connexion-message p{max-width:31ch;font-size:15px;line-height:1.8;color:#d8e3d3}
+.connexion-parcours{display:flex;gap:26px;padding-top:24px;border-top:1px solid rgba(220,231,199,.23)}
+.connexion-parcours span{font-size:10px;color:var(--sauge);letter-spacing:.06em}
+.connexion-parcours strong{display:block;font-size:12px;font-weight:500;margin-top:7px;color:var(--surface);letter-spacing:0}
+.connexion-orbite{position:absolute;z-index:-1;width:340px;height:340px;border:1px solid rgba(220,231,199,.1);border-radius:50%;right:-220px;top:65px;box-shadow:0 0 0 38px rgba(220,231,199,.025),0 0 0 76px rgba(220,231,199,.025)}
+.connexion-espace{display:flex;align-items:center;justify-content:center;padding:48px 44px}
+.connexion-formulaire{width:100%;max-width:370px}
+.connexion-surtitre{display:block;font-size:10px;font-weight:700;letter-spacing:.15em;color:var(--marque);text-transform:uppercase;margin-bottom:16px}
+.connexion .connexion-formulaire h1{font-size:30px;font-weight:650;line-height:1.2;letter-spacing:-.04em;margin-bottom:10px}
+.connexion-introduction{color:var(--encre-douce);font-size:14px;line-height:1.6;margin-bottom:30px}
+.connexion-champs{display:flex;flex-direction:column;gap:21px}
+.connexion-champ label{display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--encre)}
+.connexion .saisie{display:block;width:100%;height:50px;padding:12px 15px;font-size:14px;line-height:1.5;border:1px solid var(--trait-fort);border-radius:10px;background:var(--surface);color:var(--encre);font-family:inherit}
+.connexion .saisie::placeholder{color:var(--encre-pale);opacity:1}
+.connexion .saisie:focus-visible{outline:2px solid var(--marque);outline-offset:3px;box-shadow:none}
+.connexion-secret{position:relative}
+.connexion-secret:has(.connexion-voir:not([hidden])) .saisie{padding-right:86px}
+.connexion-voir{position:absolute;right:7px;top:7px;height:36px;padding:0 9px;border:0;border-radius:6px;background:transparent;color:var(--marque-fonce);font-size:11px;font-family:inherit;font-weight:650;cursor:pointer}
+.connexion-voir:hover{background:var(--surface-2)}
+.connexion-voir[hidden]{display:none}
+.connexion .connexion-envoyer{display:flex;justify-content:space-between;width:100%;min-height:50px;margin-top:3px;padding:14px 19px;border-radius:10px;font-size:14px}
+.connexion-envoyer .oria-icone{width:18px;height:18px}
+.connexion-decouverte{margin-top:29px;padding-top:23px;border-top:1px solid var(--trait)}
+.connexion-decouverte p{font-size:12px;color:var(--encre-douce);margin-bottom:8px}
+.connexion-decouverte a{display:inline-flex;align-items:center;gap:10px;font-size:13px;font-weight:650;text-decoration:none}
+.connexion-decouverte a:hover{text-decoration:underline}
+.connexion-decouverte .oria-icone{width:16px;height:16px}
+.connexion-erreur,.connexion-contexte{padding:12px 14px;border-radius:10px;font-size:13px;line-height:1.6}
+.connexion-erreur{background:var(--rouge-pale);color:var(--rouge);border:1px solid var(--rouge);margin-bottom:20px}
+.connexion-contexte{background:var(--surface-2);color:var(--marque-fonce)}
+@media(max-width:760px){.connexion{grid-template-columns:1fr;max-width:520px;margin-top:28px;min-height:0;border-radius:22px}.connexion .connexion-identite{padding:28px;gap:25px}.connexion .connexion-message h2{font-size:30px;margin-bottom:0}.connexion-message p,.connexion-parcours,.connexion-edition{display:none}.connexion-espace{padding:32px 28px}.connexion .connexion-formulaire h1{font-size:27px}}
+@media(max-width:380px){.connexion{width:calc(100% - 28px)}.connexion .connexion-identite{padding:24px}.connexion-espace{padding:28px 22px}.connexion .connexion-message h2{font-size:27px}.connexion .connexion-formulaire h1{font-size:24px}}

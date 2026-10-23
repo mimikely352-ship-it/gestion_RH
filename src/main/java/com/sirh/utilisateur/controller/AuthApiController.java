@@ -25,7 +25,9 @@ public class AuthApiController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletResponse response) {
+    @org.springframework.security.access.prepost.PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> logout(HttpServletResponse response, Authentication authentication) {
+        if (authentication != null) authService.revoquer(authentication.getName());
         authService.supprimerCookie(response);
         return ResponseEntity.noContent().build();
     }

@@ -28,6 +28,15 @@ public class OffreEmploi {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "entreprise_id")
+    private com.sirh.organisation.entity.Entreprise entreprise;
+
+    @Transient
+    public String getEntrepriseNom() {
+        return entreprise == null ? "Entreprise à préciser" : entreprise.getNom();
+    }
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "poste_id", nullable = false)
     private Poste poste;
@@ -70,6 +79,17 @@ public class OffreEmploi {
             joinColumns = @JoinColumn(name = "offre_id"),
             inverseJoinColumns = @JoinColumn(name = "diplome_id"))
     private Set<Diplome> diplomesRequis = new HashSet<>();
+
+    @Builder.Default
+    @ElementCollection
+    @CollectionTable(name = "offre_piece_requise", joinColumns = @JoinColumn(name = "offre_id"))
+    @Column(name = "libelle", nullable = false, length = 100)
+    private Set<String> piecesRequises = new HashSet<>();
+
+    @Transient
+    public java.util.List<String> getListePiecesRequises() {
+        return piecesRequises.stream().sorted().toList();
+    }
 
     /** Propriété à plat pour l'affichage dans les listes (<ui:list columns="...posteIntitule...">). */
     @Transient

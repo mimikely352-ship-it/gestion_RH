@@ -15,7 +15,7 @@
           ${requis == 'true' ? 'required' : ''} ${multiple == 'true' ? 'multiple' : ''}>
     <c:if test="${multiple != 'true'}"><option value="">—</option></c:if>
     <c:forEach var="item" items="${items}">
-      <option value="${item[valueProperty]}" ${selected == item[valueProperty] ? 'selected' : ''}>
+      <option value="${item[valueProperty]}" ${(multiple == 'true' and selected != null and selected.contains(item[valueProperty])) or (multiple != 'true' and selected == item[valueProperty]) ? 'selected' : ''}>
         <c:out value="${item[labelProperty]}"/>
       </option>
     </c:forEach>

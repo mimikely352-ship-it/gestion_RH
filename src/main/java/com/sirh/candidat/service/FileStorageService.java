@@ -43,6 +43,7 @@ public class FileStorageService {
             throw new BusinessException("Format de fichier non autorisé (" + extension + "). Autorisé : "
                     + String.join(", ", extensionsAutorisees));
         }
+        if ("pdf".equals(extension)) verifierPdf(fichier);
         String nomStocke = UUID.randomUUID() + "." + extension;
         Path destination = racine.resolve(nomStocke);
         try {
@@ -60,6 +61,26 @@ public class FileStorageService {
             throw new BusinessException("Fichier introuvable.");
         }
         return new FileSystemResource(fichier);
+    }
+
+    public void verifierPdf(MultipartFile fichier) {
+        if (fichier == null || fichier.isEmpty() || fichier.getSize() > 5 * 1024 * 1024)
+            throw new BusinessException("Chaque pièce doit être un PDF non vide de 5 Mo maximum.");
+        if (!"pdf".equals(extension(fichier.getOriginalFilename())))
+            throw new BusinessException("Les pièces complémentaires doivent être au format PDF.");
+        try (var entree = fichier.getInputStream()) {
+            if (!java.util.Arrays.equals(entree.readNBytes(5), "%PDF-".getBytes(java.nio.charset.StandardCharsets.US_ASCII)))
+                throw new BusinessException("Le fichier fourni ne possède pas un en-tête PDF valide.");
+        } catch (IOException ex) {
+            throw new BusinessException("Impossible de lire la pièce jointe.");
+        }
+    }
+
+    public void supprimer(String nomStocke) {
+        Path fichier = racine.resolve(nomStocke).normalize();
+        if (!racine.equals(fichier.getParent())) throw new IllegalArgumentException("Chemin invalide.");
+        try { Files.deleteIfExists(fichier); }
+        catch (IOException ex) { throw new IllegalStateException("Impossible de nettoyer le fichier temporaire.", ex); }
     }
 
     private String extension(String nomFichier) {

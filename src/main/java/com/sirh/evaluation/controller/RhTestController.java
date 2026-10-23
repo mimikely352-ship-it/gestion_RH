@@ -51,7 +51,7 @@ public class RhTestController {
                                    @RequestParam(required = false) String choix3,
                                    @RequestParam(required = false) String choix4,
                                    @RequestParam int correct) {
-        List<String> libelles = List.of(choix1, choix2, choix3, choix4);
+        List<String> libelles = java.util.Arrays.asList(choix1, choix2, choix3, choix4);
         List<TestService.ChoixSaisi> choix = new ArrayList<>();
         for (int i = 0; i < libelles.size(); i++) {
             if (libelles.get(i) != null && !libelles.get(i).isBlank()) {

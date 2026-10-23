@@ -43,6 +43,8 @@ public class Utilisateur {
 
     @Column(name = "date_creation", nullable = false)
     private LocalDateTime dateCreation;
+    @Column(name = "tokens_valides_depuis")
+    private LocalDateTime tokensValidesDepuis;
 
     @PrePersist
     void prePersist() {

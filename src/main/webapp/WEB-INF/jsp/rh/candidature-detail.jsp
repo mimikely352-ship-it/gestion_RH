@@ -23,9 +23,17 @@
         <a class="btn btn-secondaire btn-petit" style="margin-top:var(--e-3);"
            href="${pageContext.request.contextPath}/documents/${cv.id}/telecharger" target="_blank">Voir le CV</a>
       </c:if>
-      <h4 style="margin-top:var(--e-5);">Diplômes</h4>
+      <c:if test="${empty cv}">
+        <p class="texte-doux">Aucun CV enregistré avec cette candidature. Le CV historique des anciens dossiers peut être indisponible.</p>
+      </c:if>
+      <h4>Pièces complémentaires du dossier</h4>
+      <c:if test="${empty candidature.piecesComplementaires}"><p class="texte-doux">Aucune pièce complémentaire déposée.</p></c:if>
+      <ul><c:forEach var="piece" items="${candidature.piecesComplementaires}">
+        <li><a href="${pageContext.request.contextPath}/documents/${piece.id}/telecharger" target="_blank" rel="noopener"><c:out value="${piece.libelle}"/> — <c:out value="${piece.nomFichier}"/></a></li>
+      </c:forEach></ul>
+      <h4>Diplômes déclarés</h4>
       <ul>
-        <c:forEach var="d" items="${candidature.candidat.diplomes}"><li><c:out value="${d.libelle}"/></li></c:forEach>
+        <c:forEach var="d" items="${candidature.diplomes}"><li><c:out value="${d.libelle}"/></li></c:forEach>
       </ul>
       <h4 style="margin-top:var(--e-5);">Expériences</h4>
       <ul>
@@ -36,6 +44,17 @@
     </div></div>
 
     <div class="fiche"><div class="fiche-corps">
+      <c:if test="${candidature.statut == 'RECUE'}">
+        <h3>Présélection RH</h3>
+        <ui:formulaire action="/rh/candidatures/${candidature.id}/preselection">
+          <input type="hidden" name="retenir" value="true"/>
+          <ui:bouton label="Retenir pour entretien" type="submit" style="btn-valider"/>
+        </ui:formulaire>
+        <ui:formulaire action="/rh/candidatures/${candidature.id}/preselection">
+          <input type="hidden" name="retenir" value="false"/>
+          <ui:bouton label="Ne pas retenir" type="submit" style="btn-refuser"/>
+        </ui:formulaire>
+      </c:if>
       <h3>Entretien</h3>
       <c:forEach var="ent" items="${entretiens}">
         <p><c:out value="${ent.dateHeure}"/> — <c:out value="${ent.lieu}"/> — <ui:statut valeur="${ent.decisionRh}"/></p>
@@ -115,12 +134,14 @@
   <c:if test="${candidature.statut == 'RETENUE'}">
     <div class="fiche" style="margin-top:var(--e-6);"><div class="fiche-corps">
       <h3>Acceptation finale</h3>
+      <p>Le service du poste est repris automatiquement. S’il manque, choisissez le service d’accueil ci-dessous.</p>
       <ui:formulaire action="/rh/candidatures/${candidature.id}/embauche" cssClass="rangee">
         <select class="saisie" name="role">
           <option value="EMPLOYE">Employé</option>
           <option value="CHEF_SERVICE">Chef de service</option>
           <option value="DIRECTION">Direction</option>
         </select>
+        <ui:champ-liste label="Service d’accueil si le poste n’en possède pas" name="serviceId" items="${services}" valueProperty="id" labelProperty="nom"/>
         <ui:bouton label="Attribuer le poste et embaucher" type="submit" style="btn-valider"/>
       </ui:formulaire>
     </div></div>

@@ -25,7 +25,8 @@ public class DgDemandeController {
 
     @GetMapping
     public String liste(Model model) {
-        model.addAttribute("demandes", demandeRepository.findByStatut(StatutDemande.VALIDEE_RH));
+        model.addAttribute("demandes", demandeRepository.findByStatut(StatutDemande.VALIDEE_RH).stream()
+                .filter(d -> d.getType() != com.sirh.commun.enums.TypeDemande.TRANSFERT).toList());
         return "dg/demandes-liste";
     }
 

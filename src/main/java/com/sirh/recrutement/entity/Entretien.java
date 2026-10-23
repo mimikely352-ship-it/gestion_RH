@@ -24,6 +24,8 @@ public class Entretien {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Version private Long version;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "candidature_id", nullable = false)
     private Candidature candidature;

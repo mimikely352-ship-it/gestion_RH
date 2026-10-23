@@ -32,12 +32,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final String cookieName;
     private final SecurityContextRepository securityContextRepository;
+    private final com.sirh.utilisateur.repository.UtilisateurRepository utilisateurs;
 
     public JwtAuthFilter(JwtService jwtService, @Value("${app.jwt.cookie-name}") String cookieName,
-                          SecurityContextRepository securityContextRepository) {
+                          SecurityContextRepository securityContextRepository,
+                          com.sirh.utilisateur.repository.UtilisateurRepository utilisateurs) {
         this.jwtService = jwtService;
         this.cookieName = cookieName;
         this.securityContextRepository = securityContextRepository;
+        this.utilisateurs = utilisateurs;
     }
 
     @Override
@@ -54,6 +57,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (header != null && header.startsWith("Bearer ")) {
             return Optional.of(header.substring(7));
         }
+        if (request.getRequestURI().substring(request.getContextPath().length()).startsWith("/api/")) return Optional.empty();
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
@@ -71,6 +75,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
         String email = claims.getSubject();
         String role = claims.get("role", String.class);
+        var utilisateur = utilisateurs.findByEmail(email).orElse(null);
+        if (utilisateur == null || !utilisateur.isActif() || !utilisateur.getRole().name().equals(role)) return;
+        Number utilisateurId = claims.get("userId", Number.class);
+        if (utilisateurId == null || !utilisateur.getId().equals(utilisateurId.longValue())) return;
+        Number instant = claims.get("authTime", Number.class);
+        long emission = instant == null ? claims.getIssuedAt().getTime() : instant.longValue();
+        if (utilisateur.getTokensValidesDepuis() != null && emission <= utilisateur.getTokensValidesDepuis()
+                .toInstant(java.time.ZoneOffset.UTC).toEpochMilli()) return;
         var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
         var authentication = new UsernamePasswordAuthenticationToken(email, null, authorities);
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

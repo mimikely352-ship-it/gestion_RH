@@ -25,7 +25,8 @@ public class DirectionDemandeController {
 
     @GetMapping
     public String liste(Model model) {
-        model.addAttribute("demandes", demandeRepository.findByStatut(StatutDemande.VALIDEE_CHEF));
+        model.addAttribute("demandes", demandeRepository.findByStatut(StatutDemande.VALIDEE_CHEF).stream()
+                .filter(d -> d.getType() != com.sirh.commun.enums.TypeDemande.TRANSFERT).toList());
         return "direction/demandes-liste";
     }
 

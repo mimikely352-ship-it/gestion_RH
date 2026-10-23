@@ -1,0 +1,51 @@
+.page:has(.recrutement-editeur){max-width:none}
+.recrutement-editeur{max-width:1440px;margin:0 auto;color:var(--encre)}
+.recrutement-entete{display:flex;justify-content:space-between;align-items:center;gap:24px;margin:4px 0 28px}
+.recrutement-surtitre{font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--encre-douce)}
+.recrutement-entete h1{font-size:clamp(25px,2.5vw,36px);line-height:1.2;margin:10px 0}
+.recrutement-entete p,.recrutement-titre p{color:var(--encre-douce);line-height:1.5;margin:5px 0 0}
+.recrutement-badge{border:1px solid #d8d0b4;background:#fffaf0;color:#6c5827;padding:9px 15px;border-radius:30px;font-size:12px;white-space:nowrap}
+.recrutement-grille{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:24px;align-items:start}
+.recrutement-contenu{display:grid;gap:22px;min-width:0}
+.recrutement-carte,.recrutement-resume{background:#fff;border:1px solid var(--trait);border-radius:14px;padding:28px;box-shadow:0 3px 12px #20273804}
+.recrutement-titre{display:flex;align-items:flex-start;gap:14px;margin-bottom:25px}
+.recrutement-titre>span{display:grid;place-items:center;flex-shrink:0;width:36px;height:36px;background:var(--surface-2);color:var(--marque);border-radius:11px;font-size:12px;font-weight:700}
+.recrutement-titre h2{font-size:19px;margin:0;line-height:1.4}
+.recrutement-titre p{font-size:13px}
+.recrutement-editeur .champ{margin:0 0 18px}
+.recrutement-editeur .champ-libelle{display:block;margin-bottom:7px;font-size:13px}
+.recrutement-editeur .facultatif{margin-left:5px;font-size:11px}
+.recrutement-editeur .champ-aide{display:block;font-size:12px;line-height:1.6;margin-top:6px;color:var(--encre-douce)}
+.recrutement-editeur .saisie{width:100%;font-size:14px;border-radius:8px;min-height:44px;padding:11px 13px;box-sizing:border-box}
+.recrutement-editeur textarea.saisie{resize:vertical;line-height:1.6}
+.recrutement-editeur fieldset{border:0;margin:0;padding:0;min-width:0}
+.recrutement-editeur [hidden]{display:none!important}
+.recrutement-choix{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:22px}
+.recrutement-choix label{flex:1;min-width:190px;display:flex;gap:9px;align-items:center;border:1px solid var(--trait);border-radius:9px;padding:13px;font-size:13px;cursor:pointer}
+.recrutement-choix label:has(input:checked){border-color:var(--marque);background:var(--surface-2);color:var(--marque)}
+.recrutement-editeur input[type=checkbox],.recrutement-editeur input[type=radio]{accent-color:var(--marque);width:16px;height:16px;flex-shrink:0}
+.recrutement-champs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.recrutement-champs-trois{grid-template-columns:repeat(3,minmax(0,1fr))}
+.recrutement-carte h3{font-size:14px;margin:6px 0}
+.recrutement-filtres{display:grid;grid-template-columns:minmax(0,1fr) 170px;gap:12px;margin:15px 0 12px}
+.recrutement-diplomes{max-height:280px;overflow:auto;border:1px solid var(--trait);border-radius:9px;padding:5px 14px}
+.recrutement-diplome{display:flex;gap:11px;align-items:center;padding:12px 0;font-size:13px;line-height:1.5;cursor:pointer;border-bottom:1px solid var(--trait)}
+.recrutement-diplome:last-child{border:0}
+.recrutement-diplome:has(input:checked){color:var(--marque);font-weight:600}
+.recrutement-selection{display:flex;justify-content:space-between;gap:10px;margin-top:12px;font-size:12px;color:var(--encre-douce)}
+.recrutement-selection button{background:none;border:0;color:var(--marque);cursor:pointer;text-decoration:underline}
+.recrutement-resume{position:sticky;top:24px;padding:25px}
+.recrutement-resume h2{font-size:22px;line-height:1.4;margin:16px 0 24px;overflow-wrap:anywhere}
+.recrutement-resume dl{margin:0}
+.recrutement-resume dt{font-size:12px;color:var(--encre-douce);margin:17px 0 4px}
+.recrutement-resume dd{margin:0;font-size:14px;font-weight:600;overflow-wrap:anywhere;white-space:pre-line}
+.recrutement-note{margin:25px 0;padding:15px;background:var(--surface-2);border-radius:9px;font-size:12px;line-height:1.6;color:var(--encre-douce)}
+.recrutement-note b{color:var(--encre)}.recrutement-note p{margin:5px 0 0}
+.recrutement-resume .btn{width:100%;justify-content:center;white-space:normal}
+.recrutement-retour{display:block;text-align:center;margin-top:14px;font-size:12px;color:var(--encre-douce)}
+.recrutement-erreur{background:#fff0ef;border:1px solid #e5b6b0;border-radius:9px;padding:15px;margin-bottom:20px;color:#9c3028}
+.recrutement-visuel-cache{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+.recrutement-poste-fixe{background:var(--surface-2);padding:12px;border-radius:8px}
+@media(max-width:1150px){.recrutement-grille{grid-template-columns:minmax(0,1fr) 260px;gap:18px}.recrutement-carte{padding:22px}.recrutement-champs-trois{grid-template-columns:1fr}}
+@media(max-width:900px){.recrutement-grille{grid-template-columns:1fr}.recrutement-resume{position:static}.recrutement-entete{align-items:flex-start}.recrutement-badge{white-space:normal}.recrutement-champs-trois{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:600px){.recrutement-entete{display:block}.recrutement-badge{display:inline-block;margin-top:15px}.recrutement-carte,.recrutement-resume{padding:18px}.recrutement-champs,.recrutement-champs-trois,.recrutement-filtres{grid-template-columns:1fr}.recrutement-choix{display:grid}.recrutement-choix label{min-width:0}}

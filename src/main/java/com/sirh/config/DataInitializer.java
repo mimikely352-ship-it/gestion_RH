@@ -54,8 +54,7 @@ public class DataInitializer implements ApplicationRunner {
             serviceRepository.save(serviceDemo);
         }
 
-        log.info("Comptes de démonstration prêts (mot de passe : {}) : dg@sirh.local, rh@sirh.local, " +
-                "chef-service@sirh.local, direction@sirh.local, employe@sirh.local", MOT_DE_PASSE_DEMO);
+        log.info("Comptes de démonstration prêts. Désactiver app.demo-data.enabled en production.");
     }
 
     private Utilisateur creerSiAbsent(String email, Role role, Service service) {

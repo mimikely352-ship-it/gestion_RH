@@ -1,6 +1,5 @@
 package com.sirh.recrutement.controller;
 
-import com.sirh.candidat.repository.DocumentRepository;
 import com.sirh.candidat.repository.ExperienceRepository;
 import com.sirh.commun.enums.Role;
 import com.sirh.embauche.service.EmbaucheService;
@@ -31,8 +30,8 @@ public class RhCandidatureController {
     private final PassageTestService passageTestService;
     private final EvaluationService evaluationService;
     private final ExperienceRepository experienceRepository;
-    private final DocumentRepository documentRepository;
     private final EmbaucheService embaucheService;
+    private final com.sirh.organisation.repository.ServiceRepository serviceRepository;
 
     @GetMapping
     public String liste(Model model) {
@@ -48,13 +47,22 @@ public class RhCandidatureController {
         model.addAttribute("passages", passageTestService.listerPourCandidature(id));
         model.addAttribute("evaluations", evaluationService.listerPourCandidature(id));
         model.addAttribute("experiences", experienceRepository.findByCandidatId(candidature.getCandidat().getId()));
-        model.addAttribute("cv", documentRepository.findFirstByCandidatIdAndTypeOrderByDateUploadDesc(candidature.getCandidat().getId(), "CV").orElse(null));
+        model.addAttribute("cv", candidature.getCvDocument());
+        model.addAttribute("services", serviceRepository.findAll());
         return "rh/candidature-detail";
     }
 
+    @PostMapping("/{id}/preselection")
+    public String preselection(@PathVariable Long id, @RequestParam boolean retenir) {
+        candidatureService.changerStatut(id, retenir
+                ? com.sirh.commun.enums.StatutCandidature.ACCEPTEE_ENTRETIEN
+                : com.sirh.commun.enums.StatutCandidature.NON_RETENUE);
+        return "redirect:/rh/candidatures/" + id;
+    }
+
     @PostMapping("/{id}/embauche")
-    public String finaliser(@PathVariable Long id, @RequestParam Role role) {
-        embaucheService.finaliser(id, role, null);
+    public String finaliser(@PathVariable Long id, @RequestParam Role role, @RequestParam(required = false) Long serviceId) {
+        embaucheService.finaliser(id, role, serviceId);
         return "redirect:/rh/candidatures/" + id;
     }
 

@@ -25,8 +25,8 @@ public class NotificationApiController {
     }
 
     @PutMapping("/{id}/lu")
-    public void marquerLue(@PathVariable Long id) {
-        notificationService.marquerLue(id);
+    public void marquerLue(@PathVariable Long id, Authentication authentication) {
+        notificationService.marquerLue(id, authentication.getName());
     }
 
     private Long utilisateurId(Authentication authentication) {

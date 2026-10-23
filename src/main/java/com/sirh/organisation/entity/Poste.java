@@ -19,6 +19,9 @@ public class Poste {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Builder.Default
+    @Column(name = "mobilite_ouverte", nullable = false)
+    private boolean mobiliteOuverte = true;
 
     @Column(nullable = false, length = 150)
     private String intitule;
@@ -26,7 +29,10 @@ public class Poste {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "section_id", nullable = false)
+    @Column(length = 150)
+    private String categorie;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "section_id")
     private Section section;
 }

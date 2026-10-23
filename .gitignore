@@ -1,0 +1,20 @@
+# Compilation, rapports, captures et profils de navigateur de test
+/build/
+/.ivy-cache/
+/lib/
+
+# Documents envoyes dans l'application (CV et pieces personnelles)
+/uploads/
+
+# Configuration locale et secrets
+.env
+.env.*
+!.env.example
+application-local.properties
+
+# Fichiers locaux des editeurs et du systeme
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db

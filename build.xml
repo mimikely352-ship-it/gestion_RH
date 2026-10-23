@@ -69,6 +69,9 @@
         <copy todir="${classes.dir}">
             <fileset dir="${resources.dir}" erroronmissingdir="false"/>
         </copy>
+        <copy todir="${classes.dir}/db/migration">
+            <fileset dir="sql" includes="09_dates_parcours_employes.sql,10_fiabilisation_metier.sql"/>
+        </copy>
     </target>
 
     <target name="compile-tests" depends="compile" description="Compile les tests">

@@ -2,6 +2,8 @@
 <%@ attribute name="label" required="true" %>
 <%@ attribute name="name" required="true" %>
 <%@ attribute name="type" required="false" %>
+<%@ attribute name="min" required="false" %>
+<%@ attribute name="maxlength" required="false" %>
 <%@ attribute name="value" required="false" %>
 <%@ attribute name="requis" required="false" %>
 <%@ attribute name="aide" required="false" %>
@@ -13,8 +15,9 @@
     <c:if test="${requis != 'true'}"> <span class="facultatif">(facultatif)</span></c:if>
   </label>
   <input class="saisie ${not empty erreur ? 'invalide' : ''}" id="champ-${name}" name="${name}"
-         type="${not empty type ? type : 'text'}" value="${value}"
+         type="${not empty type ? type : 'text'}" value="<c:out value='${value}'/>" min="${min}" maxlength="${maxlength}"
+         aria-invalid="${not empty erreur ? 'true' : 'false'}" aria-describedby="${not empty aide ? 'aide-'.concat(name) : ''} ${not empty erreur ? 'erreur-'.concat(name) : ''}"
          ${requis == 'true' ? 'required' : ''}/>
-  <c:if test="${not empty aide}"><span class="champ-aide"><c:out value="${aide}"/></span></c:if>
-  <c:if test="${not empty erreur}"><span class="champ-erreur"><c:out value="${erreur}"/></span></c:if>
+  <c:if test="${not empty aide}"><span class="champ-aide" id="aide-${name}"><c:out value="${aide}"/></span></c:if>
+  <c:if test="${not empty erreur}"><span class="champ-erreur" id="erreur-${name}"><c:out value="${erreur}"/></span></c:if>
 </div>

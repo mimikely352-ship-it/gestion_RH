@@ -47,6 +47,17 @@ public class CandidatInscriptionService {
     public Candidat inscrire(String email, String motDePasse, String nom, String prenom, String telephone,
                               LocalDate dateNaissance, String lieuNaissance, String cin, String adresse,
                               List<ExperienceSaisie> experiences, Set<Long> diplomeIds, MultipartFile cv) {
+        if (email == null || !email.matches("[^\\s@]+@[^\\s@]+\\.[^\\s@]+") || motDePasse == null || motDePasse.length() < 10
+                || motDePasse.getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 72 || nom == null || nom.isBlank() || prenom == null || prenom.isBlank())
+            throw new BusinessException("Renseignez un email valide, vos nom et prénom et un mot de passe de 10 à 72 caractères.");
+        email = email.strip().toLowerCase(java.util.Locale.ROOT);
+        if (dateNaissance != null && !dateNaissance.isBefore(LocalDate.now())) throw new BusinessException("Date de naissance invalide.");
+        if (experiences != null) for (var e : experiences) {
+            if (e.dateDebut() == null || e.dateDebut().isAfter(LocalDate.now())
+                    || (e.dateFin() != null && (e.dateFin().isBefore(e.dateDebut()) || e.dateFin().isAfter(LocalDate.now()))))
+                throw new BusinessException("Vérifiez les dates de vos expériences professionnelles.");
+        }
+        if (cv != null && !cv.isEmpty()) fileStorageService.verifierPdf(cv);
         if (utilisateurRepository.existsByEmail(email)) {
             throw new BusinessException("Un compte existe déjà avec cet email.");
         }
@@ -92,6 +103,12 @@ public class CandidatInscriptionService {
 
         if (cv != null && !cv.isEmpty()) {
             String chemin = fileStorageService.enregistrer(cv);
+            if (org.springframework.transaction.support.TransactionSynchronizationManager.isSynchronizationActive())
+                org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(new org.springframework.transaction.support.TransactionSynchronization() {
+                    @Override public void afterCompletion(int statut) {
+                        if (statut != STATUS_COMMITTED) fileStorageService.supprimer(chemin);
+                    }
+                });
             Document document = Document.builder()
                     .type("CV")
                     .nomFichier(cv.getOriginalFilename())

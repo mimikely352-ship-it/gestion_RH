@@ -44,6 +44,9 @@ public class CandidatureApiController {
     @PutMapping("/api/candidatures/{id}/statut")
     @PreAuthorize("hasRole('RH')")
     public CandidatureDto changerStatut(@PathVariable Long id, @RequestParam StatutCandidature statut) {
+        if (statut != StatutCandidature.ACCEPTEE_ENTRETIEN && statut != StatutCandidature.NON_RETENUE) {
+            throw new com.sirh.commun.exception.BusinessException("Utilisez les actions du parcours pour les autres décisions.");
+        }
         return new CandidatureDto(candidatureService.changerStatut(id, statut));
     }
 }

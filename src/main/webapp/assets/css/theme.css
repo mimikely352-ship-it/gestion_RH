@@ -1,0 +1,107 @@
+/* ORIA RH — charte commune. Modifier les variables ici pour changer les couleurs.
+   Chargée après les styles de composants, sur toutes les pages de l'application. */
+:root {
+  --marque:#426c35;
+  --marque-fonce:#2b4d27;
+  --foret:#243f2d;
+  --sauge:#dce7c7;
+  --papier:#f1f3e9;
+  --surface:#fffef8;
+  --surface-2:#edf1e3;
+  --trait:#d8dfce;
+  --trait-fort:#b4c1a5;
+  --encre:#263a28;
+  --encre-douce:#5a6b54;
+  --encre-pale:#68795f;
+  --indigo:var(--marque);
+  --indigo-fonce:var(--marque-fonce);
+  --indigo-nuit:var(--foret);
+  --indigo-pale:#e1ebd5;
+  --kraft:#c5aa69;
+  --kraft-fonce:#6e592d;
+  --kraft-pale:#f4eedc;
+  --vert:#326646;
+  --vert-pale:#e4f0e4;
+  --ambre:#865d1c;
+  --ambre-pale:#f7efdb;
+  --rouge:#a3352c;
+  --rouge-pale:#f9e8e2;
+  --interface-encre:var(--encre);
+  --interface-secondaire:var(--encre-douce);
+  --interface-bord:var(--trait);
+  --interface-fond:var(--papier);
+  --interface-accent:var(--marque);
+  --police:'Segoe UI',Arial,system-ui,sans-serif;
+  --large:100%;
+  --serre:100%;
+  --r-champ:12px;
+  --r-fiche:18px;
+  --r-etiquette:8px;
+  --ombre-fiche:0 3px 15px rgba(38,58,40,.035);
+  --focus:0 0 0 3px rgba(66,108,53,.22);
+}
+body{background:var(--papier);color:var(--encre)}
+.oria-icone{display:inline-block;width:20px;height:20px;vertical-align:middle;flex-shrink:0;color:inherit}
+.cloche{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;color:var(--marque-fonce)}
+.cloche .oria-icone{width:23px;height:23px}
+.offre-indicateurs dd span .oria-icone{width:15px;height:15px}
+h1,h2,h3,h4{color:var(--encre);letter-spacing:-.025em}
+a{color:var(--marque)}a:hover{color:var(--marque-fonce)}
+:where(a,button,input,select,textarea,summary,[tabindex]):focus-visible{outline-color:var(--marque)}
+.marque-logo{width:46px;height:46px;flex-shrink:0;display:block;border-radius:13px;object-fit:cover;object-position:center;background:#090909}
+.site-marque strong,.lateral-marque strong{font-size:23px;font-weight:750;letter-spacing:-.04em}
+.site-entete{width:calc(100% - 40px);max-width:1360px;margin:20px auto 0;border:1px solid var(--trait);border-radius:24px;top:12px;background:var(--surface);box-shadow:var(--ombre-fiche)}
+.site-entete__inner{max-width:none;padding:15px 27px;gap:22px}
+.site-marque strong{color:var(--marque-fonce)}
+.site-nav a{font-size:14px;font-weight:600}
+.site-pied{max-width:1360px;width:calc(100% - 40px);margin:48px auto 0;border-radius:24px 24px 0 0;background:var(--foret);color:#e4ecd8;padding:28px 20px}
+.site-pied p,.site-pied a{color:#e4ecd8}
+.btn{border-radius:999px;min-height:44px;font-weight:600}
+.btn-principal,.btn-valider{background:var(--marque);border-color:var(--marque);color:#fff}
+.btn-principal:hover,.btn-valider:hover{background:var(--marque-fonce);border-color:var(--marque-fonce);color:#fff}
+.btn-secondaire{background:var(--surface);border-color:var(--trait-fort);color:var(--marque-fonce)}
+.btn-secondaire:hover{background:var(--surface-2);border-color:var(--marque)}
+.saisie{border-radius:12px;background:var(--surface);border-color:var(--trait-fort)}
+:is(.offre-assistant,.recrutement-editeur) .saisie{border-radius:12px}
+:is(.offre-carte,.annonce-contenu,.annonce-depot,.annonce-reperes,.recrutement-carte,.recrutement-resume,.assistant-formulaire,.profil-resume,.candidature){background:var(--surface);border-color:var(--trait);border-radius:18px;box-shadow:var(--ombre-fiche)}
+.offre-etat-vide{background:var(--surface-2);border-color:var(--trait-fort)}
+.offre-liste-criteres li,.offre-table thead th,.offre-apercu,.assistant-recap,.annonce-fichier input{border-color:var(--trait)}
+.offre-puce{color:var(--marque)}
+.offre-repere,.offre-compteur,.recrutement-titre>span,.avatar{background:var(--indigo-pale);color:var(--marque-fonce)}
+.offre-actions-secondaires,.annonce-suite,.annonce-section+.annonce-section{border-color:var(--trait)}
+.offre-note,.offre-precision,.offre-texte-secondaire,.annonce-note,.annonce-section p,.annonce-depot p{color:var(--encre-douce)}
+.assistant-publication,.annonce-note{background:var(--surface-2);border-left-color:var(--marque);color:var(--encre-douce);border-radius:0 10px 10px 0}
+.assistant-navigation button[aria-current=step] span{background:var(--sauge);border-color:#9caf80;color:var(--marque-fonce)}
+.assistant-etape>h2:focus{outline-color:var(--marque)}
+.annonce-depot .btn-principal,.assistant-actions .btn-principal{background:var(--marque);border-color:var(--marque)}
+.lateral{background:var(--foret);border-right:1px solid #3c5740;padding-top:24px}
+.lateral-marque{margin-bottom:24px;gap:11px}
+.lateral-marque strong{color:#fffdf1}
+.lateral .marque-logo{width:43px;height:43px}
+.lateral-titre{color:#b6c9a4;font-size:11px;letter-spacing:.05em;text-transform:uppercase}
+.lateral-lien{color:#e0ead7;border-radius:11px;min-height:44px}
+.lateral-lien.actif{background:#e7edd9;color:var(--foret);box-shadow:none}
+.lateral-lien:hover{background:#36553a;color:#fff}
+.lateral-utilisateur small{color:#c1d0b2}
+.lateral-utilisateur .avatar{background:#dce7c7;color:var(--foret)}
+.entete{background:var(--surface);border-color:var(--trait)}
+.fil,.fil a{color:var(--encre-douce)}
+.interface-menu{border-color:#9ab18c}
+.interface-evitement{color:var(--marque-fonce);border-color:var(--marque)}
+.marque-hero{max-width:1320px;margin:24px auto 0;border-radius:30px;overflow:hidden;position:relative;background:radial-gradient(ellipse at 80% 0%,#91ab69 0%,transparent 45%),linear-gradient(125deg,#203d2c,#3e6239);color:#fffdf0;padding:60px 48px;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,.7fr);gap:40px;align-items:center}
+.marque-hero h1{color:#fffdf0;max-width:18ch;font-size:clamp(32px,3.7vw,54px);line-height:1.13;margin:14px 0 20px;font-weight:700}
+.marque-hero p{font-size:16px;line-height:1.8;color:#e0e8d3;max-width:52ch;margin-bottom:25px}
+.marque-surtitre{font-size:11px;font-weight:600;letter-spacing:.12em;color:#d3dfbb}
+.marque-hero .btn-principal{background:#e2edc9;border-color:#e2edc9;color:#2c482c;padding:12px 22px}
+.marque-hero .btn-principal:hover{background:#f3f6e8}
+.marque-hero-identite{padding:24px;text-align:center;justify-self:center;min-width:0}
+.marque-hero-identite img{width:150px;height:150px;object-fit:cover;object-position:center;border-radius:30px;display:block;margin:0 auto 19px;box-shadow:0 12px 45px #102e2638}
+.marque-hero-identite strong{display:block;color:#fffdf0;font-size:29px;letter-spacing:-.04em}
+.marque-hero-identite p{font-size:13px;margin:8px auto 0;color:#e0e8d3;max-width:24ch}
+.marque-recherche{position:relative;max-width:970px;display:flex;gap:14px;align-items:flex-end;background:#dfe9c6;border:1px solid #d1ddbb;border-radius:24px;padding:20px 24px;margin:-1px auto 0;box-shadow:0 8px 22px #304b3010}
+.marque-recherche>div{flex:1;min-width:0}.marque-recherche label{display:block;font-size:12px;color:#3c5533;font-weight:600;margin:0 0 7px}.marque-recherche input{width:100%;min-height:46px;background:var(--surface);border:1px solid #becda9;border-radius:999px;padding:11px 18px;font:inherit;font-size:14px}.marque-recherche .btn{padding:11px 25px}
+.site-main{padding-top:34px}.offre-carte__desc{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;line-height:1.75;white-space:pre-line;color:var(--encre-douce)}
+.offre-logo--purple{background:var(--indigo-pale);color:var(--marque)}
+.offre-carte:hover,.candidature:hover{box-shadow:0 5px 22px #304b3010;transform:none;border-color:var(--trait-fort)}
+@media(max-width:1360px){.marque-hero{margin-left:20px;margin-right:20px}.marque-recherche{margin-left:auto;margin-right:auto;width:calc(100% - 100px)}}
+@media(max-width:760px){.site-entete{width:calc(100% - 24px);margin-top:12px;border-radius:20px;top:6px}.site-entete__inner{padding:12px 15px;gap:10px}.site-actions .btn{font-size:12px;padding:9px 12px}.marque-logo{width:39px;height:39px}.site-marque strong{font-size:21px}.marque-hero{margin:16px 12px 0;padding:34px 25px;grid-template-columns:1fr;gap:0;border-radius:24px}.marque-hero h1{font-size:34px}.marque-hero-identite{display:none}.marque-hero p{font-size:14px}.marque-recherche{width:calc(100% - 48px);padding:16px;gap:10px;border-radius:20px;align-items:stretch;flex-direction:column}.marque-recherche .btn{width:100%}.offres-grille{grid-template-columns:1fr}.site-pied{width:calc(100% - 24px);padding:22px 12px;margin-top:32px}.lateral-marque{margin-bottom:0}.lateral{padding-top:12px}.annonce-depot{position:static}}

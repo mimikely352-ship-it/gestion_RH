@@ -137,6 +137,7 @@ CREATE TABLE offre_diplome_requis (
 
 CREATE TABLE candidature (
   id BIGSERIAL PRIMARY KEY,
+  version BIGINT NOT NULL DEFAULT 0,
   offre_id BIGINT NOT NULL REFERENCES offre_emploi(id),
   candidat_id BIGINT NOT NULL REFERENCES candidat(id),
   cv_document_id BIGINT REFERENCES document(id),
@@ -147,6 +148,17 @@ CREATE TABLE candidature (
   date_candidature TIMESTAMP NOT NULL DEFAULT NOW(),
   UNIQUE (offre_id, candidat_id)
 );
+
+CREATE TABLE candidature_diplome (
+  candidature_id BIGINT NOT NULL REFERENCES candidature(id),
+  diplome_id BIGINT NOT NULL REFERENCES diplome(id),
+  PRIMARY KEY (candidature_id, diplome_id)
+);
+
+ALTER TABLE poste ADD COLUMN categorie VARCHAR(150);
+ALTER TABLE poste ALTER COLUMN section_id DROP NOT NULL;
+ALTER TABLE offre_emploi ADD CONSTRAINT offre_experience_non_negative
+  CHECK (experience_min_mois IS NULL OR experience_min_mois >= 0);
 
 CREATE TABLE entretien (
   id BIGSERIAL PRIMARY KEY,
@@ -287,3 +299,16 @@ CREATE INDEX idx_candidature_offre ON candidature(offre_id);
 CREATE INDEX idx_demande_auteur ON demande(auteur_id);
 CREATE INDEX idx_notification_utilisateur_lu ON notification(utilisateur_id, lu);
 CREATE INDEX idx_offre_statut ON offre_emploi(statut);
+
+-- Dossier complementaire configurable par offre.
+ALTER TABLE document ADD COLUMN libelle VARCHAR(100);
+CREATE TABLE offre_piece_requise (
+  offre_id BIGINT NOT NULL REFERENCES offre_emploi(id),
+  libelle VARCHAR(100) NOT NULL,
+  PRIMARY KEY (offre_id, libelle)
+);
+CREATE TABLE candidature_document (
+  candidature_id BIGINT NOT NULL REFERENCES candidature(id),
+  document_id BIGINT NOT NULL REFERENCES document(id),
+  PRIMARY KEY (candidature_id, document_id)
+);

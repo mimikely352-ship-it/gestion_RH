@@ -27,6 +27,8 @@ public class EntretienService {
 
     @Transactional
     public Entretien planifier(Long candidatureId, LocalDateTime dateHeure, String lieu) {
+        if (dateHeure == null || !dateHeure.isAfter(LocalDateTime.now()))
+            throw new BusinessException("Choisissez une date d’entretien future.");
         Candidature candidature = candidatureService.obtenir(candidatureId);
         if (candidature.getStatut() != StatutCandidature.ACCEPTEE_ENTRETIEN) {
             throw new BusinessException("La candidature n'est pas au stade entretien.");
@@ -51,6 +53,11 @@ public class EntretienService {
     public Entretien decider(Long entretienId, Decision decision, String commentaire) {
         Entretien entretien = entretienRepository.findById(entretienId)
                 .orElseThrow(() -> new ResourceNotFoundException("Entretien introuvable : " + entretienId));
+        if (decision == null || decision == Decision.EN_ATTENTE || entretien.getStatut() != StatutEntretien.PLANIFIE
+                || entretien.getCandidature().getStatut() != StatutCandidature.EN_ENTRETIEN)
+            throw new BusinessException("Cet entretien ne peut plus recevoir cette décision.");
+        if (entretien.getDateHeure().isAfter(LocalDateTime.now()))
+            throw new BusinessException("L’entretien n’a pas encore eu lieu.");
         entretien.setStatut(StatutEntretien.REALISE);
         entretien.setDecisionRh(decision);
         entretien.setCommentaire(commentaire);

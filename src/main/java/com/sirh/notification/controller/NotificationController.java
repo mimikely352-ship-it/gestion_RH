@@ -30,8 +30,8 @@ public class NotificationController {
     }
 
     @PostMapping("/notifications/{id}/lu")
-    public String marquerLue(@PathVariable Long id) {
-        notificationService.marquerLue(id);
+    public String marquerLue(@PathVariable Long id, Authentication authentication) {
+        notificationService.marquerLue(id, authentication.getName());
         return "redirect:/notifications";
     }
 }

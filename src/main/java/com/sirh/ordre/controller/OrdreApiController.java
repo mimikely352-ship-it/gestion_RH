@@ -36,8 +36,13 @@ public class OrdreApiController {
 
     @PutMapping("/{id}/executer")
     @PreAuthorize("hasRole('RH')")
-    public OrdreDto executer(@PathVariable Long id) {
-        return new OrdreDto(ordreService.marquerExecute(id));
+    public OrdreDto executer(@PathVariable Long id, Authentication authentication) {
+        return new OrdreDto(ordreService.marquerExecute(id, authentication.getName()));
+    }
+
+    @PutMapping("/{id}/demarrer") @PreAuthorize("hasRole('RH')")
+    public OrdreDto demarrer(@PathVariable Long id, Authentication authentication) {
+        return new OrdreDto(ordreService.marquerEnExecution(id, authentication.getName()));
     }
 
     private Long utilisateurId(Authentication authentication) {

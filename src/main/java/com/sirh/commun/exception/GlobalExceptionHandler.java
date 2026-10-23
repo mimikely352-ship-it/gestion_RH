@@ -11,7 +11,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /** Centralise les erreurs de l'API REST (/api/**) en réponses JSON homogènes. */
-@RestControllerAdvice(basePackages = "com.sirh")
+@RestControllerAdvice(annotations = org.springframework.web.bind.annotation.RestController.class)
+@org.springframework.core.annotation.Order(0)
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
@@ -42,4 +43,10 @@ public class GlobalExceptionHandler {
         payload.put("message", message);
         return ResponseEntity.status(status).body(payload);
     }
+
+    @ExceptionHandler({org.springframework.dao.OptimisticLockingFailureException.class, jakarta.persistence.OptimisticLockException.class})
+    public ResponseEntity<Map<String, Object>> conflit(Exception ex) { return body(HttpStatus.CONFLICT, "Le dossier a été modifié par un autre utilisateur. Rechargez la page."); }
+
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> integrite(Exception ex) { return body(HttpStatus.CONFLICT, "Cette action entre en conflit avec des données déjà enregistrées."); }
 }

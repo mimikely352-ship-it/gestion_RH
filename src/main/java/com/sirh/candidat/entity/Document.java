@@ -25,6 +25,9 @@ public class Document {
     @Column(nullable = false, length = 30)
     private String type; // CV, AUTRE
 
+    @Column(length = 100)
+    private String libelle;
+
     @Column(name = "nom_fichier", nullable = false, length = 255)
     private String nomFichier;
 

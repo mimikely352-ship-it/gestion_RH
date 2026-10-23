@@ -26,8 +26,9 @@ public class RhDemandeController {
 
     @GetMapping
     public String liste(Model model) {
-        model.addAttribute("aValider", demandeRepository.findByStatut(StatutDemande.VALIDEE_DIRECTION));
-        model.addAttribute("aExecuter", demandeRepository.findByStatut(StatutDemande.VALIDEE_DG));
+        model.addAttribute("aValider", demandeService.listerPourValidationRh());
+        model.addAttribute("aExecuter", demandeService.listerPourExecutionRh());
+        model.addAttribute("enExecution", demandeRepository.findByStatut(StatutDemande.EN_EXECUTION));
         return "rh/demandes-liste";
     }
 
@@ -50,8 +51,15 @@ public class RhDemandeController {
     }
 
     @PostMapping("/{id}/cloturer-execution")
-    public String cloturerExecution(@PathVariable Long id) {
-        demandeService.marquerExecutee(id);
+    public String cloturerExecution(@PathVariable Long id,
+            @RequestParam @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate dateEffet,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes flash) {
+        try {
+            demandeService.marquerExecutee(id, dateEffet);
+            flash.addFlashAttribute("succes", "Réalisation confirmée. La demande est exécutée.");
+        } catch (com.sirh.commun.exception.BusinessException e) {
+            flash.addFlashAttribute("erreur", e.getMessage());
+        }
         return "redirect:/rh/demandes/" + id;
     }
 

@@ -24,6 +24,7 @@ public class TestService {
     private final QuestionTestRepository questionTestRepository;
     private final ChoixTestRepository choixTestRepository;
     private final OffreEmploiService offreEmploiService;
+    private final com.sirh.evaluation.repository.PassageTestRepository passages;
 
     public record ChoixSaisi(String libelle, boolean estCorrect) {
     }
@@ -33,6 +34,8 @@ public class TestService {
 
     @Transactional
     public Test creer(Long offreId, int niveau, String titre, List<QuestionSaisie> questions) {
+        if (titre == null || titre.isBlank() || titre.length() > 150) throw new BusinessException("Renseignez un titre de test de 150 caractères maximum.");
+        if (questions != null) questions.forEach(q -> verifierQuestion(q.enonce(), q.choix()));
         if (niveau < 1 || niveau > 5) {
             throw new BusinessException("Le niveau d'un test doit être compris entre 1 et 5.");
         }
@@ -68,6 +71,8 @@ public class TestService {
 
     @Transactional
     public QuestionTest ajouterQuestion(Long testId, String enonce, List<ChoixSaisi> choix) {
+        verifierQuestion(enonce, choix);
+        if (passages.existsByTestId(testId)) throw new BusinessException("Un test déjà passé ne peut plus être modifié.");
         Test test = obtenir(testId);
         int ordre = questionTestRepository.findByTestIdOrderByOrdreAsc(testId).size();
         QuestionTest question = QuestionTest.builder()
@@ -106,5 +111,13 @@ public class TestService {
 
     public List<ChoixTest> choixDe(Long questionId) {
         return choixTestRepository.findByQuestionId(questionId);
+    }
+
+    private void verifierQuestion(String enonce, List<ChoixSaisi> choix) {
+        if (enonce == null || enonce.isBlank() || choix == null) throw new BusinessException("Précisez la question et ses choix.");
+        var renseignes = choix.stream().filter(c -> c.libelle() != null && !c.libelle().isBlank()).toList();
+        if (renseignes.size() < 2 || renseignes.stream().anyMatch(c -> c.libelle().length() > 255)
+                || renseignes.stream().filter(ChoixSaisi::estCorrect).count() != 1)
+            throw new BusinessException("Une question requiert au moins deux choix et une seule bonne réponse.");
     }
 }

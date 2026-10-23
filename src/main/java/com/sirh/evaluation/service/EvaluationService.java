@@ -45,6 +45,8 @@ public class EvaluationService {
     @Transactional
     public Evaluation creer(Long candidatureId, String titre, FormatEvaluation format, List<QuestionSaisie> questions) {
         Candidature candidature = candidatureService.obtenir(candidatureId);
+        if (candidature.getStatut() != StatutCandidature.EN_EVALUATION)
+            throw new com.sirh.commun.exception.BusinessException("La candidature n’est pas au stade de l’évaluation.");
         Evaluation evaluation = Evaluation.builder()
                 .candidature(candidature)
                 .titre(titre)
@@ -84,6 +86,8 @@ public class EvaluationService {
     @Transactional
     public QuestionEvaluation ajouterQuestion(Long evaluationId, String enonce, List<ChoixSaisi> choix) {
         Evaluation evaluation = obtenir(evaluationId);
+        if (evaluation.getDateEvaluation() != null || evaluation.getDecisionRh() != Decision.EN_ATTENTE)
+            throw new com.sirh.commun.exception.BusinessException("Cette évaluation est déjà soumise ou décidée.");
         int ordre = questionEvaluationRepository.findByEvaluationIdOrderByOrdreAsc(evaluationId).size();
         QuestionEvaluation question = QuestionEvaluation.builder()
                 .evaluation(evaluation)
@@ -111,7 +115,11 @@ public class EvaluationService {
     @Transactional
     public void soumettre(Long evaluationId, Map<Long, Long> reponsesQcm, Map<Long, String> reponsesTexte) {
         Evaluation evaluation = obtenir(evaluationId);
+        if (evaluation.getDateEvaluation() != null || evaluation.getDecisionRh() != Decision.EN_ATTENTE
+                || evaluation.getCandidature().getStatut() != StatutCandidature.EN_EVALUATION)
+            throw new com.sirh.commun.exception.BusinessException("Cette évaluation n’est plus ouverte aux réponses.");
         List<QuestionEvaluation> questions = questionEvaluationRepository.findByEvaluationIdOrderByOrdreAsc(evaluationId);
+        if (questions.isEmpty()) throw new com.sirh.commun.exception.BusinessException("Cette évaluation ne contient aucune question.");
         for (QuestionEvaluation question : questions) {
             ReponseEvaluation.ReponseEvaluationBuilder builder = ReponseEvaluation.builder()
                     .evaluation(evaluation)
@@ -121,6 +129,8 @@ public class EvaluationService {
                 if (choixId != null) {
                     ChoixEvaluation choix = choixEvaluationRepository.findById(choixId)
                             .orElseThrow(() -> new ResourceNotFoundException("Choix introuvable : " + choixId));
+                    if (!choix.getQuestion().getId().equals(question.getId()))
+                        throw new com.sirh.commun.exception.BusinessException("Une réponse ne correspond pas à sa question.");
                     builder.choix(choix);
                 }
             } else {
@@ -136,6 +146,9 @@ public class EvaluationService {
     @Transactional
     public Evaluation decider(Long evaluationId, Decision decision) {
         Evaluation evaluation = obtenir(evaluationId);
+        if (decision == null || decision == Decision.EN_ATTENTE || evaluation.getDateEvaluation() == null
+                || evaluation.getDecisionRh() != Decision.EN_ATTENTE || evaluation.getCandidature().getStatut() != StatutCandidature.EN_EVALUATION)
+            throw new com.sirh.commun.exception.BusinessException("Soumission requise et décision finale unique pour cette évaluation.");
         evaluation.setDecisionRh(decision);
         evaluation = evaluationRepository.save(evaluation);
 

@@ -23,6 +23,12 @@ public class GlobalModelAttributes {
     private final UtilisateurRepository utilisateurRepository;
     private final NotificationService notificationService;
 
+    @org.springframework.beans.factory.annotation.Value("${app.brand.name:Oria RH}")
+    private String nomApplication;
+
+    @ModelAttribute("nomApplication")
+    public String nomApplication() { return nomApplication; }
+
     @ModelAttribute("utilisateurConnecte")
     public Utilisateur utilisateurConnecte(Authentication authentication) {
         return utilisateurOptionnel(authentication).orElse(null);

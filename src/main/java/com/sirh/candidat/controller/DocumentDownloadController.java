@@ -24,7 +24,8 @@ public class DocumentDownloadController {
     private final FileStorageService fileStorageService;
 
     @GetMapping("/documents/{id}/telecharger")
-    @PreAuthorize("hasAnyRole('RH','CANDIDAT')")
+    @PreAuthorize("hasAnyRole('RH','CANDIDAT','EMPLOYE')")
+    // Cette méthode sert à télécharger ou afficher un document, par exemple le CV d’un candidat.
     public ResponseEntity<Resource> telecharger(@PathVariable Long id, Authentication authentication) {
         Document document = documentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Document introuvable : " + id));
@@ -39,7 +40,8 @@ public class DocumentDownloadController {
         Resource ressource = fileStorageService.charger(document.getChemin());
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_PDF)
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + document.getNomFichier() + "\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, org.springframework.http.ContentDisposition.inline()
+                        .filename(document.getNomFichier(), java.nio.charset.StandardCharsets.UTF_8).build().toString())
                 .body(ressource);
     }
 }

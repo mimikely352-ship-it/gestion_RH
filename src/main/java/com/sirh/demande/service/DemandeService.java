@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Circuit hiérarchique des demandes internes : Employé → Chef de service → Direction → RH → DG.
+ * Transferts : décision RH directe. Autres demandes : Chef → Direction → RH → DG.
  * Chaque étape de validation est historisée ; un rejet à n'importe quelle étape clôt le circuit.
  */
 @Service
@@ -35,18 +35,25 @@ public class DemandeService {
     private final PosteRepository posteRepository;
     private final OffreEmploiRepository offreEmploiRepository;
     private final NotificationService notificationService;
+    private final com.sirh.embauche.service.AffectationAutomatiqueService affectationAutomatique;
+    private final com.sirh.embauche.repository.DossierEmployeRepository dossiers;
+    private final com.sirh.embauche.repository.AffectationRepository affectations;
+    private final com.sirh.embauche.service.ParcoursEmployeService parcours;
 
     @Value("${app.demande.delai-execution-jours-defaut}")
     private int delaiExecutionJoursDefaut;
 
     @Transactional
     public Demande creer(Long auteurId, TypeDemande type, Long posteCibleId, String description) {
-        Utilisateur auteur = utilisateurRepository.findById(auteurId)
+        Utilisateur auteur = utilisateurRepository.verrouiller(auteurId)
                 .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable : " + auteurId));
-        if (auteur.getService() == null) {
+        affectationAutomatique.completer(auteur);
+        if (type == null || description == null || description.isBlank() || description.length() > 10000)
+            throw new BusinessException("Précisez le type et un motif de 1 à 10 000 caractères.");
+        if (type != TypeDemande.TRANSFERT && auteur.getService() == null) {
             throw new BusinessException("Impossible de créer une demande : aucun service de rattachement.");
         }
-        if (auteur.getService().getChefService() == null) {
+        if (type != TypeDemande.TRANSFERT && auteur.getService().getChefService() == null) {
             throw new BusinessException("Ce service n'a pas de chef de service désigné pour valider la demande.");
         }
 
@@ -56,16 +63,24 @@ public class DemandeService {
                     .orElseThrow(() -> new ResourceNotFoundException("Poste introuvable : " + posteCibleId));
         }
 
-        if (type == TypeDemande.TRANSFERT) {
+        Long origine = null;
+        if (type == TypeDemande.TRANSFERT || type == TypeDemande.PROMOTION) {
             if (posteCible == null) {
                 throw new BusinessException("Un transfert doit cibler un poste.");
             }
-            final Long idPosteCible = posteCible.getId();
-            boolean offrePubliee = offreEmploiRepository.findByStatut(StatutOffre.PUBLIEE).stream()
-                    .anyMatch(o -> o.getPoste().getId().equals(idPosteCible));
-            if (!offrePubliee) {
-                throw new BusinessException("Un transfert n'est possible que s'il existe une offre publiée pour ce poste.");
-            }
+            if (!posteCible.isMobiliteOuverte() || com.sirh.embauche.service.AffectationAutomatiqueService.serviceDuPoste(posteCible) == null)
+                throw new BusinessException("Ce poste n’est pas ouvert à la mobilité interne ou son service manque.");
+            var dossier = dossiers.findByUtilisateurId(auteurId)
+                    .orElseThrow(() -> new BusinessException("Votre dossier employé doit être complété par les RH."));
+            var actuelle = affectations.findByDossierIdAndActuelleTrue(dossier.getId())
+                    .orElseThrow(() -> new BusinessException("Votre affectation actuelle doit être complétée par les RH."));
+            if (actuelle.getPoste().getId().equals(posteCible.getId()))
+                throw new BusinessException("Vous occupez déjà ce poste.");
+            boolean enCours = demandeRepository.findByAuteurId(auteurId).stream().anyMatch(d ->
+                    (d.getType() == TypeDemande.TRANSFERT || d.getType() == TypeDemande.PROMOTION)
+                    && d.getStatut() != StatutDemande.REJETEE && d.getStatut() != StatutDemande.EXECUTEE);
+            if (enCours) throw new BusinessException("Vous avez déjà une demande de mouvement en cours.");
+            origine = actuelle.getId();
         }
 
         Demande demande = Demande.builder()
@@ -74,10 +89,14 @@ public class DemandeService {
                 .posteCible(posteCible)
                 .description(description)
                 .statut(StatutDemande.SOUMISE)
+                .affectationOrigineId(origine)
                 .build();
         demande = demandeRepository.save(demande);
 
-        notificationService.notifier(auteur.getService().getChefService().getId(),
+        if (type == TypeDemande.TRANSFERT) {
+            notificationService.notifierRh("Nouvelle demande de transfert de " + auteur.getEmail() + " à examiner.",
+                    TypeNotification.DEMANDE, "/rh/demandes");
+        } else notificationService.notifier(auteur.getService().getChefService().getId(),
                 "Nouvelle demande (" + type + ") de " + auteur.getEmail() + " à valider.",
                 TypeNotification.DEMANDE, "/chef-service/demandes");
         return demande;
@@ -89,8 +108,20 @@ public class DemandeService {
         Utilisateur valideur = utilisateurRepository.findById(valideurId)
                 .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable : " + valideurId));
 
-        EtapeValidation etape = etapeAttendue(demande.getStatut());
+        EtapeValidation etape = transfertAExaminer(demande) ? EtapeValidation.RH : etapeAttendue(demande.getStatut());
+        if (demande.getType() == TypeDemande.TRANSFERT && !transfertAExaminer(demande)) {
+            throw new BusinessException("Ce transfert a déjà fait l’objet d’une décision RH.");
+        }
         verifierHabilitation(demande, valideur, etape);
+        if (decision == null) throw new BusinessException("Précisez une décision.");
+        if (decision == DecisionValidation.VALIDE && (demande.getType() == TypeDemande.TRANSFERT || demande.getType() == TypeDemande.PROMOTION)) {
+            utilisateurRepository.verrouiller(demande.getAuteur().getId()).orElseThrow(() -> new BusinessException("Compte introuvable."));
+            var dossier = dossiers.findByUtilisateurId(demande.getAuteur().getId()).orElseThrow(() -> new BusinessException("Dossier employé manquant."));
+            var actuelle = affectations.findByDossierIdAndActuelleTrue(dossier.getId()).orElseThrow(() -> new BusinessException("Affectation actuelle manquante."));
+            if (!actuelle.getId().equals(demande.getAffectationOrigineId()))
+                throw new BusinessException("L’affectation a changé depuis la demande. Déposez une nouvelle demande.");
+            if (!demande.getPosteCible().isMobiliteOuverte()) throw new BusinessException("Le poste n’est plus ouvert à la mobilité.");
+        }
 
         validationDemandeRepository.save(ValidationDemande.builder()
                 .demande(demande)
@@ -109,6 +140,14 @@ public class DemandeService {
             return demande;
         }
 
+        if (demande.getType() == TypeDemande.TRANSFERT) {
+            demande.setStatut(StatutDemande.VALIDEE_RH);
+            demande.setDateLimiteExecution(LocalDateTime.now().plusDays(delaiExecutionJoursDefaut));
+            demandeRepository.save(demande);
+            notificationService.notifier(demande.getAuteur().getId(), "Votre transfert a été accepté par les RH. Votre poste reste inchangé jusqu’à sa réalisation.",
+                    TypeNotification.DEMANDE, "/employe/demandes");
+            return demande;
+        }
         switch (etape) {
             case CHEF_SERVICE -> avancerVers(demande, StatutDemande.VALIDEE_CHEF, roleValideurSuivant(demande));
             case DIRECTION -> avancerVers(demande, StatutDemande.VALIDEE_DIRECTION, roleValideurSuivant(demande));
@@ -126,8 +165,8 @@ public class DemandeService {
     @Transactional
     public Demande marquerEnExecution(Long demandeId) {
         Demande demande = obtenir(demandeId);
-        if (demande.getStatut() != StatutDemande.VALIDEE_DG) {
-            throw new BusinessException("La demande doit être validée par le DG avant exécution.");
+        if (!preteAExecuter(demande)) {
+            throw new BusinessException("La demande doit être approuvée avant exécution.");
         }
         demande.setStatut(StatutDemande.EN_EXECUTION);
         return demandeRepository.save(demande);
@@ -135,7 +174,24 @@ public class DemandeService {
 
     @Transactional
     public Demande marquerExecutee(Long demandeId) {
+        return marquerExecutee(demandeId, java.time.LocalDate.now());
+    }
+
+    @Transactional
+    public Demande marquerExecutee(Long demandeId, java.time.LocalDate dateEffet) {
         Demande demande = obtenir(demandeId);
+        if (!preteAExecuter(demande) && demande.getStatut() != StatutDemande.EN_EXECUTION) {
+            throw new BusinessException("La demande doit être validée avant son exécution.");
+        }
+        demande.setDateExecution(LocalDateTime.now());
+        if (dateEffet == null || dateEffet.isAfter(java.time.LocalDate.now())
+                || (demande.getDateCreation() != null && dateEffet.isBefore(demande.getDateCreation().toLocalDate())))
+            throw new BusinessException("La date de réalisation doit être comprise entre la demande et aujourd’hui.");
+        demande.setDateEffet(dateEffet);
+        if (demande.getType() == TypeDemande.TRANSFERT || demande.getType() == TypeDemande.PROMOTION) {
+            parcours.appliquerMouvement(demande, dateEffet);
+            utilisateurRepository.save(demande.getAuteur());
+        }
         demande.setStatut(StatutDemande.EXECUTEE);
         demande = demandeRepository.save(demande);
         notificationService.notifier(demande.getAuteur().getId(),
@@ -150,6 +206,24 @@ public class DemandeService {
 
     public List<Demande> listerPourAuteur(Long auteurId) {
         return demandeRepository.findByAuteurId(auteurId);
+    }
+
+    public List<Demande> listerPourValidationRh() {
+        return demandeRepository.aValiderParRh();
+    }
+
+    public List<Demande> listerPourExecutionRh() {
+        return demandeRepository.aExecuterParRh();
+    }
+
+    private static boolean transfertAExaminer(Demande d) {
+        return d.getType() == TypeDemande.TRANSFERT && (d.getStatut() == StatutDemande.SOUMISE
+                || d.getStatut() == StatutDemande.VALIDEE_CHEF || d.getStatut() == StatutDemande.VALIDEE_DIRECTION);
+    }
+
+    private static boolean preteAExecuter(Demande d) {
+        return d.getStatut() == StatutDemande.VALIDEE_DG
+                || (d.getType() == TypeDemande.TRANSFERT && d.getStatut() == StatutDemande.VALIDEE_RH);
     }
 
     public List<ValidationDemande> historique(Long demandeId) {
@@ -196,7 +270,12 @@ public class DemandeService {
             utilisateurRepository.findByRole(roleAPrevenir)
                     .forEach(u -> notificationService.notifier(u.getId(),
                             "Une demande (" + demande.getType() + ") attend votre validation.",
-                            TypeNotification.DEMANDE, "/demandes/" + demande.getId()));
+                            TypeNotification.DEMANDE, switch (roleAPrevenir) {
+                                case DIRECTION -> "/direction/demandes";
+                                case RH -> "/rh/demandes";
+                                case DG -> "/dg/demandes";
+                                default -> "/chef-service/demandes";
+                            }));
         }
     }
 

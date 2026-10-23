@@ -36,7 +36,13 @@ public class CandidatInscriptionController {
     }
 
     @PostMapping
-    public String soumettre(@ModelAttribute("form") InscriptionCandidatForm form, Model model) {
+    public String soumettre(@jakarta.validation.Valid @ModelAttribute("form") InscriptionCandidatForm form,
+            org.springframework.validation.BindingResult erreurs, Model model) {
+        if (erreurs.hasErrors()) {
+            model.addAttribute("erreur", erreurs.getAllErrors().get(0).getDefaultMessage());
+            model.addAttribute("diplomes", diplomeRepository.findAll());
+            return "public/inscription";
+        }
         try {
             List<CandidatInscriptionService.ExperienceSaisie> experiences = form.getExperiences().stream()
                     .filter(e -> e.getIntitule() != null && !e.getIntitule().isBlank())

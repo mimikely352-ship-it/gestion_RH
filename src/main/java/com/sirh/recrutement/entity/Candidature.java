@@ -38,6 +38,24 @@ public class Candidature {
     @JoinColumn(name = "cv_document_id")
     private Document cvDocument;
 
+    @Builder.Default
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "candidature_document",
+            joinColumns = @JoinColumn(name = "candidature_id"),
+            inverseJoinColumns = @JoinColumn(name = "document_id"))
+    private java.util.Set<Document> piecesComplementaires = new java.util.HashSet<>();
+
+    @Builder.Default
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "candidature_diplome",
+            joinColumns = @JoinColumn(name = "candidature_id"),
+            inverseJoinColumns = @JoinColumn(name = "diplome_id"))
+    private java.util.Set<com.sirh.referentiel.entity.Diplome> diplomes = new java.util.HashSet<>();
+
+    @Version
+    private Long version;
+
+
     @Column(name = "score_matching", precision = 5, scale = 2)
     private BigDecimal scoreMatching;
 
@@ -48,6 +66,9 @@ public class Candidature {
 
     @Column(name = "date_candidature", nullable = false)
     private LocalDateTime dateCandidature;
+
+    @Column(name = "date_entree")
+    private java.time.LocalDate dateEntree;
 
     @PrePersist
     void prePersist() {

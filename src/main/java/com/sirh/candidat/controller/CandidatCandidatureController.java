@@ -22,21 +22,25 @@ import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('CANDIDAT')")
+@PreAuthorize("hasAnyRole('CANDIDAT','EMPLOYE')")
 public class CandidatCandidatureController {
 
     private final CandidatureService candidatureService;
     private final CandidatRepository candidatRepository;
     private final EntretienService entretienService;
+    private final com.sirh.candidat.service.DossierCandidatureService dossierCandidatureService;
 
+    @PreAuthorize("hasRole('CANDIDAT')")
     @PostMapping("/candidat/candidatures")
-    public String postuler(@RequestParam Long offreId, Authentication authentication, Model model) {
+    public String postuler(@RequestParam Long offreId, Authentication authentication,
+            @RequestParam(required = false) Map<String, org.springframework.web.multipart.MultipartFile> fichiers,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirection) {
         Candidat candidat = candidatCourant(authentication);
         try {
-            candidatureService.postuler(candidat.getId(), offreId);
+            dossierCandidatureService.deposer(candidat.getId(), offreId, fichiers == null ? Map.of() : fichiers);
             return "redirect:/candidat/mes-candidatures";
         } catch (BusinessException e) {
-            model.addAttribute("erreur", e.getMessage());
+            redirection.addFlashAttribute("erreur", e.getMessage() + " Veuillez sélectionner à nouveau les fichiers.");
             return "redirect:/offres/" + offreId;
         }
     }

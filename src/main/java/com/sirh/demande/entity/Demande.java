@@ -25,6 +25,12 @@ public class Demande {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Version private Long version;
+    @Column(name = "affectation_origine_id") private Long affectationOrigineId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "affectation_origine_id", insertable = false, updatable = false)
+    private com.sirh.embauche.entity.Affectation affectationOrigine;
+    @Column(name = "date_effet") private java.time.LocalDate dateEffet;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -51,6 +57,9 @@ public class Demande {
 
     @Column(name = "date_limite_execution")
     private LocalDateTime dateLimiteExecution;
+
+    @Column(name = "date_execution")
+    private LocalDateTime dateExecution;
 
     @PrePersist
     void prePersist() {

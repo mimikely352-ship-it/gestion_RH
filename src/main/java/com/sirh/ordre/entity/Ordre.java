@@ -24,6 +24,8 @@ public class Ordre {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Version private Long version;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "dg_id", nullable = false)
     private Utilisateur dg;
@@ -68,5 +70,15 @@ public class Ordre {
     @Transient
     public String getDgEmail() {
         return dg == null ? "" : dg.getEmail();
+    }
+
+    @Transient
+    public String getDateEmissionAffichee() { return formater(dateEmission); }
+
+    @Transient
+    public String getDateLimiteAffichee() { return formater(dateLimite); }
+
+    private static String formater(LocalDateTime date) {
+        return date == null ? "Non renseignée" : date.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy 'à' HH:mm"));
     }
 }

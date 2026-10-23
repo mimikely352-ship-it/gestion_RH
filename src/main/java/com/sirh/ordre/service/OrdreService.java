@@ -28,6 +28,8 @@ public class OrdreService {
 
     @Transactional
     public Ordre emettre(Long dgId, Long rhId, String description, int delaiJours) {
+        if (delaiJours < 1 || delaiJours > 365 || description == null || description.isBlank() || description.length() > 10000)
+            throw new BusinessException("Précisez une instruction et un délai compris entre 1 et 365 jours.");
         Utilisateur dg = utilisateurRepository.findById(dgId)
                 .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable : " + dgId));
         if (dg.getRole() != Role.DG) {
@@ -58,15 +60,19 @@ public class OrdreService {
     }
 
     @Transactional
-    public Ordre marquerEnExecution(Long ordreId) {
+    public Ordre marquerEnExecution(Long ordreId, String email) {
         Ordre ordre = obtenir(ordreId);
+        verifierDestinataire(ordre, email);
+        if (ordre.getStatut() != StatutOrdre.EMIS) throw new BusinessException("Cet ordre n’est plus en attente d’exécution.");
         ordre.setStatut(StatutOrdre.EN_EXECUTION);
         return ordreRepository.save(ordre);
     }
 
     @Transactional
-    public Ordre marquerExecute(Long ordreId) {
+    public Ordre marquerExecute(Long ordreId, String email) {
         Ordre ordre = obtenir(ordreId);
+        verifierDestinataire(ordre, email);
+        if (ordre.getStatut() != StatutOrdre.EN_EXECUTION) throw new BusinessException("Démarrez l’exécution avant de la terminer.");
         ordre.setStatut(StatutOrdre.EXECUTE);
         ordre = ordreRepository.save(ordre);
         notificationService.notifier(ordre.getDg().getId(),
@@ -78,6 +84,11 @@ public class OrdreService {
     public Ordre obtenir(Long id) {
         return ordreRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ordre introuvable : " + id));
+    }
+
+    private void verifierDestinataire(Ordre ordre, String email) {
+        if (!ordre.getRh().getEmail().equals(email))
+            throw new org.springframework.security.access.AccessDeniedException("Cet ordre est destiné à un autre compte RH.");
     }
 
     public List<Ordre> listerPourRh(Long rhId) {

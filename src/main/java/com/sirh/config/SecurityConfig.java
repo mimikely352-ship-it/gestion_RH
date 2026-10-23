@@ -63,7 +63,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
-                    "/", "/accueil", "/login", "/deconnexion",
+                    "/", "/accueil", "/login", "/deconnexion", "/compte/session", "/compte/accueil",
                     "/candidats/inscription", "/candidats/inscription/**",
                     "/offres", "/offres/**",
                     "/assets/**",
@@ -74,7 +74,16 @@ public class SecurityConfig {
                     // (le conteneur servlet bloque /WEB-INF/** par spécification), donc sans risque.
                     "/WEB-INF/**"
                 ).permitAll()
+                .requestMatchers("/employe/**").hasRole("EMPLOYE")
                 .anyRequest().authenticated())
+            .exceptionHandling(errors -> errors.accessDeniedHandler((request, response, exception) -> {
+                // Un ancien onglet ne doit pas afficher l'espace employé sous un autre compte.
+                if ("GET".equals(request.getMethod()) && request.getRequestURI().substring(request.getContextPath().length()).startsWith("/employe/")) {
+                    response.sendRedirect(request.getContextPath() + "/compte/accueil");
+                } else {
+                    response.sendError(403);
+                }
+            }))
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

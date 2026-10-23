@@ -28,6 +28,7 @@ public class EmbaucheService {
     private final UtilisateurRepository utilisateurRepository;
     private final ServiceRepository serviceRepository;
     private final NotificationService notificationService;
+    private final ParcoursEmployeService parcours;
 
     @Transactional
     public Candidature finaliser(Long candidatureId, Role roleAttribue, Long serviceId) {
@@ -35,20 +36,26 @@ public class EmbaucheService {
         if (candidature.getStatut() != StatutCandidature.RETENUE) {
             throw new BusinessException("Seule une candidature retenue peut être finalisée.");
         }
-        if (roleAttribue == Role.CANDIDAT) {
+        if (roleAttribue != Role.EMPLOYE && roleAttribue != Role.CHEF_SERVICE && roleAttribue != Role.DIRECTION) {
             throw new BusinessException("Le rôle attribué doit être un rôle interne (EMPLOYE, CHEF_SERVICE, DIRECTION...).");
         }
 
-        Utilisateur utilisateur = candidature.getCandidat().getUtilisateur();
-        utilisateur.setRole(roleAttribue);
-        if (serviceId != null) {
-            com.sirh.organisation.entity.Service service = serviceRepository.findById(serviceId)
+        var service = AffectationAutomatiqueService.serviceDuPoste(candidature.getOffre().getPoste());
+        if (service == null && serviceId != null) {
+            service = serviceRepository.findById(serviceId)
                     .orElseThrow(() -> new ResourceNotFoundException("Service introuvable : " + serviceId));
-            utilisateur.setService(service);
         }
+        if (service == null) throw new BusinessException("Le poste de l’offre doit être associé à une section et à un service avant l’embauche.");
+
+        Utilisateur utilisateur = candidature.getCandidat().getUtilisateur();
+        utilisateurRepository.verrouiller(utilisateur.getId())
+                .orElseThrow(() -> new BusinessException("Compte introuvable."));
+        utilisateur.setRole(roleAttribue);
+        utilisateur.setService(service);
         utilisateurRepository.save(utilisateur);
 
-        candidature.setStatut(StatutCandidature.EMBAUCHE);
+        candidature.setDateEntree(java.time.LocalDate.now());
+        parcours.embaucher(candidature, service);
         candidature = candidatureService.changerStatut(candidatureId, StatutCandidature.EMBAUCHE);
 
         notificationService.notifier(utilisateur.getId(),

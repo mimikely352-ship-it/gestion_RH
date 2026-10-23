@@ -43,6 +43,17 @@ public class PassageTestService {
     public PassageTest soumettre(Long candidatureId, Long testId, Map<Long, Long> reponses) {
         Candidature candidature = candidatureService.obtenir(candidatureId);
         var test = testService.obtenir(testId);
+        if (candidature.getStatut() != StatutCandidature.EN_TEST || !test.getOffre().getId().equals(candidature.getOffre().getId()))
+            throw new com.sirh.commun.exception.BusinessException("Ce test n’est pas accessible pour cette candidature à cette étape.");
+        if (passageTestRepository.existsByCandidatureIdAndTestId(candidatureId, testId))
+            throw new com.sirh.commun.exception.BusinessException("Ce test a déjà été soumis.");
+        var anterieurs = testRepository.findByOffreIdOrderByNiveauAsc(candidature.getOffre().getId());
+        var dejaPasses = passageTestRepository.findByCandidatureId(candidatureId);
+        if (anterieurs.stream().filter(t -> t.getNiveau() < test.getNiveau()).anyMatch(t -> dejaPasses.stream()
+                .noneMatch(p -> p.getTest().getId().equals(t.getId()) && p.getDecisionRh() == DecisionTest.REUSSI)))
+            throw new com.sirh.commun.exception.BusinessException("Les niveaux précédents doivent être validés par les RH.");
+        List<QuestionTest> questions = testService.questionsDe(testId);
+        if (questions.isEmpty()) throw new com.sirh.commun.exception.BusinessException("Ce test ne contient aucune question.");
 
         PassageTest passage = PassageTest.builder()
                 .candidature(candidature)
@@ -52,12 +63,13 @@ public class PassageTestService {
                 .build();
         passage = passageTestRepository.save(passage);
 
-        List<QuestionTest> questions = testService.questionsDe(testId);
         int bonnes = 0;
         for (QuestionTest question : questions) {
             Long choixId = reponses.get(question.getId());
             ChoixTest choix = choixId == null ? null : choixTestRepository.findById(choixId)
                     .orElseThrow(() -> new ResourceNotFoundException("Choix introuvable : " + choixId));
+            if (choix != null && !choix.getQuestion().getId().equals(question.getId()))
+                throw new com.sirh.commun.exception.BusinessException("Une réponse ne correspond pas à sa question.");
             reponseTestRepository.save(ReponseTest.builder()
                     .passage(passage)
                     .question(question)
@@ -78,6 +90,9 @@ public class PassageTestService {
     public PassageTest decider(Long passageId, DecisionTest decision) {
         PassageTest passage = passageTestRepository.findById(passageId)
                 .orElseThrow(() -> new ResourceNotFoundException("Passage de test introuvable : " + passageId));
+        if (decision == null || decision == DecisionTest.EN_ATTENTE || passage.getDecisionRh() != DecisionTest.EN_ATTENTE
+                || passage.getCandidature().getStatut() != StatutCandidature.EN_TEST)
+            throw new com.sirh.commun.exception.BusinessException("Ce test ne peut plus recevoir cette décision.");
         passage.setDecisionRh(decision);
         passage = passageTestRepository.save(passage);
 

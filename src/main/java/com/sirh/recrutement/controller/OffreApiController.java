@@ -22,7 +22,7 @@ public class OffreApiController {
 
     @GetMapping("/{id}")
     public OffreDto detail(@PathVariable Long id) {
-        return new OffreDto(offreEmploiService.obtenir(id));
+        return new OffreDto(offreEmploiService.obtenirPublique(id));
     }
 
     @PutMapping("/{id}/publier")
