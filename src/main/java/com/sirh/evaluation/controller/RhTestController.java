@@ -40,6 +40,13 @@ public class RhTestController {
         Test test = testService.obtenir(id);
         model.addAttribute("test", test);
         model.addAttribute("questions", testService.questionsDe(id));
+        List<com.sirh.evaluation.entity.PassageTest> passages = passageTestService.listerPourTest(id);
+        model.addAttribute("passages", passages);
+        java.util.Map<Long, java.util.List<com.sirh.evaluation.entity.ReponseTest>> reponsesParPassage = new java.util.HashMap<>();
+        for (var passage : passages) {
+            reponsesParPassage.put(passage.getId(), passageTestService.reponsesDe(passage.getId()));
+        }
+        model.addAttribute("reponsesParPassage", reponsesParPassage);
         return "rh/test-detail";
     }
 

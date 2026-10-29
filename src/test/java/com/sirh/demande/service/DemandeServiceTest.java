@@ -181,6 +181,54 @@ class DemandeServiceTest {
     }
 
     @Test
+    void rhPeutChoisirUnAutrePosteQueCeluiDemandeEtLeDgValideCeChoix() {
+        when(utilisateurRepository.findById(1L)).thenReturn(Optional.of(employe));
+        when(utilisateurRepository.findById(2L)).thenReturn(Optional.of(chef));
+        when(utilisateurRepository.findById(3L)).thenReturn(Optional.of(direction));
+        when(utilisateurRepository.findById(4L)).thenReturn(Optional.of(rh));
+        when(utilisateurRepository.findById(5L)).thenReturn(Optional.of(dg));
+        when(utilisateurRepository.findByRole(Role.DIRECTION)).thenReturn(List.of(direction));
+        when(utilisateurRepository.findByRole(Role.DG)).thenReturn(List.of(dg));
+
+        var posteDemandeParEmploye = com.sirh.organisation.entity.Poste.builder().id(9L)
+                .section(com.sirh.organisation.entity.Section.builder().service(Service.builder().id(20L).build()).build()).build();
+        var posteChoisiParRh = com.sirh.organisation.entity.Poste.builder().id(15L)
+                .section(com.sirh.organisation.entity.Section.builder().service(Service.builder().id(21L).build()).build()).build();
+        when(posteRepository.findById(9L)).thenReturn(Optional.of(posteDemandeParEmploye));
+        when(posteRepository.findById(15L)).thenReturn(Optional.of(posteChoisiParRh));
+
+        Demande demande = demandeService.creer(1L, TypeDemande.PROMOTION, 9L, "Je souhaite être promu");
+        demande.setId(400L);
+        when(demandeRepository.findById(400L)).thenReturn(Optional.of(demande));
+
+        demandeService.valider(400L, 2L, DecisionValidation.VALIDE, null); // chef de service
+        demandeService.valider(400L, 3L, DecisionValidation.VALIDE, null); // direction
+        demandeService.valider(400L, 4L, DecisionValidation.VALIDE, null, 15L); // le RH choisit un autre poste
+
+        assertEquals(15L, demande.getPosteCible().getId());
+        assertEquals(StatutDemande.VALIDEE_RH, demande.getStatut());
+
+        demandeService.valider(400L, 5L, DecisionValidation.VALIDE, null); // le DG valide le poste choisi par le RH
+        assertEquals(StatutDemande.VALIDEE_DG, demande.getStatut());
+        assertEquals(15L, demande.getPosteCible().getId());
+    }
+
+    @Test
+    void leChangementDePosteParLeRhEstRefuseEnDehorsDeLetapeRh() {
+        when(utilisateurRepository.findById(1L)).thenReturn(Optional.of(employe));
+        when(utilisateurRepository.findById(2L)).thenReturn(Optional.of(chef));
+        var poste = com.sirh.organisation.entity.Poste.builder().id(9L)
+                .section(com.sirh.organisation.entity.Section.builder().service(Service.builder().id(20L).build()).build()).build();
+        when(posteRepository.findById(9L)).thenReturn(Optional.of(poste));
+
+        Demande demande = demandeService.creer(1L, TypeDemande.PROMOTION, 9L, "Je souhaite être promu");
+        demande.setId(401L);
+        when(demandeRepository.findById(401L)).thenReturn(Optional.of(demande));
+
+        assertThrows(BusinessException.class, () -> demandeService.valider(401L, 2L, DecisionValidation.VALIDE, null, 9L));
+    }
+
+    @Test
     void validationParUnNonHabiliteEstRefusee() {
         when(utilisateurRepository.findById(1L)).thenReturn(Optional.of(employe));
         when(utilisateurRepository.findById(4L)).thenReturn(Optional.of(rh)); // RH essaie de valider à l'étape chef

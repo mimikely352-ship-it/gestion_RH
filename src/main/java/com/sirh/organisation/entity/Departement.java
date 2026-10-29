@@ -1,5 +1,6 @@
 package com.sirh.organisation.entity;
 
+import com.sirh.utilisateur.entity.Utilisateur;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,4 +27,8 @@ public class Departement {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "direction_id", nullable = false)
     private Direction direction;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "chef_departement_id")
+    private Utilisateur chefDepartement;
 }

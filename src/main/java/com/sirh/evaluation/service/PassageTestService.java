@@ -128,4 +128,13 @@ public class PassageTestService {
     public List<PassageTest> listerPourCandidature(Long candidatureId) {
         return passageTestRepository.findByCandidatureId(candidatureId);
     }
+
+    /** Résultats de tous les candidats pour un test donné, à l'usage du RH. */
+    public List<PassageTest> listerPourTest(Long testId) {
+        return passageTestRepository.findByTestIdOrderByDatePassageDesc(testId);
+    }
+
+    public List<ReponseTest> reponsesDe(Long passageId) {
+        return reponseTestRepository.findByPassageId(passageId);
+    }
 }

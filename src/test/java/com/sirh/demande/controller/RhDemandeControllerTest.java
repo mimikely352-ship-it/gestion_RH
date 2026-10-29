@@ -5,6 +5,7 @@ import com.sirh.commun.exception.BusinessException;
 import com.sirh.demande.entity.Demande;
 import com.sirh.demande.repository.DemandeRepository;
 import com.sirh.demande.service.DemandeService;
+import com.sirh.organisation.repository.PosteRepository;
 import com.sirh.utilisateur.repository.UtilisateurRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -16,7 +17,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class RhDemandeControllerTest {
     private final DemandeService service = mock(DemandeService.class);
     private final DemandeRepository repository = mock(DemandeRepository.class);
-    private final RhDemandeController controller = new RhDemandeController(service, repository, mock(UtilisateurRepository.class));
+    private final RhDemandeController controller = new RhDemandeController(service, repository,
+            mock(UtilisateurRepository.class), mock(PosteRepository.class));
 
     @Test void retrouveUneDemandeApresLeDemarrageDeSonExecution() throws Exception {
         var demande = Demande.builder().id(1L).type(TypeDemande.TRANSFERT).statut(StatutDemande.EN_EXECUTION).build();

@@ -70,7 +70,7 @@
             <fileset dir="${resources.dir}" erroronmissingdir="false"/>
         </copy>
         <copy todir="${classes.dir}/db/migration">
-            <fileset dir="sql" includes="09_dates_parcours_employes.sql,10_fiabilisation_metier.sql"/>
+            <fileset dir="sql" includes="09_dates_parcours_employes.sql,10_fiabilisation_metier.sql,13_fix_candidature_version.sql,14_rh_admin.sql"/>
         </copy>
     </target>
 

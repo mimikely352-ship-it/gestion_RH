@@ -39,6 +39,7 @@ public class RhEvaluationController {
     @PostMapping("/rh/evaluations/{id}/questions")
     public String ajouterQuestion(@PathVariable Long id,
                                    @RequestParam String enonce,
+                                   @RequestParam FormatEvaluation type,
                                    @RequestParam(required = false) String choix1,
                                    @RequestParam(required = false) String choix2,
                                    @RequestParam(required = false) String choix3,
@@ -52,7 +53,7 @@ public class RhEvaluationController {
                 choix.add(new EvaluationService.ChoixSaisi(libelles.get(i), correct != null && (i + 1) == correct));
             }
         }
-        evaluationService.ajouterQuestion(id, enonce, choix);
+        evaluationService.ajouterQuestion(id, enonce, type, choix);
         return "redirect:/rh/evaluations/" + id;
     }
 

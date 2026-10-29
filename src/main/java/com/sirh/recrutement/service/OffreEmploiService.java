@@ -49,6 +49,10 @@ public class OffreEmploiService {
         return offre;
     }
 
+    private Set<Long> normaliserDiplomes(Set<Long> diplomeIds) {
+        return diplomeIds == null ? Set.of() : diplomeIds;
+    }
+
     @Transactional
     public OffreEmploi creer(Long posteId, String titre, String description, int nbPostes,
                               Integer experienceMinMois, int seuilAcceptation, LocalDate dateLimite,
@@ -73,8 +77,9 @@ public class OffreEmploiService {
         if (description == null || description.isBlank()) throw new BusinessException("Décrivez les missions du poste.");
         if (dateLimite != null && dateLimite.isBefore(LocalDate.now()))
             throw new BusinessException("La date limite ne peut pas être passée.");
-        Set<Diplome> diplomes = new HashSet<>(diplomeRepository.findAllById(diplomeIds));
-        if (diplomes.size() != diplomeIds.size()) throw new BusinessException("Un diplôme sélectionné n'existe plus.");
+        Set<Long> idsDiplomes = normaliserDiplomes(diplomeIds);
+        Set<Diplome> diplomes = new HashSet<>(diplomeRepository.findAllById(idsDiplomes));
+        if (diplomes.size() != idsDiplomes.size()) throw new BusinessException("Un diplôme sélectionné n'existe plus.");
         Demande demandeOrigine = demandeOrigineId == null ? null : demandeService.obtenir(demandeOrigineId);
         if (demandeOrigine != null && (demandeOrigine.getType() != com.sirh.commun.enums.TypeDemande.RECRUTEMENT
                 || (demandeOrigine.getStatut() != com.sirh.commun.enums.StatutDemande.VALIDEE_DG
@@ -129,8 +134,9 @@ public class OffreEmploiService {
             throw new BusinessException("L’expérience minimale ne peut pas être négative.");
         if (dateLimite != null && dateLimite.isBefore(LocalDate.now()))
             throw new BusinessException("La date limite ne peut pas être passée.");
-        Set<Diplome> diplomes = new HashSet<>(diplomeRepository.findAllById(diplomeIds));
-        if (diplomes.size() != diplomeIds.size()) throw new BusinessException("Un diplôme sélectionné n'existe plus.");
+        Set<Long> idsDiplomes = normaliserDiplomes(diplomeIds);
+        Set<Diplome> diplomes = new HashSet<>(diplomeRepository.findAllById(idsDiplomes));
+        if (diplomes.size() != idsDiplomes.size()) throw new BusinessException("Un diplôme sélectionné n'existe plus.");
         offre.setTitre(titre);
         offre.setDescription(description.trim());
         offre.setNbPostes(nbPostes);

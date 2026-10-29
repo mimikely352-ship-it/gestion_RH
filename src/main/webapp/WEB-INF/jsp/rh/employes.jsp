@@ -2,7 +2,10 @@
 <%@ taglib prefix="ui" tagdir="/WEB-INF/tags" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <ui:layout title="Employés et historique" activeMenu="employes">
-  <h1>Employés et historique</h1>
+  <div class="rangee" style="justify-content:space-between;">
+    <h1>Employés et historique</h1>
+    <ui:bouton label="Créer un employé" href="/rh/employes/nouveau" style="btn-principal"/>
+  </div>
   <c:if test="${not empty message}"><p role="status"><c:out value="${message}"/></p></c:if>
   <c:if test="${not empty erreur}"><ui:alerte type="erreur"><c:out value="${erreur}"/></ui:alerte></c:if>
   <p>Consultez les employés actifs, leur poste et les mouvements enregistrés. Une demande de transfert en cours ne change pas le poste actuel.</p>
@@ -31,6 +34,15 @@
               </details>
             </c:if>
             <c:if test="${not empty e.transferts}"><h3>Demandes en cours</h3><ul><c:forEach var="t" items="${e.transferts}"><li><c:out value="${t}"/></li></c:forEach></ul></c:if>
+            <c:if test="${e.dossierId != null}">
+              <details><summary>Promouvoir / muter directement (sans demande de l’employé)</summary>
+                <ui:formulaire action="/rh/employes/${e.dossierId}/promouvoir">
+                  <ui:champ-liste label="Nouveau poste" name="posteCibleId" items="${postes}" valueProperty="id" labelProperty="intitule" requis="true"/>
+                  <ui:champ label="Date d’effet" name="dateEffet" type="date"/>
+                  <ui:bouton label="Appliquer la promotion" type="submit" style="btn-principal"/>
+                </ui:formulaire>
+              </details>
+            </c:if>
           </details></td>
         </tr></c:forEach></tbody>
       </table>

@@ -1,5 +1,6 @@
 package com.sirh.organisation.entity;
 
+import com.sirh.utilisateur.entity.Utilisateur;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,4 +23,8 @@ public class Direction {
 
     @Column(nullable = false, unique = true, length = 100)
     private String nom;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "directeur_id")
+    private Utilisateur directeur;
 }

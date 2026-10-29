@@ -84,19 +84,20 @@ public class EvaluationService {
     }
 
     @Transactional
-    public QuestionEvaluation ajouterQuestion(Long evaluationId, String enonce, List<ChoixSaisi> choix) {
+    public QuestionEvaluation ajouterQuestion(Long evaluationId, String enonce, FormatEvaluation type, List<ChoixSaisi> choix) {
         Evaluation evaluation = obtenir(evaluationId);
         if (evaluation.getDateEvaluation() != null || evaluation.getDecisionRh() != Decision.EN_ATTENTE)
             throw new com.sirh.commun.exception.BusinessException("Cette évaluation est déjà soumise ou décidée.");
+        FormatEvaluation typeQuestion = type == null ? evaluation.getFormat() : type;
         int ordre = questionEvaluationRepository.findByEvaluationIdOrderByOrdreAsc(evaluationId).size();
         QuestionEvaluation question = QuestionEvaluation.builder()
                 .evaluation(evaluation)
                 .enonce(enonce)
-                .type(evaluation.getFormat())
+                .type(typeQuestion)
                 .ordre(ordre)
                 .build();
         question = questionEvaluationRepository.save(question);
-        if (evaluation.getFormat() == FormatEvaluation.QCM && choix != null) {
+        if (typeQuestion == FormatEvaluation.QCM && choix != null) {
             for (ChoixSaisi c : choix) {
                 if (c.libelle() == null || c.libelle().isBlank()) {
                     continue;
@@ -124,7 +125,7 @@ public class EvaluationService {
             ReponseEvaluation.ReponseEvaluationBuilder builder = ReponseEvaluation.builder()
                     .evaluation(evaluation)
                     .question(question);
-            if (evaluation.getFormat() == FormatEvaluation.QCM) {
+            if (question.getType() == FormatEvaluation.QCM) {
                 Long choixId = reponsesQcm == null ? null : reponsesQcm.get(question.getId());
                 if (choixId != null) {
                     ChoixEvaluation choix = choixEvaluationRepository.findById(choixId)

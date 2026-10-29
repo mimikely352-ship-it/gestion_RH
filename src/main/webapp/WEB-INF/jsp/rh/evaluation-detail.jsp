@@ -12,9 +12,9 @@
       <h3>Réponses du candidat</h3>
       <c:forEach var="r" items="${reponses}" varStatus="st">
         <div style="margin-bottom:var(--e-3);">
-          <p><b>${st.index + 1}. <c:out value="${r.question.enonce}"/></b></p>
+          <p><b>${st.index + 1}. <c:out value="${r.question.enonce}"/></b> <span class="texte-petit texte-doux">(${r.question.type})</span></p>
           <c:choose>
-            <c:when test="${evaluation.format == 'QCM'}">
+            <c:when test="${r.question.type == 'QCM'}">
               <p><c:out value="${not empty r.choix ? r.choix.libelle : '(sans réponse)'}"/>
                 <c:if test="${not empty r.choix}"> — <ui:statut valeur="${r.choix.estCorrect ? 'CORRECT' : 'INCORRECT'}"/></c:if>
               </p>
@@ -47,20 +47,25 @@
   <div class="fiche" style="margin-top:var(--e-5);max-width:640px;"><div class="fiche-corps">
     <h3>Questions</h3>
     <c:forEach var="q" items="${questions}" varStatus="st">
-      <p><b>${st.index + 1}. <c:out value="${q.enonce}"/></b></p>
+      <p><b>${st.index + 1}. <c:out value="${q.enonce}"/></b> <span class="texte-petit texte-doux">(${q.type})</span></p>
     </c:forEach>
     <h3 style="margin-top:var(--e-5);">Ajouter une question</h3>
-    <ui:formulaire action="/rh/evaluations/${evaluation.id}/questions">
+    <p class="texte-petit texte-doux">Chaque question peut être un QCM ou une zone de texte libre, indépendamment des autres.</p>
+    <ui:formulaire action="/rh/evaluations/${evaluation.id}/questions" cssClass="pile question-mixte">
       <ui:champ-texte label="Énoncé" name="enonce" requis="true"/>
-      <c:if test="${evaluation.format == 'QCM'}">
+      <div class="rangee">
+        <label class="case"><input type="radio" name="type" value="QCM" checked onchange="document.querySelector('.question-mixte .choix-qcm').hidden=false"/> QCM</label>
+        <label class="case"><input type="radio" name="type" value="TEXTE" onchange="document.querySelector('.question-mixte .choix-qcm').hidden=true"/> Zone de texte libre</label>
+      </div>
+      <div class="choix-qcm">
         <c:forEach var="i" begin="1" end="4">
           <div class="rangee">
             <input type="radio" name="correct" value="${i}"/>
             <div style="flex:1;"><ui:champ label="Choix ${i}" name="choix${i}"/></div>
           </div>
         </c:forEach>
-        <p class="texte-petit texte-doux">Cochez le bouton radio du choix correct.</p>
-      </c:if>
+        <p class="texte-petit texte-doux">Cochez le bouton radio du choix correct (QCM uniquement).</p>
+      </div>
       <ui:bouton label="Ajouter la question" type="submit" style="btn-principal"/>
     </ui:formulaire>
   </div></div>

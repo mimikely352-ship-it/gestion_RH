@@ -104,6 +104,17 @@ public class DemandeService {
 
     @Transactional
     public Demande valider(Long demandeId, Long valideurId, DecisionValidation decision, String commentaire) {
+        return valider(demandeId, valideurId, decision, commentaire, null);
+    }
+
+    /**
+     * @param nouveauPosteCibleId poste final choisi par le RH, qui peut différer du poste demandé par l'employé
+     *                            (un autre poste, un poste de chef de service dans un autre département, etc.).
+     *                            Uniquement pris en compte à l'étape de validation RH, sur un transfert ou une
+     *                            promotion ; le DG valide ensuite ce poste final, pas celui demandé initialement.
+     */
+    @Transactional
+    public Demande valider(Long demandeId, Long valideurId, DecisionValidation decision, String commentaire, Long nouveauPosteCibleId) {
         Demande demande = obtenir(demandeId);
         Utilisateur valideur = utilisateurRepository.findById(valideurId)
                 .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable : " + valideurId));
@@ -120,6 +131,17 @@ public class DemandeService {
             var actuelle = affectations.findByDossierIdAndActuelleTrue(dossier.getId()).orElseThrow(() -> new BusinessException("Affectation actuelle manquante."));
             if (!actuelle.getId().equals(demande.getAffectationOrigineId()))
                 throw new BusinessException("L’affectation a changé depuis la demande. Déposez une nouvelle demande.");
+            if (nouveauPosteCibleId != null) {
+                if (etape != EtapeValidation.RH)
+                    throw new BusinessException("Le poste cible ne peut être modifié qu'à l'étape de validation RH.");
+                Poste nouveauPoste = posteRepository.findById(nouveauPosteCibleId)
+                        .orElseThrow(() -> new ResourceNotFoundException("Poste introuvable : " + nouveauPosteCibleId));
+                if (!nouveauPoste.isMobiliteOuverte() || com.sirh.embauche.service.AffectationAutomatiqueService.serviceDuPoste(nouveauPoste) == null)
+                    throw new BusinessException("Ce poste n’est pas ouvert à la mobilité interne ou son service manque.");
+                if (actuelle.getPoste().getId().equals(nouveauPoste.getId()))
+                    throw new BusinessException("L’employé occupe déjà ce poste.");
+                demande.setPosteCible(nouveauPoste);
+            }
             if (!demande.getPosteCible().isMobiliteOuverte()) throw new BusinessException("Le poste n’est plus ouvert à la mobilité.");
         }
 

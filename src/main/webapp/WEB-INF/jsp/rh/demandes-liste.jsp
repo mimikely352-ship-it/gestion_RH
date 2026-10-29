@@ -17,6 +17,10 @@
             <div class="rangee" style="margin-top:var(--e-3);">
               <ui:formulaire action="/rh/demandes/${d.id}/valider" cssClass="rangee">
                 <input type="hidden" name="decision" value="VALIDE"/>
+                <c:if test="${d.type == 'TRANSFERT' or d.type == 'PROMOTION'}">
+                  <ui:champ-liste label="Poste final (modifiable)" name="nouveauPosteCibleId" items="${postes}"
+                                   valueProperty="id" labelProperty="intitule" selected="${d.posteCible != null ? d.posteCible.id : null}"/>
+                </c:if>
                 <ui:bouton label="Valider" type="submit" style="btn-valider btn-petit"/>
               </ui:formulaire>
               <ui:formulaire action="/rh/demandes/${d.id}/valider" cssClass="rangee">

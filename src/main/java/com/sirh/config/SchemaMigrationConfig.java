@@ -33,7 +33,7 @@ public class SchemaMigrationConfig {
                         statement.execute("SELECT pg_advisory_xact_lock(904103)");
                         statement.execute("CREATE TABLE IF NOT EXISTS app_schema_migration(version VARCHAR(80) PRIMARY KEY, checksum VARCHAR(64) NOT NULL, appliquee_le TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)");
                     }
-                    for (var fichier : java.util.List.of("09_dates_parcours_employes.sql", "10_fiabilisation_metier.sql")) {
+                    for (var fichier : java.util.List.of("09_dates_parcours_employes.sql", "10_fiabilisation_metier.sql", "13_fix_candidature_version.sql", "14_rh_admin.sql")) {
                         byte[] octets = new ClassPathResource("db/migration/" + fichier).getContentAsByteArray();
                         String somme = java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(octets));
                         try (var requete = connexion.prepareStatement("SELECT checksum FROM app_schema_migration WHERE version=?")) {

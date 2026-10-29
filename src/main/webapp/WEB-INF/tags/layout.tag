@@ -58,6 +58,11 @@
         <a class="lateral-lien ${activeMenu == 'candidatures' ? 'actif' : ''}" href="${pageContext.request.contextPath}/rh/candidatures">Candidatures</a>
         <a class="lateral-lien ${activeMenu == 'entretiens' ? 'actif' : ''}" href="${pageContext.request.contextPath}/rh/entretiens">Entretiens</a>
       </nav>
+      <nav class="lateral-groupe" aria-label="Organisation">
+        <span class="lateral-titre">Organisation</span>
+        <a class="lateral-lien ${activeMenu == 'organisation' ? 'actif' : ''}" href="${pageContext.request.contextPath}/rh/organisation">Direction / départements / services</a>
+        <a class="lateral-lien ${activeMenu == 'employe-nouveau' ? 'actif' : ''}" href="${pageContext.request.contextPath}/rh/employes/nouveau">Créer un employé</a>
+      </nav>
     </sec:authorize>
 
     <sec:authorize access="hasAnyRole('EMPLOYE','CHEF_SERVICE','DIRECTION','RH','DG')">

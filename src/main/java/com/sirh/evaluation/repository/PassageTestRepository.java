@@ -9,4 +9,5 @@ public interface PassageTestRepository extends JpaRepository<PassageTest, Long> 
     boolean existsByCandidatureIdAndTestId(Long candidatureId, Long testId);
     boolean existsByTestId(Long testId);
     List<PassageTest> findByCandidatureId(Long candidatureId);
+    List<PassageTest> findByTestIdOrderByDatePassageDesc(Long testId);
 }

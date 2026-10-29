@@ -13,6 +13,8 @@
           <div class="fiche"><div class="fiche-corps">
             <h3><c:out value="${d.type}"/> — <c:out value="${d.auteurEmail}"/></h3>
             <p class="texte-doux"><c:out value="${d.description}"/></p>
+            <c:if test="${d.affectationOrigine != null}"><p>Poste actuel : <strong><c:out value="${d.affectationOrigine.posteLibelle}"/></strong></p></c:if>
+            <c:if test="${d.posteCible != null}"><p>Poste final retenu : <strong><c:out value="${d.posteCible.intitule}"/></strong></p></c:if>
             <div class="rangee" style="margin-top:var(--e-3);">
               <ui:formulaire action="/dg/demandes/${d.id}/valider" cssClass="rangee">
                 <input type="hidden" name="decision" value="VALIDE"/>

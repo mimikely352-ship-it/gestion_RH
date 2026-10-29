@@ -23,21 +23,30 @@ public class RhDemandeController {
     private final DemandeService demandeService;
     private final DemandeRepository demandeRepository;
     private final UtilisateurRepository utilisateurRepository;
+    private final com.sirh.organisation.repository.PosteRepository posteRepository;
 
     @GetMapping
     public String liste(Model model) {
         model.addAttribute("aValider", demandeService.listerPourValidationRh());
         model.addAttribute("aExecuter", demandeService.listerPourExecutionRh());
         model.addAttribute("enExecution", demandeRepository.findByStatut(StatutDemande.EN_EXECUTION));
+        model.addAttribute("postes", posteRepository.findAll());
         return "rh/demandes-liste";
     }
 
     @PostMapping("/{id}/valider")
     public String valider(@PathVariable Long id, Authentication authentication,
-                           @RequestParam DecisionValidation decision, @RequestParam(required = false) String commentaire) {
+                           @RequestParam DecisionValidation decision, @RequestParam(required = false) String commentaire,
+                           @RequestParam(required = false) Long nouveauPosteCibleId,
+                           org.springframework.web.servlet.mvc.support.RedirectAttributes flash) {
         Long moiId = utilisateurRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable.")).getId();
-        demandeService.valider(id, moiId, decision, commentaire);
+        try {
+            demandeService.valider(id, moiId, decision, commentaire, nouveauPosteCibleId);
+        } catch (com.sirh.commun.exception.BusinessException e) {
+            flash.addFlashAttribute("erreur", e.getMessage());
+            return "redirect:/rh/demandes/" + id;
+        }
         return "redirect:/rh/demandes";
     }
 
@@ -67,6 +76,7 @@ public class RhDemandeController {
     public String detail(@PathVariable Long id, Model model) {
         model.addAttribute("demande", demandeService.obtenir(id));
         model.addAttribute("historique", demandeService.historique(id));
+        model.addAttribute("postes", posteRepository.findAll());
         return "rh/demande-detail";
     }
 }

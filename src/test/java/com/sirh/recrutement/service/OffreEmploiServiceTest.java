@@ -55,6 +55,21 @@ class OffreEmploiServiceTest {
         assertThrows(BusinessException.class, () -> service.lirePiecesRequises("1\n2\n3\n4\n5\n6\n7\n8\n9"));
     }
 
+    @Test void accepteUnNiveauDeDiplomeNullPourUnBrouillon() {
+        var repository = mock(OffreEmploiRepository.class);
+        var postes = mock(PosteRepository.class);
+        var diplomes = mock(DiplomeRepository.class);
+        var poste = com.sirh.organisation.entity.Poste.builder().id(1L).intitule("Designer").build();
+        var offre = com.sirh.recrutement.entity.OffreEmploi.builder().id(7L).poste(poste).titre("Ancien titre").build();
+        when(repository.findById(7L)).thenReturn(java.util.Optional.of(offre));
+        when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
+        when(diplomes.findAllById(Set.of())).thenReturn(java.util.List.of());
+        var service = new OffreEmploiService(repository, postes, mock(SectionRepository.class), diplomes, mock(DemandeService.class));
+        var resultat = service.modifierBrouillon(7L, "Designer senior", "Nouvelles missions", 3, 24, null, null);
+        assertTrue(resultat.getDiplomesRequis().isEmpty());
+        verify(diplomes).findAllById(Set.of());
+    }
+
     @Test void modifieLeBrouillonSansCreerDePosteNiChangerSonStatut() {
         var repository = mock(OffreEmploiRepository.class);
         var postes = mock(PosteRepository.class);
