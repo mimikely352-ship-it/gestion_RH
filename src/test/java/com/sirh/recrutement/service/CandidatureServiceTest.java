@@ -137,4 +137,32 @@ class CandidatureServiceTest {
         assertThrows(BusinessException.class, () -> service.changerStatut(5L, StatutCandidature.EMBAUCHE));
         verify(repository, never()).save(any());
     }
+
+    @Test void clotureLOffreQuandLeDernierPosteEstPourvu() {
+        offre.setNbPostes(2);
+        when(repository.findById(6L)).thenReturn(Optional.of(Candidature.builder().id(6L)
+                .statut(StatutCandidature.RETENUE).offre(offre).build()));
+        when(repository.countByOffreIdAndStatut(3L, StatutCandidature.EMBAUCHE)).thenReturn(1L);
+        service.changerStatut(6L, StatutCandidature.EMBAUCHE);
+        verify(offres).cloturer(3L);
+    }
+
+    @Test void laisseLOffreOuverteTantQueDesPostesRestent() {
+        offre.setNbPostes(3);
+        when(repository.findById(6L)).thenReturn(Optional.of(Candidature.builder().id(6L)
+                .statut(StatutCandidature.RETENUE).offre(offre).build()));
+        when(repository.countByOffreIdAndStatut(3L, StatutCandidature.EMBAUCHE)).thenReturn(1L);
+        service.changerStatut(6L, StatutCandidature.EMBAUCHE);
+        verify(offres, never()).cloturer(any());
+    }
+
+    @Test void refuseUneEmbaucheAuDelaDuNombreDePostes() {
+        offre.setNbPostes(1);
+        offre.setStatut(StatutOffre.CLOTUREE);
+        when(repository.findById(6L)).thenReturn(Optional.of(Candidature.builder().id(6L)
+                .statut(StatutCandidature.RETENUE).offre(offre).build()));
+        when(repository.countByOffreIdAndStatut(3L, StatutCandidature.EMBAUCHE)).thenReturn(1L);
+        assertThrows(BusinessException.class, () -> service.changerStatut(6L, StatutCandidature.EMBAUCHE));
+        verify(repository, never()).save(any());
+    }
 }

@@ -9,6 +9,7 @@ public interface CandidatureRepository extends JpaRepository<Candidature, Long> 
     List<Candidature> findByCandidatUtilisateurIdAndStatut(Long utilisateurId, com.sirh.commun.enums.StatutCandidature statut);
     List<Candidature> findByCandidatId(Long candidatId);
     List<Candidature> findByOffreId(Long offreId);
+    long countByOffreIdAndStatut(Long offreId, com.sirh.commun.enums.StatutCandidature statut);
     boolean existsByOffreIdAndCandidatId(Long offreId, Long candidatId);
     boolean existsByCandidatIdAndOffreEntrepriseId(Long candidatId, Long entrepriseId);
 }

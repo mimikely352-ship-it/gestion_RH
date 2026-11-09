@@ -15,10 +15,16 @@
     <div style="overflow-x:auto">
       <table class="tableau">
         <caption class="champ-aide">Le poste provient de l’embauche ou d’un mouvement exécuté. Les dates absentes des anciens dossiers ne sont pas reconstituées.</caption>
-        <thead><tr><th scope="col">Employé</th><th scope="col">Poste actuel</th><th scope="col">Date d’entrée</th><th scope="col">Service</th><th scope="col">Parcours dans l’entreprise</th></tr></thead>
+        <thead><tr><th scope="col">Employé</th><th scope="col">Poste actuel</th><th scope="col">Date d’entrée</th><th scope="col">Service</th><th scope="col">Intégration</th><th scope="col">Parcours dans l’entreprise</th></tr></thead>
         <tbody><c:forEach var="e" items="${employes}"><tr>
-          <td><strong><c:out value="${e.nom}"/></strong><br><c:out value="${e.email}"/></td>
+          <td>
+            <c:choose>
+              <c:when test="${e.dossierId != null}"><a href="${pageContext.request.contextPath}/rh/employes/${e.dossierId}"><strong><c:out value="${e.nom}"/></strong></a></c:when>
+              <c:otherwise><strong><c:out value="${e.nom}"/></strong></c:otherwise>
+            </c:choose>
+            <br><c:out value="${e.email}"/></td>
           <td><c:out value="${e.poste}"/></td><td><c:out value="${e.dateEntree}"/></td><td><c:out value="${e.service}"/></td>
+          <td><c:if test="${e.dossierId != null}"><a href="${pageContext.request.contextPath}/rh/employes/${e.dossierId}"><c:out value="${avancementIntegration[e.dossierId]}"/></a></c:if></td>
           <td><details><summary>Voir le parcours</summary>
             <h3>Affectations enregistrées</h3>
             <c:if test="${empty e.historique}"><p>Aucun historique disponible pour ce compte.</p></c:if>
@@ -47,6 +53,39 @@
         </tr></c:forEach></tbody>
       </table>
     </div>
+  </div></div>
+  <c:if test="${not empty documentsARenouveler}">
+    <div class="fiche" style="margin-top:var(--e-6);"><div class="fiche-corps">
+      <h2>Documents administratifs à renouveler</h2>
+      <p class="texte-doux">Pièces expirées ou expirant dans les 30 jours (dernière version déposée).</p>
+      <div style="overflow-x:auto"><table class="tableau">
+        <thead><tr><th scope="col">Salarié</th><th scope="col">Document</th><th scope="col">Expire le</th><th scope="col">État</th></tr></thead>
+        <tbody><c:forEach var="r" items="${documentsARenouveler}"><tr>
+          <td><a href="${pageContext.request.contextPath}/rh/employes/${r.dossierId}#documents"><c:out value="${r.nom}"/></a></td>
+          <td><c:out value="${r.document}"/></td><td><c:out value="${r.expiration}"/></td>
+          <td><span class="statut ${r.validite == 'Expiré' ? 'statut--danger' : 'statut--attente'}"><c:out value="${r.validite}"/></span></td>
+        </tr></c:forEach></tbody>
+      </table></div>
+    </div></div>
+  </c:if>
+  <div class="fiche" style="margin-top:var(--e-6);"><div class="fiche-corps">
+    <h2>Départs : démissions et renvois</h2>
+    <p class="texte-doux">Les employés partis n’apparaissent plus dans l’effectif ; leur dossier complet reste consultable ici.</p>
+    <c:if test="${empty departs}"><p>Aucun départ enregistré.</p></c:if>
+    <c:if test="${not empty departs}">
+      <div style="overflow-x:auto"><table class="tableau">
+        <thead><tr><th scope="col">Employé</th><th scope="col">Type</th><th scope="col">Dernier jour</th><th scope="col">État du dossier</th></tr></thead>
+        <tbody><c:forEach var="d" items="${departs}"><tr>
+          <td><a href="${pageContext.request.contextPath}/rh/employes/${d.dossier.id}#depart"><strong><c:out value="${d.dossier.prenom}"/> <c:out value="${d.dossier.nom}"/></strong></a></td>
+          <td><c:out value="${d.type.libelle}"/></td>
+          <td><c:out value="${d.dateEffet}"/></td>
+          <td><c:choose>
+            <c:when test="${d.statut == 'EN_COURS'}"><span class="statut statut--attente">En cours</span></c:when>
+            <c:otherwise><span class="statut statut--neutre">Clôturé — a quitté l’entreprise</span></c:otherwise>
+          </c:choose></td>
+        </tr></c:forEach></tbody>
+      </table></div>
+    </c:if>
   </div></div>
   <nav aria-label="Pagination">
     <c:if test="${pageEffectif > 0}"><a class="btn btn-secondaire" href="?page=${pageEffectif - 1}">Page precedente</a></c:if>

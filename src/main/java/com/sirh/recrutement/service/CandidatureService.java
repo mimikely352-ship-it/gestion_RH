@@ -117,8 +117,20 @@ public class CandidatureService {
             default -> false;
         };
         if (!autorise) throw new BusinessException("Transition de candidature non autorisée.");
+        OffreEmploi offre = candidature.getOffre();
+        long embauches = 0;
+        if (statut == StatutCandidature.EMBAUCHE && offre != null && offre.getId() != null) {
+            embauches = candidatureRepository.countByOffreIdAndStatut(offre.getId(), StatutCandidature.EMBAUCHE);
+            if (embauches >= offre.getNbPostes())
+                throw new BusinessException("Tous les postes de cette offre sont déjà pourvus.");
+        }
         boolean preselection = candidature.getStatut() == StatutCandidature.RECUE;
         candidature.setStatut(statut);
+        if (statut == StatutCandidature.EMBAUCHE && offre != null && offre.getId() != null
+                && embauches + 1 >= offre.getNbPostes() && offre.getStatut() == StatutOffre.PUBLIEE) {
+            // Quota atteint : l'offre ne reçoit plus de candidatures.
+            offreEmploiService.cloturer(offre.getId());
+        }
         if (preselection) {
             String decision = statut == StatutCandidature.ACCEPTEE_ENTRETIEN
                     ? "retenue pour un entretien" : "non retenue";

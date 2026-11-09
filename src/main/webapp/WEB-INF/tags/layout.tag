@@ -72,11 +72,16 @@
           <a class="lateral-lien ${activeMenu == 'mes-demandes' ? 'actif' : ''}" href="${pageContext.request.contextPath}/employe/demandes">Mes demandes</a>
           <a class="lateral-lien" href="${pageContext.request.contextPath}/candidat/mes-candidatures">Mon dossier de recrutement</a>
         </sec:authorize>
+        <sec:authorize access="hasAnyRole('EMPLOYE','CHEF_SERVICE','DIRECTION')">
+          <a class="lateral-lien ${activeMenu == 'mon-dossier' ? 'actif' : ''}" href="${pageContext.request.contextPath}/mon-dossier">Mon dossier salarié</a>
+        </sec:authorize>
         <sec:authorize access="hasRole('CHEF_SERVICE')">
           <a class="lateral-lien ${activeMenu == 'demandes' ? 'actif' : ''}" href="${pageContext.request.contextPath}/chef-service/demandes">Demandes à valider</a>
+          <a class="lateral-lien ${activeMenu == 'dossiers' ? 'actif' : ''}" href="${pageContext.request.contextPath}/dossiers">Dossiers de mon équipe</a>
         </sec:authorize>
         <sec:authorize access="hasRole('DIRECTION')">
           <a class="lateral-lien ${activeMenu == 'demandes' ? 'actif' : ''}" href="${pageContext.request.contextPath}/direction/demandes">Demandes à valider</a>
+          <a class="lateral-lien ${activeMenu == 'dossiers' ? 'actif' : ''}" href="${pageContext.request.contextPath}/dossiers">Dossiers salariés</a>
         </sec:authorize>
         <sec:authorize access="hasRole('RH')">
           <a class="lateral-lien ${activeMenu == 'employes' ? 'actif' : ''}" href="${pageContext.request.contextPath}/rh/employes">Employés et historique</a>
@@ -87,6 +92,7 @@
         <sec:authorize access="hasRole('DG')">
           <a class="lateral-lien ${activeMenu == 'demandes' ? 'actif' : ''}" href="${pageContext.request.contextPath}/dg/demandes">Demandes à valider</a>
           <a class="lateral-lien ${activeMenu == 'ordres' ? 'actif' : ''}" href="${pageContext.request.contextPath}/dg/ordres">Mes ordres</a>
+          <a class="lateral-lien ${activeMenu == 'dossiers' ? 'actif' : ''}" href="${pageContext.request.contextPath}/dossiers">Dossiers salariés</a>
         </sec:authorize>
       </nav>
     </sec:authorize>

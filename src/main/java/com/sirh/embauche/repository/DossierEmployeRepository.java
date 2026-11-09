@@ -9,6 +9,9 @@ public interface DossierEmployeRepository extends JpaRepository<DossierEmploye, 
             com.sirh.commun.enums.Role role, org.springframework.data.domain.Pageable page);
     long countByUtilisateurRoleAndUtilisateurActifTrue(com.sirh.commun.enums.Role role);
     Optional<DossierEmploye> findByUtilisateurId(Long id);
+    boolean existsByCinAndIdNot(String cin, Long id);
+    @EntityGraph(attributePaths = {"utilisateur"})
+    java.util.List<DossierEmploye> findByUtilisateurActifTrueOrderByNomAscPrenomAsc();
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select d from DossierEmploye d where d.utilisateur.id = :id")
     Optional<DossierEmploye> verrouillerParUtilisateur(@org.springframework.data.repository.query.Param("id") Long id);

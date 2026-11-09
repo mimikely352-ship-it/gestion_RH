@@ -57,6 +57,8 @@ Si `sirh` existe déjà, ne pas relancer sa création. Choisir ensuite **un seul
 | `11_entreprises_offres.sql` | Table des entreprises et lien des offres ; import manuel obligatoire. |
 | `12_reset_donnees_test.sql` | Efface les anciennes données et comptes, importe lui-même `11` et `02`, puis crée deux entreprises et trois offres de test. |
 | `09` et `10` | Migrations appliquées automatiquement au démarrage local avec la configuration par défaut ; pas de commande supplémentaire dans ces parcours. |
+| `16_contrats_onboarding_departs.sql` | Contrats successifs (CDD, CDI...), onboarding (checklist + workflow), départs (démission, renvoi) et documents du dossier employé ; appliquée automatiquement au démarrage, comme `13` et `14`. |
+| `17_dossier_salarie.sql` | Dossier salarié central : matricule, identité et coordonnées, historique de rémunération, validité des documents administratifs, journal d'audit ; appliquée automatiquement au démarrage. |
 
 Les modifications `04`, `06` et `08` sont déjà intégrées au schéma `01` actuel : ne pas les importer après une nouvelle installation. `03`, `05` et `rattacher_employe.sql` ne font pas partie du parcours de démarrage d'une base neuve.
 

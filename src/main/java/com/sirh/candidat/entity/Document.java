@@ -46,6 +46,26 @@ public class Document {
     @Column(name = "date_upload", nullable = false)
     private LocalDateTime dateUpload;
 
+    /** Document du dossier employé (contrat signé, pièces de départ...), sinon null. */
+    @Column(name = "dossier_id")
+    private Long dossierId;
+
+    @Column(name = "contrat_id")
+    private Long contratId;
+
+    @Column(name = "depart_id")
+    private Long departId;
+
+    // ----- Document administratif du salarié et sa validité -----
+    @Column(length = 60)
+    private String numero;
+
+    @Column(name = "date_emission")
+    private java.time.LocalDate dateEmission;
+
+    @Column(name = "date_expiration")
+    private java.time.LocalDate dateExpiration;
+
     @PrePersist
     void prePersist() {
         if (dateUpload == null) {
