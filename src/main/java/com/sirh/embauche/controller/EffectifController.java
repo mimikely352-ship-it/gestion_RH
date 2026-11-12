@@ -35,6 +35,7 @@ public class EffectifController {
     private final DepartService departs;
     private final HabilitationService habilitations;
     private final AuditDossierService audit;
+    private final com.sirh.embauche.service.ContratService contrats;
 
     @GetMapping("/rh/employes")
     public String liste(@RequestParam(defaultValue = "0") int page, Model model) {
@@ -44,6 +45,7 @@ public class EffectifController {
                 .map(EffectifService.Employe::getDossierId).filter(java.util.Objects::nonNull).toList()));
         model.addAttribute("departs", departs.recents());
         model.addAttribute("documentsARenouveler", fiches.documentsARenouveler());
+        model.addAttribute("contratsAEcheance", contrats.aEcheance());
         model.addAttribute("nombreEmployes", effectif.compter());
         model.addAttribute("pageEffectif", Math.max(0, page));
         model.addAttribute("postes", postes.findAll());

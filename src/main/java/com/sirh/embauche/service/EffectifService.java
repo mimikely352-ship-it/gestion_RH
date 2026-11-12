@@ -17,20 +17,29 @@ public class EffectifService {
     private final AffectationRepository affectations;
     private final DemandeRepository demandes;
     private final CorrectionDateEntreeRepository corrections;
+    private final ContratRepository contrats;
     @Getter @RequiredArgsConstructor
     public static class Employe {
         private final String nom, email, poste, service, dateEntree;
         private final Long dossierId;
         private final List<String> historique, transferts;
+        private final String matricule, role, contrat;
+        /** echu | bientot | a-venir | aucun | null (contrat sans alerte). */
+        private final String contratAlerte;
     }
+    /** Effectif en poste : tous les salariés disposant d'un dossier (employés, chefs de service, direction). */
     @Transactional(readOnly = true)
     public List<Employe> lister() { return lister(0); }
     @Transactional(readOnly = true)
     public List<Employe> lister(int page) {
-        var liste = dossiers.findByUtilisateurRoleAndUtilisateurActifTrue(Role.EMPLOYE,
+        var liste = dossiers.findByUtilisateurActifTrue(
                 PageRequest.of(Math.max(0, page), 25, Sort.by("nom", "prenom", "id"))).getContent();
         if (liste.isEmpty()) return List.of();
-        var periodes = affectations.findByDossierIdInOrderByIdAsc(liste.stream().map(DossierEmploye::getId).toList());
+        var ids = liste.stream().map(DossierEmploye::getId).toList();
+        var contratsParDossier = new HashMap<Long, List<Contrat>>();
+        contrats.findByDossierIdInAndStatutIn(ids, List.of(StatutContrat.EN_COURS, StatutContrat.A_VENIR))
+                .forEach(c -> contratsParDossier.computeIfAbsent(c.getDossierId(), k -> new ArrayList<>()).add(c));
+        var periodes = affectations.findByDossierIdInOrderByIdAsc(ids);
         var demandesPage = demandes.findByAuteurIdIn(liste.stream().map(e -> e.getUtilisateur().getId()).toList());
         List<Employe> resultat = new ArrayList<>();
         for (var e : liste) {
@@ -45,14 +54,46 @@ public class EffectifService {
                     .forEach(d -> historique.add("Formation réalisée : " + d.getDescription() + " — " + date(d.getDateEffet() == null && d.getDateExecution() != null ? d.getDateExecution().toLocalDate() : d.getDateEffet())));
             var attente = mouvements.stream().filter(d -> d.getStatut() != StatutDemande.REJETEE && d.getStatut() != StatutDemande.EXECUTEE)
                     .map(d -> d.getType() + " — " + d.getDescription() + " — " + d.getStatut()).toList();
+            var lesContrats = contratsParDossier.getOrDefault(e.getId(), List.of());
+            var enCours = lesContrats.stream().filter(c -> c.getStatut() == StatutContrat.EN_COURS).findFirst().orElse(null);
+            var aVenir = lesContrats.stream().filter(c -> c.getStatut() == StatutContrat.A_VENIR).findFirst().orElse(null);
             resultat.add(new Employe(e.getPrenom() + " " + e.getNom(), e.getUtilisateur().getEmail(),
                     actuelle == null ? "Affectation à vérifier" : actuelle.getPosteLibelle(),
                     actuelle == null || actuelle.getServiceLibelle() == null ? "Service non renseigné" : actuelle.getServiceLibelle(),
-                    date(e.getDateEntree()), e.getId(), historique, attente));
+                    date(e.getDateEntree()), e.getId(), historique, attente,
+                    e.getMatricule(), libelleRole(e.getUtilisateur().getRole()), libelleContrat(enCours, aVenir),
+                    alerteContrat(enCours, aVenir)));
         }
         return resultat;
     }
-    public long compter() { return dossiers.countByUtilisateurRoleAndUtilisateurActifTrue(Role.EMPLOYE); }
+    public long compter() { return dossiers.countByUtilisateurActifTrue(); }
+
+    private static String libelleRole(Role role) {
+        if (role == null) return null;
+        return switch (role) {
+            case CHEF_SERVICE -> "Chef de service";
+            case DIRECTION -> "Direction";
+            default -> null; // employé : rôle par défaut, non affiché
+        };
+    }
+
+    /** Ex. « CDD jusqu’au 12/05/2027 · puis CDD à partir du 13/05/2027 », « CDI à partir du 01/12/2026 (à venir) ». */
+    static String libelleContrat(Contrat enCours, Contrat aVenir) {
+        if (enCours == null && aVenir == null) return "Aucun contrat";
+        String actuel = enCours == null ? null : enCours.getType().name()
+                + (enCours.getDateFinPrevue() == null ? "" : " jusqu’au " + date(enCours.getDateFinPrevue()));
+        String suivant = aVenir == null ? null : aVenir.getType().name() + " à partir du " + date(aVenir.getDateDebut());
+        if (actuel == null) return suivant + " (à venir)";
+        return suivant == null ? actuel : actuel + " · puis " + suivant;
+    }
+
+    static String alerteContrat(Contrat enCours, Contrat aVenir) {
+        if (enCours == null) return aVenir == null ? "aucun" : "a-venir";
+        if (aVenir != null || enCours.getDateFinPrevue() == null) return null;
+        var aujourdhui = LocalDate.now();
+        if (enCours.getDateFinPrevue().isBefore(aujourdhui)) return "echu";
+        return enCours.getDateFinPrevue().isAfter(aujourdhui.plusDays(30)) ? null : "bientot";
+    }
     private static String date(LocalDate d) {
         return d == null ? "Date non renseignée" : d.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
     }

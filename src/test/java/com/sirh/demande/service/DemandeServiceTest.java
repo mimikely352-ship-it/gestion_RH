@@ -24,6 +24,70 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 class DemandeServiceTest {
+    @Test void rejetSansMotifNeModifiePasLaDemandeNiSonHistorique() {
+        var demande = Demande.builder().id(123L).type(TypeDemande.RECRUTEMENT).auteur(employe)
+                .statut(StatutDemande.SOUMISE).build();
+        when(demandeRepository.findById(123L)).thenReturn(Optional.of(demande));
+        when(utilisateurRepository.findById(2L)).thenReturn(Optional.of(chef));
+        for (String motif : new String[]{null,"","   "})
+            assertThrows(BusinessException.class, () -> demandeService.valider(123L,2L,DecisionValidation.REJETE,motif));
+        assertEquals(StatutDemande.SOUMISE,demande.getStatut());
+        Mockito.verify(validationDemandeRepository,Mockito.never()).save(any());
+        Mockito.verify(demandeRepository,Mockito.never()).save(any());
+    }
+    @Test void besoinConserveSalaireParPosteDansToutLeCircuit() {
+        when(utilisateurRepository.findById(1L)).thenReturn(Optional.of(employe));
+        var poste = com.sirh.organisation.entity.Poste.builder().id(9L).intitule("Développeur").build();
+        when(posteRepository.findById(9L)).thenReturn(Optional.of(poste));
+        var salaire = new java.math.BigDecimal("1250000.50");
+        var date = java.time.LocalDate.now().plusDays(30);
+        var budget = new java.math.BigDecimal("45000018.00"); // 3 × 1 250 000,50 × 12
+        var demande = demandeService.creer(1L, TypeDemande.RECRUTEMENT, 9L, "Renfort équipe", 3, salaire, budget, date, MotifBesoin.CREATION);
+        assertEquals(budget, demande.getBudgetGlobalRecrutement());
+        assertEquals(0, budget.compareTo(demande.getCoutAnnuelPrevu()));
+        demande.setId(100L);
+        when(demandeRepository.findById(100L)).thenReturn(Optional.of(demande));
+        for (var valideur : List.of(chef, direction, rh, dg)) {
+            when(utilisateurRepository.findById(valideur.getId())).thenReturn(Optional.of(valideur));
+            demandeService.valider(100L, valideur.getId(), DecisionValidation.VALIDE, "Accord");
+            assertEquals(salaire, demande.getSalaireMensuelParPoste());
+            assertEquals(3, demande.getEffectifDemande());
+            assertEquals(date, demande.getDateSouhaitee());
+        }
+        assertEquals(StatutDemande.VALIDEE_DG, demande.getStatut());
+        var dto = new com.sirh.demande.dto.DemandeDto(demande);
+        assertEquals(salaire, dto.getSalaireMensuelParPoste());
+        assertEquals("CREATION", dto.getMotifBesoin());
+    }
+
+    @Test void besoinIncompletOuInvalideNePeutPasEtreSoumis() {
+        var date = java.time.LocalDate.now();
+        var salaire = java.math.BigDecimal.TEN;
+        var budget = new java.math.BigDecimal("120");
+        assertThrows(BusinessException.class, () -> demandeService.creer(1L, TypeDemande.RECRUTEMENT, 9L, "Besoin"));
+        assertThrows(BusinessException.class, () -> demandeService.creer(1L, TypeDemande.RECRUTEMENT, null, "Besoin", 1, salaire, budget, date, MotifBesoin.CREATION));
+        assertThrows(BusinessException.class, () -> demandeService.creer(1L, TypeDemande.RECRUTEMENT, 9L, "Besoin", 0, salaire, budget, date, MotifBesoin.CREATION));
+        assertThrows(BusinessException.class, () -> demandeService.creer(1L, TypeDemande.RECRUTEMENT, 9L, "Besoin", 1, java.math.BigDecimal.ZERO, budget, date, MotifBesoin.CREATION));
+        assertThrows(BusinessException.class, () -> demandeService.creer(1L, TypeDemande.RECRUTEMENT, 9L, "Besoin", 1, new java.math.BigDecimal("1.001"), budget, date, MotifBesoin.CREATION));
+        assertThrows(BusinessException.class, () -> demandeService.creer(1L, TypeDemande.RECRUTEMENT, 9L, "Besoin", 1, salaire, budget, date.minusDays(1), MotifBesoin.CREATION));
+        assertThrows(BusinessException.class, () -> demandeService.creer(1L, TypeDemande.RECRUTEMENT, 9L, "Besoin", 1, salaire, budget, date, null));
+        // Budget absent, nul ou inférieur à effectif × salaire × 12.
+        assertThrows(BusinessException.class, () -> demandeService.creer(1L, TypeDemande.RECRUTEMENT, 9L, "Besoin", 1, salaire, null, date, MotifBesoin.CREATION));
+        assertThrows(BusinessException.class, () -> demandeService.creer(1L, TypeDemande.RECRUTEMENT, 9L, "Besoin", 1, salaire, java.math.BigDecimal.ZERO, date, MotifBesoin.CREATION));
+        assertThrows(BusinessException.class, () -> demandeService.creer(1L, TypeDemande.RECRUTEMENT, 9L, "Besoin", 2, salaire, budget, date, MotifBesoin.CREATION));
+        Mockito.verify(demandeRepository, Mockito.never()).save(any());
+    }
+
+    @Test void autresDemandesIgnorentLesChampsDeRecrutement() {
+        when(utilisateurRepository.findById(1L)).thenReturn(Optional.of(employe));
+        var d = demandeService.creer(1L, TypeDemande.FORMATION, null, "Formation", 3,
+                java.math.BigDecimal.TEN, java.math.BigDecimal.TEN, java.time.LocalDate.now(), MotifBesoin.REMPLACEMENT);
+        assertNull(d.getSalaireMensuelParPoste());
+        assertNull(d.getBudgetGlobalRecrutement());
+        assertNull(d.getEffectifDemande());
+        assertNull(d.getDateSouhaitee());
+        assertNull(d.getMotifBesoin());
+    }
 
     private DemandeRepository demandeRepository;
     private ValidationDemandeRepository validationDemandeRepository;

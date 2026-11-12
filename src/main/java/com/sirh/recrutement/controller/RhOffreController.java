@@ -41,6 +41,17 @@ public class RhOffreController {
         model.addAttribute("sections", sectionRepository.findAll());
         model.addAttribute("diplomes", diplomeRepository.findAll());
         model.addAttribute("demandeId", demandeId);
+        if (demandeId != null) {
+            var besoin = offreEmploiService.obtenirBesoinValide(demandeId);
+            model.addAttribute("besoinOrigine", besoin);
+            var saisie = new java.util.HashMap<String, Object>();
+            if (besoin != null && besoin.getPosteCible() != null) {
+                saisie.put("modePoste", "EXISTANT");
+                saisie.put("posteId", besoin.getPosteCible().getId());
+            }
+            if (besoin != null && besoin.getEffectifDemande() != null) saisie.put("nbPostes", besoin.getEffectifDemande());
+            model.addAttribute("saisie", saisie);
+        }
         return "rh/offre-form";
     }
 

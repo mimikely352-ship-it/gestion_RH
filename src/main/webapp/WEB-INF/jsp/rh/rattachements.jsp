@@ -3,7 +3,7 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <ui:layout title="Rattachement des employés" activeMenu="rattachements">
   <h1>Rattachement des employés</h1>
-  <p>Complétez le service actuel des employés dont l’affectation manque. Le responsable du service recevra leurs demandes internes.</p>
+  <p>Rattachez chaque employé à son service.</p>
   <c:if test="${not empty erreur}"><ui:alerte type="erreur"><c:out value="${erreur}"/></ui:alerte></c:if>
   <c:if test="${not empty succes}"><p role="status"><c:out value="${succes}"/></p></c:if>
   <c:choose>
@@ -11,7 +11,7 @@
     <c:otherwise>
       <div class="fiche"><div class="fiche-corps">
         <h2>Compléter une affectation</h2>
-        <p>Choisissez le service où travaille actuellement l’employé. Son poste souhaité sera indiqué dans sa demande de transfert.</p>
+        <p>Choisissez le service actuel.</p>
         <ui:formulaire action="/rh/employes/rattachements">
           <ui:champ-liste label="Employé sans service" name="employeId" items="${employes}" valueProperty="id" labelProperty="email" requis="true"/>
           <div class="champ">

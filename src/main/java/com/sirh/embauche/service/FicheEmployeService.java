@@ -83,8 +83,14 @@ public class FicheEmployeService {
         public String getNomFichier() { return nomFichier; }
         public String getDate() { return date; }
     }
+    /**
+     * @param version    numéro de version du document pour son type (1 = premier dépôt) ; 0 pour les pièces
+     *                   à plusieurs exemplaires (diplômes, autres), qui ne se remplacent pas
+     * @param remplaceLe date du dépôt de la version suivante, null pour la version en vigueur
+     */
     public record LigneDocumentAdministratif(Long id, String libelle, String numero, String emission, String expiration,
-                                            ValiditeDocument validite, String nomFichier, boolean remplace) {
+                                            ValiditeDocument validite, String nomFichier, boolean remplace,
+                                            int version, String remplaceLe, String depose) {
         public Long getId() { return id; }
         public String getLibelle() { return libelle; }
         public String getNumero() { return numero; }
@@ -94,6 +100,9 @@ public class FicheEmployeService {
         public String getValiditeLibelle() { return remplace ? "Remplacé" : validite.getLibelle(); }
         public String getNomFichier() { return nomFichier; }
         public boolean isRemplace() { return remplace; }
+        public int getVersion() { return version; }
+        public String getRemplaceLe() { return remplaceLe; }
+        public String getDepose() { return depose; }
     }
     public record LigneRemuneration(String dateEffet, String salaire, String motif, String saisie, boolean actuelle) {
         public String getDateEffet() { return dateEffet; }
@@ -109,8 +118,16 @@ public class FicheEmployeService {
         public String getAction() { return action; }
         public String getDetail() { return detail; }
     }
+    /**
+     * @param precedent « Renouvelle le CDD du 12/11/2026 » si le contrat en remplace un autre
+     * @param suivant   « Remplacé par le CDD du 13/05/2027 » si un contrat lui succède
+     */
     public record LigneContrat(Long id, String type, String libelleType, String debut, String finPrevue, String finEffective,
-                               String statut, String salaire, String signeLe, Long documentId, String motifFin, boolean echu) {
+                               String statut, String salaire, String signeLe, Long documentId, String motifFin, boolean echu,
+                               String precedent, String suivant) {
+        public String getPrecedent() { return precedent; }
+        public String getSuivant() { return suivant; }
+        public boolean isAVenir() { return "A_VENIR".equals(statut); }
         public Long getId() { return id; }
         public String getType() { return type; }
         public String getLibelleType() { return libelleType; }
@@ -170,6 +187,8 @@ public class FicheEmployeService {
         private final String offreRecrutement;
         private final OnboardingService.Vue onboarding;
         private final LigneContrat contratEnCours;
+        /** Contrat saisi à l'avance (renouvellement, embauche avec entrée future), pas encore en vigueur. */
+        private final LigneContrat contratAVenir;
         private final List<LigneContrat> contrats;
         private final String salaireActuel;
         private final List<LigneRemuneration> remunerations;
@@ -211,8 +230,9 @@ public class FicheEmployeService {
                 .stream().findFirst().orElse(null);
 
         var docsEmploye = h.documents() ? documents.findByDossierIdOrderByDateUploadDesc(dossierId) : List.<Document>of();
-        var lignesContrats = contrats.findByDossierIdOrderByDateDebutDescIdDesc(dossierId).stream()
-                .map(c -> contrat(c, docsEmploye, h.salaire())).toList();
+        var listeContrats = contrats.findByDossierIdOrderByDateDebutDescIdDesc(dossierId);
+        var lignesContrats = listeContrats.stream()
+                .map(c -> contrat(c, listeContrats, docsEmploye, h.salaire())).toList();
         var lignesDeparts = departs.findByDossierIdOrderByIdDesc(dossierId).stream()
                 .filter(d -> d.getStatut() != StatutDepart.ANNULE)
                 .map(d -> depart(d, docsEmploye)).toList();
@@ -228,26 +248,49 @@ public class FicheEmployeService {
                     r.getMotif(), r.getCreeLe().format(HORODATAGE) + " par " + r.getCreePar(), r == enVigueur)).toList();
         }
 
-        // ----- Documents administratifs (le plus récent de chaque type fait foi) -----
+        // ----- Documents administratifs : versions -----
+        // Pièce unique (CIN, certificat...) : chaque dépôt est une nouvelle version qui remplace la précédente.
+        // Pièces à plusieurs exemplaires (diplômes, autres) : les dépôts s'ajoutent sans se remplacer.
         var administratifs = docsEmploye.stream()
                 .filter(d -> d.getContratId() == null && d.getDepartId() == null && TypeDocumentAdministratif.depuis(d.getType()) != null)
                 .toList();
         var plusRecentParType = new HashMap<String, Document>();
-        administratifs.forEach(d -> plusRecentParType.merge(d.getType(), d,
-                (a, b) -> a.getDateUpload().isAfter(b.getDateUpload()) ? a : b));
+        var versions = new HashMap<Long, Integer>();
+        var remplaceLe = new HashMap<Long, String>();
+        administratifs.stream().collect(Collectors.groupingBy(Document::getType)).forEach((code, depots) -> {
+            var ordre = depots.stream().sorted(ORDRE_DEPOT).toList();
+            plusRecentParType.put(code, ordre.get(ordre.size() - 1));
+            if (TypeDocumentAdministratif.depuis(code).isPlusieursExemplaires()) return;
+            for (int i = 0; i < ordre.size(); i++) {
+                versions.put(ordre.get(i).getId(), i + 1);
+                if (i + 1 < ordre.size()) remplaceLe.put(ordre.get(i).getId(), horodatage(ordre.get(i + 1)));
+            }
+        });
         var lignesAdmin = administratifs.stream().map(d -> new LigneDocumentAdministratif(d.getId(),
                 TypeDocumentAdministratif.depuis(d.getType()).getLibelle(), d.getNumero(),
                 d.getDateEmission() == null ? "—" : date(d.getDateEmission()),
                 d.getDateExpiration() == null ? "—" : date(d.getDateExpiration()),
                 ValiditeDocument.de(d.getDateExpiration(), aujourdhui), d.getNomFichier(),
-                plusRecentParType.get(d.getType()) != d)).toList();
+                remplaceLe.containsKey(d.getId()), versions.getOrDefault(d.getId(), 0), remplaceLe.get(d.getId()),
+                horodatage(d))).toList();
         List<String> manquantes = !h.documents() ? List.of() : Arrays.stream(TypeDocumentAdministratif.values())
                 .filter(TypeDocumentAdministratif::isObligatoire)
                 .filter(t -> { var d = plusRecentParType.get(t.name());
                     return d == null || ValiditeDocument.de(d.getDateExpiration(), aujourdhui) == ValiditeDocument.EXPIRE; })
                 .map(TypeDocumentAdministratif::getLibelle).toList();
+        // Exemplaires signés déposés plusieurs fois pour un même contrat : versions numérotées.
+        var suffixes = new HashMap<Long, String>();
+        docsEmploye.stream().filter(d -> d.getContratId() != null).collect(Collectors.groupingBy(Document::getContratId))
+                .forEach((contratId, depots) -> {
+                    if (depots.size() < 2) return;
+                    var ordre = depots.stream().sorted(ORDRE_DEPOT).toList();
+                    for (int i = 0; i < ordre.size(); i++)
+                        suffixes.put(ordre.get(i).getId(), " — version " + (i + 1) + (i + 1 < ordre.size()
+                                ? ", remplacée le " + horodatage(ordre.get(i + 1)) : " (en vigueur)"));
+                });
         var autres = new ArrayList<LigneDocument>();
-        docsEmploye.stream().filter(d -> !administratifs.contains(d)).forEach(d -> autres.add(document(d)));
+        docsEmploye.stream().filter(d -> !administratifs.contains(d))
+                .forEach(d -> autres.add(document(d, suffixes.getOrDefault(d.getId(), ""))));
 
         // ----- Carrière -----
         var parcours = periodes.stream().map(a -> new LigneParcours(origine(a.getOrigine()), a.getPosteLibelle(),
@@ -301,6 +344,7 @@ public class FicheEmployeService {
                 .onboarding(onboarding.vue(dossier))
                 .contrats(lignesContrats)
                 .contratEnCours(lignesContrats.stream().filter(LigneContrat::isEnCours).findFirst().orElse(null))
+                .contratAVenir(lignesContrats.stream().filter(LigneContrat::isAVenir).findFirst().orElse(null))
                 .salaireActuel(salaireActuel).remunerations(lignesRemu)
                 .departs(h.depart() ? lignesDeparts : List.of())
                 .departEnCours(h.depart() ? lignesDeparts.stream().filter(LigneDepart::isEnCours).findFirst().orElse(null) : null)
@@ -345,8 +389,9 @@ public class FicheEmployeService {
             var type = TypeDocumentAdministratif.depuis(d.getType());
             var dossier = actifs.get(d.getDossierId());
             if (type == null || dossier == null || d.getContratId() != null || d.getDepartId() != null) continue;
-            boolean remplace = documents.findByDossierIdOrderByDateUploadDesc(d.getDossierId()).stream()
-                    .anyMatch(x -> d.getType().equals(x.getType()) && x.getDateUpload().isAfter(d.getDateUpload()));
+            boolean remplace = !type.isPlusieursExemplaires() && documents.findByDossierIdOrderByDateUploadDesc(d.getDossierId())
+                    .stream().anyMatch(x -> d.getType().equals(x.getType()) && x.getContratId() == null
+                            && x.getDepartId() == null && ORDRE_DEPOT.compare(x, d) > 0);
             if (remplace) continue;
             resultat.add(Map.of("dossierId", dossier.getId(), "nom", dossier.getPrenom() + " " + dossier.getNom(),
                     "document", type.getLibelle(), "expiration", date(d.getDateExpiration()),
@@ -355,15 +400,30 @@ public class FicheEmployeService {
         return resultat;
     }
 
-    private static LigneContrat contrat(Contrat c, List<Document> docs, boolean salaire) {
-        Long documentId = docs.stream().filter(d -> c.getId().equals(d.getContratId())).map(Document::getId).findFirst().orElse(null);
+    /** Ordre de dépôt des documents : date d'envoi puis identifiant (deux dépôts dans la même seconde). */
+    static final Comparator<Document> ORDRE_DEPOT = Comparator
+            .comparing(Document::getDateUpload, Comparator.nullsFirst(Comparator.naturalOrder()))
+            .thenComparing(Document::getId, Comparator.nullsFirst(Comparator.naturalOrder()));
+
+    private static LigneContrat contrat(Contrat c, List<Contrat> tous, List<Document> docs, boolean salaire) {
+        // Exemplaire signé en vigueur : le dernier déposé pour ce contrat.
+        Long documentId = docs.stream().filter(d -> c.getId().equals(d.getContratId())).max(ORDRE_DEPOT)
+                .map(Document::getId).orElse(null);
         boolean echu = c.getStatut() == StatutContrat.EN_COURS && c.getDateFinPrevue() != null
                 && c.getDateFinPrevue().isBefore(LocalDate.now());
+        String precedent = c.getContratPrecedentId() == null ? null : tous.stream()
+                .filter(p -> p.getId().equals(c.getContratPrecedentId())).findFirst()
+                .map(p -> "Renouvelle le " + p.getType().name() + " du " + date(p.getDateDebut())).orElse(null);
+        String suivant = tous.stream().filter(s -> c.getId().equals(s.getContratPrecedentId())
+                        && s.getStatut() != StatutContrat.ANNULE).findFirst()
+                .map(s -> "Remplacé par le " + s.getType().name() + " du " + date(s.getDateDebut())
+                        + (s.getStatut() == StatutContrat.A_VENIR ? " (à venir)" : "")).orElse(null);
         return new LigneContrat(c.getId(), c.getType().name(), c.getType().getLibelle(), date(c.getDateDebut()),
                 c.getDateFinPrevue() == null ? "—" : date(c.getDateFinPrevue()),
                 c.getDateFinEffective() == null ? null : date(c.getDateFinEffective()),
                 c.getStatut().name(), salaire ? (c.getSalaireBrut() == null ? "Non renseigné" : montant(c.getSalaireBrut())) : "Confidentiel",
-                c.getDateSignature() == null ? null : date(c.getDateSignature()), documentId, c.getMotifFin(), echu);
+                c.getDateSignature() == null ? null : date(c.getDateSignature()), documentId, c.getMotifFin(), echu,
+                precedent, suivant);
     }
 
     private static LigneDepart depart(Depart d, List<Document> docs) {
@@ -379,8 +439,17 @@ public class FicheEmployeService {
     }
 
     private static LigneDocument document(Document d) {
+        return document(d, "");
+    }
+
+    /** @param suffixe précision ajoutée au libellé (version d'un exemplaire signé...) */
+    private static LigneDocument document(Document d, String suffixe) {
         String libelle = d.getLibelle() != null && !d.getLibelle().isBlank() ? d.getLibelle() : d.getType();
-        return new LigneDocument(d.getId(), libelle, d.getNomFichier(), d.getDateUpload() == null ? "" : d.getDateUpload().format(JOUR));
+        return new LigneDocument(d.getId(), libelle + suffixe, d.getNomFichier(), d.getDateUpload() == null ? "" : d.getDateUpload().format(JOUR));
+    }
+
+    private static String horodatage(Document d) {
+        return d.getDateUpload() == null ? "date inconnue" : d.getDateUpload().format(HORODATAGE);
     }
 
     private static String situation(String code) {

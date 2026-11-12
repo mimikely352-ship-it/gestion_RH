@@ -1,17 +1,18 @@
 package com.sirh.commun.enums;
 
 /**
- * Checklist d'intégration d'un nouvel employé. Les tâches automatiques sont validées par
- * les données elles-mêmes (compte de connexion actif, contrat en cours signé) ;
- * les autres sont cochées par le responsable indiqué.
+ * Checklist d'intégration d'un nouvel employé (METIER.md, bloc 4). Les tâches automatiques sont
+ * validées par les données elles-mêmes (contrat d'embauche signé, compte de connexion actif) ;
+ * les autres sont cochées par leur responsable : RH, ou responsable du service (« Manager »).
  */
 public enum TacheOnboarding {
-    CONTRAT_SIGNE("Contrat signé", "RH", true),
-    COMPTE("Compte de connexion (login) créé", "Informatique", true),
-    BADGE("Badge d’accès remis", "Services généraux", false),
-    MATERIEL("Matériel de travail remis", "Informatique", false),
-    FORMATION("Formation d’accueil suivie", "Responsable du service", false),
-    INSCRIPTION_PAIE("Inscription à la paie", "Paie", false);
+    CONTRAT_SIGNE("Signature du contrat", "RH", true),
+    BADGE("Création du badge", "RH", false),
+    COMPTE("Création du compte informatique (login)", "Admin", true),
+    MATERIEL("Remise du matériel", "Manager", false),
+    FORMATION("Formation d’intégration", "Manager", false),
+    INSCRIPTION_PAIE("Inscription à la paie", "RH", false),
+    COMPTE_BANCAIRE("Ouverture du compte bancaire", "RH", false);
 
     private final String libelle;
     private final String responsable;
@@ -26,4 +27,6 @@ public enum TacheOnboarding {
     public String getLibelle() { return libelle; }
     public String getResponsable() { return responsable; }
     public boolean isAutomatique() { return automatique; }
+    /** Tâche confiée au responsable du service : le chef de service peut la cocher. */
+    public boolean isManager() { return "Manager".equals(responsable); }
 }

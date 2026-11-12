@@ -19,8 +19,9 @@
   <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/interface.css">
   <c:if test="${not empty pageCss}"><link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/${pageCss}"></c:if>
   <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css">
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/clarte.css">
 </head>
-<body>
+<body class="oria-interface">
 <a class="interface-evitement" href="#contenu-candidat">Aller au contenu principal</a>
 
 <header class="site-entete">
@@ -63,5 +64,6 @@
     <p class="texte-petit">© 2026 <c:out value="${nomApplication}" default="Oria RH"/> — Les talents font grandir les équipes.</p>
   </div>
 </footer>
+<script src="${pageContext.request.contextPath}/assets/js/interface.js" defer></script>
 </body>
 </html>

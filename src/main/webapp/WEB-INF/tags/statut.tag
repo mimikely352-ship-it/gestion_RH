@@ -22,12 +22,19 @@
   <c:when test="${v == 'REFUSEE'}"><c:set var="libelle" value="Non retenue après évaluation"/></c:when>
   <c:when test="${v == 'EMBAUCHE'}"><c:set var="libelle" value="Embauche finalisée"/></c:when>
   <c:when test="${v == 'EN_ATTENTE'}"><c:set var="libelle" value="En attente de décision"/></c:when>
+  <c:when test="${v == 'ATTENTE_MANAGER'}"><c:set var="libelle" value="Responsable"/></c:when>
+  <c:when test="${v == 'ATTENTE_RH'}"><c:set var="libelle" value="Validation RH"/></c:when>
+  <c:when test="${v == 'ATTENTE_MANAGER'}"><c:set var="libelle" value="Responsable"/></c:when>
+  <c:when test="${v == 'ATTENTE_RH'}"><c:set var="libelle" value="Validation RH"/></c:when>
   <c:when test="${v == 'ACCEPTE'}"><c:set var="libelle" value="Accepté"/></c:when>
   <c:when test="${v == 'REFUSE'}"><c:set var="libelle" value="Refusé"/></c:when>
   <c:when test="${v == 'REUSSI'}"><c:set var="libelle" value="Réussi"/></c:when>
   <c:when test="${v == 'ECHEC'}"><c:set var="libelle" value="Échec"/></c:when>
 </c:choose>
 <c:choose>
+  <c:when test="${v == 'ATTENTE_MANAGER' or v == 'ATTENTE_RH'}">
+    <span class="statut statut--attente"><c:out value="${libelle}"/></span>
+  </c:when>
   <c:when test="${fn:contains(v,'REFUS') or fn:contains(v,'REJET') or fn:contains(v,'ECHEC') or v == 'NON_RETENUE'}">
     <span class="statut statut--danger"><c:out value="${libelle}"/></span>
   </c:when>

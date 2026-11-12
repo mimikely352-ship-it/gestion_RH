@@ -45,6 +45,32 @@ public class DemandeService {
 
     @Transactional
     public Demande creer(Long auteurId, TypeDemande type, Long posteCibleId, String description) {
+        return creer(auteurId, type, posteCibleId, description, null, null, null, null, null);
+    }
+
+    /**
+     * @param budgetGlobal enveloppe salariale annuelle du besoin ; elle doit couvrir effectif × salaire × 12
+     *                     et plafonne ensuite les propositions d'embauche émises pour ce besoin.
+     */
+    @Transactional
+    public Demande creer(Long auteurId, TypeDemande type, Long posteCibleId, String description,
+            Integer effectif, java.math.BigDecimal salaireMensuel, java.math.BigDecimal budgetGlobal,
+            java.time.LocalDate dateSouhaitee, MotifBesoin motif) {
+        if (type == TypeDemande.RECRUTEMENT) {
+            if (posteCibleId == null || effectif == null || effectif < 1 || motif == null)
+                throw new BusinessException("Précisez le poste, l’effectif positif et le motif du besoin.");
+            if (!montantValide(salaireMensuel))
+                throw new BusinessException("Indiquez un salaire mensuel positif, avec deux décimales maximum.");
+            if (!montantValide(budgetGlobal))
+                throw new BusinessException("Indiquez un budget global de recrutement positif, avec deux décimales maximum.");
+            var coutAnnuel = salaireMensuel.multiply(java.math.BigDecimal.valueOf(12L * effectif));
+            if (budgetGlobal.compareTo(coutAnnuel) < 0)
+                throw new BusinessException("Le budget global (" + budgetGlobal.toPlainString()
+                        + " Ar) ne couvre pas le coût annuel prévu : " + effectif + " poste(s) × "
+                        + salaireMensuel.toPlainString() + " Ar × 12 mois = " + coutAnnuel.toPlainString() + " Ar.");
+            if (dateSouhaitee == null || dateSouhaitee.isBefore(java.time.LocalDate.now()))
+                throw new BusinessException("La date souhaitée doit être aujourd’hui ou ultérieure.");
+        }
         Utilisateur auteur = utilisateurRepository.verrouiller(auteurId)
                 .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable : " + auteurId));
         affectationAutomatique.completer(auteur);
@@ -90,6 +116,11 @@ public class DemandeService {
                 .description(description)
                 .statut(StatutDemande.SOUMISE)
                 .affectationOrigineId(origine)
+                .effectifDemande(type == TypeDemande.RECRUTEMENT ? effectif : null)
+                .salaireMensuelParPoste(type == TypeDemande.RECRUTEMENT ? salaireMensuel : null)
+                .budgetGlobalRecrutement(type == TypeDemande.RECRUTEMENT ? budgetGlobal : null)
+                .dateSouhaitee(type == TypeDemande.RECRUTEMENT ? dateSouhaitee : null)
+                .motifBesoin(type == TypeDemande.RECRUTEMENT ? motif : null)
                 .build();
         demande = demandeRepository.save(demande);
 
@@ -125,6 +156,9 @@ public class DemandeService {
         }
         verifierHabilitation(demande, valideur, etape);
         if (decision == null) throw new BusinessException("Précisez une décision.");
+        if (decision == DecisionValidation.REJETE && (commentaire == null || commentaire.isBlank()))
+            throw new BusinessException("Indiquez le motif du rejet.");
+        commentaire = commentaire == null || commentaire.isBlank() ? null : commentaire.trim();
         if (decision == DecisionValidation.VALIDE && (demande.getType() == TypeDemande.TRANSFERT || demande.getType() == TypeDemande.PROMOTION)) {
             utilisateurRepository.verrouiller(demande.getAuteur().getId()).orElseThrow(() -> new BusinessException("Compte introuvable."));
             var dossier = dossiers.findByUtilisateurId(demande.getAuteur().getId()).orElseThrow(() -> new BusinessException("Dossier employé manquant."));
@@ -158,7 +192,7 @@ public class DemandeService {
             demandeRepository.save(demande);
             notificationService.notifier(demande.getAuteur().getId(),
                     "Votre demande a été rejetée à l'étape " + etape + ".",
-                    TypeNotification.DEMANDE, "/employe/demandes");
+                    TypeNotification.DEMANDE, lienAuteur(demande));
             return demande;
         }
 
@@ -167,7 +201,7 @@ public class DemandeService {
             demande.setDateLimiteExecution(LocalDateTime.now().plusDays(delaiExecutionJoursDefaut));
             demandeRepository.save(demande);
             notificationService.notifier(demande.getAuteur().getId(), "Votre transfert a été accepté par les RH. Votre poste reste inchangé jusqu’à sa réalisation.",
-                    TypeNotification.DEMANDE, "/employe/demandes");
+                    TypeNotification.DEMANDE, lienAuteur(demande));
             return demande;
         }
         switch (etape) {
@@ -217,8 +251,13 @@ public class DemandeService {
         demande.setStatut(StatutDemande.EXECUTEE);
         demande = demandeRepository.save(demande);
         notificationService.notifier(demande.getAuteur().getId(),
-                "Votre demande a été exécutée.", TypeNotification.DEMANDE, "/employe/demandes");
+                "Votre demande a été exécutée.", TypeNotification.DEMANDE, lienAuteur(demande));
         return demande;
+    }
+
+    private String lienAuteur(Demande demande) {
+        return demande.getType() == TypeDemande.RECRUTEMENT && demande.getAuteur().getRole() == Role.CHEF_SERVICE
+                ? "/besoins" : "/employe/demandes";
     }
 
     public Demande obtenir(Long id) {
@@ -236,6 +275,10 @@ public class DemandeService {
 
     public List<Demande> listerPourExecutionRh() {
         return demandeRepository.aExecuterParRh();
+    }
+
+    private static boolean montantValide(java.math.BigDecimal m) {
+        return m != null && m.signum() > 0 && m.scale() <= 2 && m.precision() - m.scale() <= 17;
     }
 
     private static boolean transfertAExaminer(Demande d) {

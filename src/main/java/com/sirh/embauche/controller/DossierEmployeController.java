@@ -104,10 +104,23 @@ public class DossierEmployeController {
             @RequestParam(required = false) BigDecimal salaireBrut,
             @RequestParam(name = "fichier", required = false) MultipartFile fichier,
             Authentication compte, RedirectAttributes flash) {
-        return executer(dossierId, compte, flash, "Contrat enregistré. L’historique des contrats précédents est conservé.", "contrats",
+        return executer(dossierId, compte, flash, "Contrat enregistré. S’il commence plus tard, il reste « à venir » : "
+                        + "le contrat actuel s’applique jusqu’à la veille, puis la bascule est automatique.", "contrats",
                 ActionAudit.CONTRAT_AJOUTE, () -> {
                     var c = contrats.ajouter(dossierId, type, dateDebut, dateFinPrevue, salaireBrut, fichier, compte.getName());
-                    return c.getType() + " à partir du " + c.getDateDebut();
+                    return c.getType() + " à partir du " + c.getDateDebut()
+                            + (c.getStatut() == StatutContrat.A_VENIR ? " (à venir)" : "")
+                            + (c.getContratPrecedentId() == null ? "" : ", remplace le contrat n°" + c.getContratPrecedentId());
+                });
+    }
+
+    @PostMapping("/contrats/{contratId:\\d+}/annuler")
+    public String annulerContrat(@PathVariable Long dossierId, @PathVariable Long contratId,
+            Authentication compte, RedirectAttributes flash) {
+        return executer(dossierId, compte, flash, "Contrat à venir annulé : le contrat en cours reste applicable.", "contrats",
+                ActionAudit.CONTRAT_ANNULE, () -> {
+                    var c = contrats.annulerAVenir(dossierId, contratId, compte.getName());
+                    return c.getType() + " prévu à partir du " + c.getDateDebut();
                 });
     }
 

@@ -5,6 +5,7 @@
 <ui:layout title="${empty offreId ? 'Créer une offre' : 'Modifier le brouillon'}" activeMenu="offres">
   <div class="offre-assistant" data-etape-initiale="${empty etapeErreur ? 0 : etapeErreur}">
     <a class="offre-retour" href="${pageContext.request.contextPath}/rh/offres">Toutes les offres</a>
+    <c:if test="${besoinOrigine != null}"><section class="fiche fiche-corps"><h2>Besoin approuvé</h2><ui:besoin demande="${besoinOrigine}"/></section></c:if>
     <header class="assistant-entete"><h1>${empty offreId ? 'Créer une offre d’emploi' : 'Modifier le brouillon'}</h1><p>Renseignez le poste, rédigez l’annonce, puis vérifiez les informations avant publication.</p></header>
     <c:if test="${not empty erreur}"><div class="assistant-erreur-globale" role="alert" tabindex="-1"><c:out value="${erreur}"/></div></c:if>
     <c:set var="formulaireAction" value="/rh/offres"/>
@@ -88,10 +89,10 @@
         <ui:champ label="Date limite de candidature" name="dateLimite" type="date" value="${fn:escapeXml(saisie.dateLimite)}" erreur="${erreursChamps.dateLimite}" aide="Facultatif. Sans date limite, l’offre reste ouverte jusqu’à sa clôture."/>
         <div class="champ"><label class="champ-libelle" for="champ-piecesRequises">Documents complémentaires demandés (facultatif)</label>
           <textarea class="saisie" id="champ-piecesRequises" name="piecesRequises" rows="3" aria-describedby="aide-piecesRequises erreur-piecesRequises"><c:out value="${saisie.piecesRequises}"/></textarea>
-          <span class="champ-aide" id="aide-piecesRequises">Une pièce par ligne, 8 maximum, 100 caractères par libellé. Un PDF de 5 Mo maximum sera demandé au candidat pour chaque pièce.</span>
+          <span class="champ-aide" id="aide-piecesRequises">8 pièces, une par ligne. Libellé : 100 caractères. PDF : 5 Mo par pièce.</span>
           <span class="champ-erreur" id="erreur-piecesRequises"><c:out value="${erreursChamps.piecesRequises}"/></span>
         </div>
-        <p class="assistant-publication">Le brouillon reste privé. « Publier l’offre » rend l’annonce visible sur la page des offres et ouvre les candidatures.</p>
+        <p class="assistant-publication">Brouillon privé. Publication : candidatures ouvertes.</p>
       </section>
       <footer class="assistant-actions">
         <button type="button" class="btn btn-secondaire" data-retour>Retour</button>

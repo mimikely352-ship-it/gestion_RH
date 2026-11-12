@@ -44,16 +44,26 @@ public class EmployeDemandeController {
     @PostMapping
     public String creer(Authentication authentication, @RequestParam TypeDemande type,
                          @RequestParam(required = false) Long posteCibleId,
+                         @RequestParam(required = false) Integer effectifDemande,
+                         @RequestParam(required = false) java.math.BigDecimal salaireMensuelParPoste,
+                         @RequestParam(required = false) java.math.BigDecimal budgetGlobalRecrutement,
+                         @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate dateSouhaitee,
+                         @RequestParam(required = false) com.sirh.commun.enums.MotifBesoin motifBesoin,
                          @RequestParam String description, Model model) {
         try {
             Long auteurId = utilisateurConnecte(authentication).getId();
-            demandeService.creer(auteurId, type, posteCibleId, description);
+            demandeService.creer(auteurId, type, posteCibleId, description, effectifDemande, salaireMensuelParPoste, budgetGlobalRecrutement, dateSouhaitee, motifBesoin);
             return "redirect:/employe/demandes";
         } catch (BusinessException e) {
             preparerRattachement(authentication, model);
             model.addAttribute("typeChoisi", type);
             model.addAttribute("posteChoisi", posteCibleId);
             model.addAttribute("description", description);
+            model.addAttribute("effectifDemande", effectifDemande);
+            model.addAttribute("salaireMensuelParPoste", salaireMensuelParPoste);
+            model.addAttribute("budgetGlobalRecrutement", budgetGlobalRecrutement);
+            model.addAttribute("dateSouhaitee", dateSouhaitee);
+            model.addAttribute("motifBesoin", motifBesoin);
             model.addAttribute("erreur", e.getMessage());
             model.addAttribute("postes", posteRepository.findAll());
             model.addAttribute("types", TypeDemande.values());

@@ -1,5 +1,6 @@
 # Compilation, rapports, captures et profils de navigateur de test
 /build/
+/build-*/
 /.ivy-cache/
 /lib/
 

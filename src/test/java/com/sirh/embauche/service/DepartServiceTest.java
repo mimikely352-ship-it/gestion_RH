@@ -31,8 +31,9 @@ class DepartServiceTest {
     final AffectationRepository affectations = mock(AffectationRepository.class);
     final UtilisateurRepository utilisateurs = mock(UtilisateurRepository.class);
     final DocumentRepository documents = mock(DocumentRepository.class);
+    final ContratService contratService = mock(ContratService.class);
     final DepartService sut = new DepartService(departs, dossiers, contrats, affectations, utilisateurs, documents,
-            mock(DocumentEmployeService.class));
+            mock(DocumentEmployeService.class), contratService);
 
     final Utilisateur utilisateur = Utilisateur.builder().id(2L).email("e@test.local").actif(true).build();
     final DossierEmploye dossier = DossierEmploye.builder().id(1L).utilisateur(utilisateur).build();
@@ -83,6 +84,7 @@ class DepartServiceTest {
         assertEquals(StatutContrat.ROMPU, contrat.getStatut());
         assertEquals(effet, contrat.getDateFinEffective());
         assertTrue(contrat.getMotifFin().contains("Faute grave"));
+        verify(contratService).annulerContratAVenir(eq(1L), contains("Faute grave"));
         assertFalse(affectation.isActuelle());
         assertEquals(effet, affectation.getDateFin());
         assertFalse(utilisateur.isActif());

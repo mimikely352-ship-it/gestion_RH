@@ -109,7 +109,10 @@ public class DossierSalarieService {
                 .orElseThrow(() -> new ResourceNotFoundException("Employé introuvable : " + dossierId));
         if (!dossier.getUtilisateur().isActif()) throw new BusinessException("Cet employé a quitté l’entreprise.");
         var contrat = contrats.findFirstByDossierIdAndStatut(dossierId, StatutContrat.EN_COURS)
-                .orElseThrow(() -> new BusinessException("Enregistrez d’abord le contrat en cours de l’employé."));
+                .orElseThrow(() -> new BusinessException(contrats.findFirstByDossierIdAndStatut(dossierId, StatutContrat.A_VENIR)
+                        .map(c -> "Le contrat de l’employé commence le " + c.getDateDebut().format(JOUR)
+                                + " : la révision sera possible à partir de cette date.")
+                        .orElse("Enregistrez d’abord le contrat en cours de l’employé.")));
         if (dateEffet == null || salaireBrut == null) throw new BusinessException("Indiquez la date d’effet et le nouveau salaire.");
         if (salaireBrut.signum() < 0) throw new BusinessException("Le salaire ne peut pas être négatif.");
         if (texte(motif) == null) throw new BusinessException("Indiquez le motif de la révision (augmentation annuelle, promotion...).");

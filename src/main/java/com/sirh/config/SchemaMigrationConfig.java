@@ -25,7 +25,7 @@ public class SchemaMigrationConfig {
     @Bean InitializingBean schemaMigration(DataSource dataSource,
             org.springframework.core.env.Environment environnement) {
         return () -> {
-            if (!environnement.getProperty("app.schema-migrations.enabled", Boolean.class, true)) return;
+            if (!environnement.getProperty("app.schema-migrations.enabled", Boolean.class, false)) return;
             try (var connexion = dataSource.getConnection()) {
                 connexion.setAutoCommit(false);
                 try {
@@ -33,7 +33,7 @@ public class SchemaMigrationConfig {
                         statement.execute("SELECT pg_advisory_xact_lock(904103)");
                         statement.execute("CREATE TABLE IF NOT EXISTS app_schema_migration(version VARCHAR(80) PRIMARY KEY, checksum VARCHAR(64) NOT NULL, appliquee_le TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)");
                     }
-                    for (var fichier : java.util.List.of("09_dates_parcours_employes.sql", "10_fiabilisation_metier.sql", "13_fix_candidature_version.sql", "14_rh_admin.sql", "16_contrats_onboarding_departs.sql", "17_dossier_salarie.sql")) {
+                    for (var fichier : java.util.List.of("09_dates_parcours_employes.sql", "10_fiabilisation_metier.sql", "13_fix_candidature_version.sql", "14_rh_admin.sql", "16_contrats_onboarding_departs.sql", "17_dossier_salarie.sql", "18_proposition_embauche.sql", "19_besoin_personnel.sql", "20_temps_conges_absences.sql", "21_budget_recrutement.sql", "22_embauche_contrats.sql", "23_conges_annulation.sql", "24_conges_commentaire_responsable.sql")) {
                         byte[] octets = new ClassPathResource("db/migration/" + fichier).getContentAsByteArray();
                         String somme = java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(octets));
                         try (var requete = connexion.prepareStatement("SELECT checksum FROM app_schema_migration WHERE version=?")) {

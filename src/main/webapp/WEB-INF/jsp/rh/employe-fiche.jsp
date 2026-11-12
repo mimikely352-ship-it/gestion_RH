@@ -15,8 +15,21 @@
     <div>
       <p class="texte-doux" style="margin:0;">Dossier salarié <strong><c:out value="${fiche.matricule}"/></strong></p>
       <h1><c:out value="${fiche.nomComplet}"/></h1>
-      <p class="texte-doux"><c:out value="${fiche.poste}"/> — <c:out value="${fiche.service}"/>
-        <c:if test="${fiche.contratEnCours != null}"> — <c:out value="${fiche.contratEnCours.type}"/></c:if></p>
+      <p class="texte-doux"><c:out value="${fiche.poste}"/> — <c:out value="${fiche.service}"/></p>
+      <ul class="rangee" aria-label="Résumé du dossier" style="list-style:none;padding:0;margin:0;gap:var(--e-4);flex-wrap:wrap;">
+        <li><a href="#contrats">Contrat :
+          <c:choose>
+            <c:when test="${fiche.contratEnCours != null}"><c:out value="${fiche.contratEnCours.type}"/><c:if test="${fiche.contratEnCours.finPrevue != '—'}"> jusqu’au <c:out value="${fiche.contratEnCours.finPrevue}"/></c:if></c:when>
+            <c:when test="${fiche.contratAVenir != null}"><c:out value="${fiche.contratAVenir.type}"/> à partir du <c:out value="${fiche.contratAVenir.debut}"/> (à venir)</c:when>
+            <c:otherwise>aucun</c:otherwise>
+          </c:choose></a>
+          <c:if test="${fiche.contratEnCours != null and fiche.contratEnCours.echu}"> <span class="statut statut--danger">Échu</span></c:if>
+          <c:if test="${fiche.contratEnCours != null and fiche.contratAVenir != null}"> <span class="statut statut--neutre">Renouvellement prévu le <c:out value="${fiche.contratAVenir.debut}"/></span></c:if></li>
+        <li><a href="#onboarding">Intégration : <c:out value="${fiche.onboarding.faits}"/> / <c:out value="${fiche.onboarding.total}"/></a></li>
+        <c:if test="${h.documents and not empty fiche.piecesAdministrativesManquantes}">
+          <li><a href="#documents"><span class="statut statut--attente">${fn:length(fiche.piecesAdministrativesManquantes)} pièce(s) obligatoire(s) manquante(s)</span></a></li>
+        </c:if>
+      </ul>
     </div>
     <c:choose>
       <c:when test="${fiche.actif and fiche.departEnCours != null}"><span class="statut statut--attente">Départ en cours</span></c:when>
@@ -26,7 +39,7 @@
   </div>
   <c:if test="${not rh}">
     <ui:alerte type="info">Consultation en lecture seule.
-      <c:if test="${not h.donneesPersonnelles}"> Votre habilitation donne accès à la situation professionnelle uniquement : données personnelles, rémunération et documents sont confidentiels.</c:if>
+      <c:if test="${not h.donneesPersonnelles}">Accès professionnel uniquement. Données personnelles confidentielles.</c:if>
       Chaque consultation est enregistrée dans le journal d’audit du dossier.</ui:alerte>
   </c:if>
   <c:if test="${not empty message}"><ui:alerte type="succes"><c:out value="${message}"/></ui:alerte></c:if>
@@ -110,9 +123,10 @@
         <div><dt>Service</dt><dd><c:out value="${fiche.service}"/></dd></div>
         <div><dt>Contrat en cours</dt><dd>
           <c:choose>
-            <c:when test="${fiche.contratEnCours != null}"><c:out value="${fiche.contratEnCours.libelleType}"/> depuis le <c:out value="${fiche.contratEnCours.debut}"/></c:when>
+            <c:when test="${fiche.contratEnCours != null}"><c:out value="${fiche.contratEnCours.libelleType}"/> depuis le <c:out value="${fiche.contratEnCours.debut}"/><c:if test="${fiche.contratEnCours.finPrevue != '—'}">, fin prévue le <c:out value="${fiche.contratEnCours.finPrevue}"/></c:if></c:when>
             <c:otherwise>Aucun</c:otherwise>
           </c:choose>
+          <c:if test="${fiche.contratAVenir != null}"><br><small class="texte-doux">À venir : <c:out value="${fiche.contratAVenir.libelleType}"/> à partir du <c:out value="${fiche.contratAVenir.debut}"/></small></c:if>
         </dd></div>
         <c:if test="${h.salaire}"><div><dt>Salaire en vigueur</dt><dd><c:out value="${empty fiche.salaireActuel ? 'Non renseigné' : fiche.salaireActuel}"/></dd></div></c:if>
         <div><dt>Date d’entrée</dt><dd><c:out value="${fiche.dateEntree}"/></dd></div>
@@ -131,9 +145,10 @@
   </div>
 
   <%-- ================= CONTRATS ================= --%>
-  <div class="fiche" id="contrats" style="margin-top:var(--e-6);"><div class="fiche-corps">
-    <h2>Contrats</h2>
-    <p class="texte-doux">Chaque nouveau contrat (renouvellement de CDD, passage en CDI...) clôt le précédent sans l’effacer.</p>
+  <details class="fiche lecture-section" id="contrats" style="margin-top:var(--e-6);"><summary>Contrats</summary><div class="fiche-corps">
+
+    <p class="texte-doux">Chaque nouveau contrat (renouvellement de CDD, passage en CDI...) remplace le précédent sans l’effacer.
+      Un contrat qui commence plus tard reste « à venir » : le contrat actuel s’applique jusqu’à la veille, puis la bascule est automatique.</p>
     <c:if test="${fiche.contratEnCours != null and fiche.contratEnCours.echu}">
       <ui:alerte type="alerte">Le contrat en cours devait se terminer le <c:out value="${fiche.contratEnCours.finPrevue}"/> : renouvelez-le, passez à un autre contrat ou ouvrez un dossier de départ.</ui:alerte>
     </c:if>
@@ -143,19 +158,29 @@
         <thead><tr><th scope="col">Type</th><th scope="col">Début</th><th scope="col">Fin prévue</th><th scope="col">Fin effective</th>
           <th scope="col">Statut</th><c:if test="${h.salaire}"><th scope="col">Salaire initial</th></c:if><c:if test="${h.documents}"><th scope="col">Exemplaire signé</th></c:if></tr></thead>
         <tbody><c:forEach var="k" items="${fiche.contrats}"><tr>
-          <td><strong><c:out value="${k.type}"/></strong><br><small class="texte-doux"><c:out value="${k.libelleType}"/></small></td>
+          <td><strong><c:out value="${k.type}"/></strong><br><small class="texte-doux"><c:out value="${k.libelleType}"/></small>
+            <c:if test="${not empty k.precedent}"><br><small class="texte-doux"><c:out value="${k.precedent}"/></small></c:if>
+            <c:if test="${not empty k.suivant}"><br><small class="texte-doux"><c:out value="${k.suivant}"/></small></c:if></td>
           <td><c:out value="${k.debut}"/></td><td><c:out value="${k.finPrevue}"/></td>
           <td><c:out value="${empty k.finEffective ? '—' : k.finEffective}"/>
             <c:if test="${not empty k.motifFin}"><br><small class="texte-doux"><c:out value="${k.motifFin}"/></small></c:if></td>
           <td><c:choose>
             <c:when test="${k.statut == 'EN_COURS'}"><span class="statut statut--succes">En cours</span></c:when>
+            <c:when test="${k.statut == 'A_VENIR'}"><span class="statut statut--attente">À venir</span></c:when>
             <c:when test="${k.statut == 'ROMPU'}"><span class="statut statut--danger">Rompu</span></c:when>
+            <c:when test="${k.statut == 'ANNULE'}"><span class="statut statut--neutre">Annulé</span></c:when>
             <c:otherwise><span class="statut statut--neutre">Terminé</span></c:otherwise>
-          </c:choose></td>
+          </c:choose>
+            <c:if test="${rh and fiche.actif and k.statut == 'A_VENIR'}">
+              <ui:formulaire action="/rh/employes/${fiche.dossierId}/contrats/${k.id}/annuler">
+                <ui:bouton label="Annuler ce contrat à venir" type="submit" style="btn-secondaire btn-petit"/>
+              </ui:formulaire>
+            </c:if></td>
           <c:if test="${h.salaire}"><td><c:out value="${k.salaire}"/></td></c:if>
           <c:if test="${h.documents}"><td>
             <c:choose>
               <c:when test="${k.documentId != null}"><a href="${pageContext.request.contextPath}/documents/${k.documentId}/telecharger" target="_blank" rel="noopener">Signé le <c:out value="${k.signeLe}"/></a></c:when>
+              <c:when test="${k.statut == 'ANNULE'}">—</c:when>
               <c:when test="${rh}">
                 <ui:formulaire action="/rh/employes/${fiche.dossierId}/contrats/${k.id}/signature" enctype="multipart/form-data">
                   <label for="signe-${k.id}" class="champ-aide">Non signé — déposer le PDF signé</label>
@@ -169,7 +194,11 @@
         </tr></c:forEach></tbody>
       </table></div>
     </c:if>
-    <c:if test="${rh and fiche.actif}">
+    <c:if test="${rh and fiche.actif and fiche.contratAVenir != null}">
+      <p class="texte-doux" style="margin-top:var(--e-4);">Un contrat <c:out value="${fiche.contratAVenir.type}"/> est déjà prévu à partir du
+        <c:out value="${fiche.contratAVenir.debut}"/> : annulez-le pour en saisir un autre.</p>
+    </c:if>
+    <c:if test="${rh and fiche.actif and fiche.contratAVenir == null}">
       <details style="margin-top:var(--e-4);" ${empty fiche.contrats ? 'open' : ''}>
         <summary>${empty fiche.contrats ? 'Enregistrer le contrat de l’employé' : 'Nouveau contrat (renouvellement, passage en CDI...)'}</summary>
         <ui:formulaire action="/rh/employes/${fiche.dossierId}/contrats" enctype="multipart/form-data">
@@ -192,12 +221,12 @@
         </ui:formulaire>
       </details>
     </c:if>
-  </div></div>
+  </div></details>
 
   <%-- ================= RÉMUNÉRATION ================= --%>
   <c:if test="${h.salaire}">
-    <div class="fiche" id="remuneration" style="margin-top:var(--e-6);"><div class="fiche-corps">
-      <h2>Rémunération</h2>
+    <details class="fiche lecture-section" id="remuneration" style="margin-top:var(--e-6);"><summary>Rémunération</summary><div class="fiche-corps">
+
       <p class="texte-doux">Confidentiel. Chaque révision ajoute une ligne ; les montants précédents ne sont jamais modifiés.</p>
       <c:if test="${empty fiche.remunerations}"><p>Aucune rémunération enregistrée.</p></c:if>
       <c:if test="${not empty fiche.remunerations}">
@@ -224,13 +253,13 @@
           </ui:formulaire>
         </details>
       </c:if>
-    </div></div>
+    </div></details>
   </c:if>
 
   <%-- ================= DOCUMENTS ADMINISTRATIFS ================= --%>
   <c:if test="${h.documents}">
-    <div class="fiche" id="documents" style="margin-top:var(--e-6);"><div class="fiche-corps">
-      <h2>Documents administratifs</h2>
+    <details class="fiche lecture-section" id="documents" style="margin-top:var(--e-6);"><summary>Documents administratifs</summary><div class="fiche-corps">
+
       <c:if test="${not empty fiche.piecesAdministrativesManquantes}">
         <ui:alerte type="alerte">Dossier incomplet — pièces obligatoires manquantes ou expirées :
           <c:forEach var="m" items="${fiche.piecesAdministrativesManquantes}" varStatus="st"><c:out value="${m}"/><c:if test="${not st.last}">, </c:if></c:forEach>.</ui:alerte>
@@ -238,18 +267,20 @@
       <c:if test="${empty fiche.documentsAdministratifs}"><p>Aucun document administratif déposé.</p></c:if>
       <c:if test="${not empty fiche.documentsAdministratifs}">
         <div style="overflow-x:auto"><table class="tableau">
-          <thead><tr><th scope="col">Document</th><th scope="col">Numéro</th><th scope="col">Émis le</th><th scope="col">Expire le</th><th scope="col">Validité</th><th scope="col">Fichier</th></tr></thead>
+          <thead><tr><th scope="col">Document</th><th scope="col">Numéro</th><th scope="col">Émis le</th><th scope="col">Expire le</th><th scope="col">Validité</th><th scope="col">Fichier</th><th scope="col">Déposé le</th></tr></thead>
           <tbody><c:forEach var="a" items="${fiche.documentsAdministratifs}"><tr>
-            <td><c:out value="${a.libelle}"/></td><td><c:out value="${empty a.numero ? '—' : a.numero}"/></td>
+            <td><c:out value="${a.libelle}"/><c:if test="${a.version > 0}"> <small class="texte-doux">(version <c:out value="${a.version}"/>)</small></c:if></td>
+            <td><c:out value="${empty a.numero ? '—' : a.numero}"/></td>
             <td><c:out value="${a.emission}"/></td><td><c:out value="${a.expiration}"/></td>
             <td><c:choose>
-              <c:when test="${a.remplace}"><span class="statut statut--neutre">Remplacé</span></c:when>
+              <c:when test="${a.remplace}"><span class="statut statut--neutre">Remplacé</span><br><small class="texte-doux">le <c:out value="${a.remplaceLe}"/></small></c:when>
               <c:when test="${a.validite == 'EXPIRE'}"><span class="statut statut--danger">Expiré</span></c:when>
               <c:when test="${a.validite == 'A_RENOUVELER'}"><span class="statut statut--attente">À renouveler</span></c:when>
               <c:when test="${a.validite == 'VALIDE'}"><span class="statut statut--succes">Valide</span></c:when>
               <c:otherwise><span class="statut statut--neutre">Sans échéance</span></c:otherwise>
             </c:choose></td>
             <td><a href="${pageContext.request.contextPath}/documents/${a.id}/telecharger" target="_blank" rel="noopener"><c:out value="${a.nomFichier}"/></a></td>
+            <td><small class="texte-doux"><c:out value="${a.depose}"/></small></td>
           </tr></c:forEach></tbody>
         </table></div>
       </c:if>
@@ -264,7 +295,7 @@
               <div><label for="doc-num">Numéro (facultatif)</label><input class="saisie" id="doc-num" name="numero" maxlength="60"></div>
               <div><label for="doc-emis">Date d’émission</label><input class="saisie" id="doc-emis" type="date" name="dateEmission" max="${aujourdhui}"></div>
               <div><label for="doc-exp">Date d’expiration</label><input class="saisie" id="doc-exp" type="date" name="dateExpiration" aria-describedby="aide-doc-exp">
-                <small id="aide-doc-exp" class="champ-aide">Calculée depuis l’émission si la durée de validité est connue ; à saisir sinon (permis, passeport).</small></div>
+                <small id="aide-doc-exp" class="champ-aide">Calcul automatique si possible ; sinon, indiquez la date.</small></div>
             </div>
             <label for="doc-fichier">Fichier PDF</label>
             <input class="saisie" id="doc-fichier" type="file" name="fichier" accept="application/pdf" required>
@@ -279,13 +310,13 @@
             — <c:out value="${doc.nomFichier}"/> <small class="texte-doux"><c:out value="${doc.date}"/></small></li>
         </c:forEach></ul>
       </c:if>
-    </div></div>
+    </div></details>
   </c:if>
 
   <%-- ================= ONBOARDING ================= --%>
-  <div class="fiche" id="onboarding" style="margin-top:var(--e-6);"><div class="fiche-corps">
+  <div class="fiche" id="onboarding" data-sommaire="Intégration" style="margin-top:var(--e-6);"><div class="fiche-corps">
     <div class="rangee" style="justify-content:space-between;">
-      <h2>Intégration (onboarding)</h2>
+      <h2>Intégration</h2>
       <c:choose>
         <c:when test="${fiche.onboarding.termine}"><span class="statut statut--succes">Terminé<c:if test="${not empty fiche.onboarding.termineLe}"> le <c:out value="${fiche.onboarding.termineLe}"/></c:if></span></c:when>
         <c:otherwise><span class="statut statut--attente">En cours — <c:out value="${fiche.onboarding.faits}"/> / <c:out value="${fiche.onboarding.total}"/></span></c:otherwise>
@@ -295,27 +326,31 @@
          style="height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden;margin:var(--e-3) 0 var(--e-4);">
       <span style="display:block;height:100%;width:${fiche.onboarding.pourcentage}%;background:var(--vert);"></span>
     </div>
-    <ui:formulaire action="/rh/employes/${fiche.dossierId}/onboarding">
+    <c:if test="${peutCocherManager}">
+      <p class="texte-doux">En tant que responsable du service, vous cochez les tâches qui vous sont confiées (matériel, formation d’intégration).</p>
+    </c:if>
+    <ui:formulaire action="${rh ? '/rh/employes/' : '/dossiers/'}${fiche.dossierId}/onboarding">
       <div style="overflow-x:auto"><table class="tableau">
         <thead><tr><th scope="col">Fait</th><th scope="col">Tâche</th><th scope="col">Responsable</th><th scope="col">Suivi</th></tr></thead>
         <tbody><c:forEach var="e" items="${fiche.onboarding.etapes}"><tr>
+          <c:set var="modifiable" value="${fiche.actif and not e.automatique and (rh or (peutCocherManager and e.manager))}"/>
           <td><input type="checkbox" id="tache-${e.code}" aria-label="${e.libelle}"
                      <c:if test="${not e.automatique}">name="taches" value="${e.code}"</c:if>
-                     ${e.fait ? 'checked' : ''} ${e.automatique or not fiche.actif or not rh ? 'disabled' : ''}></td>
+                     ${e.fait ? 'checked' : ''} ${modifiable ? '' : 'disabled'}></td>
           <td><label for="tache-${e.code}"><c:out value="${e.libelle}"/></label>
             <c:if test="${e.automatique}"><br><em class="texte-doux">automatique</em></c:if></td>
           <td><c:out value="${e.responsable}"/></td>
           <td><small class="texte-doux"><c:out value="${empty e.detail ? 'À faire' : e.detail}"/></small></td>
         </tr></c:forEach></tbody>
       </table></div>
-      <c:if test="${rh and fiche.actif}"><ui:bouton label="Enregistrer la checklist" type="submit" style="btn-principal"/></c:if>
+      <c:if test="${(rh or peutCocherManager) and fiche.actif}"><ui:bouton label="Enregistrer la checklist" type="submit" style="btn-principal"/></c:if>
     </ui:formulaire>
   </div></div>
 
   <%-- ================= DÉPART ================= --%>
   <c:if test="${h.depart}">
-  <div class="fiche" id="depart" style="margin-top:var(--e-6);"><div class="fiche-corps">
-    <h2>Départ : démission ou renvoi</h2>
+  <details class="fiche lecture-section" id="depart" style="margin-top:var(--e-6);" ${fiche.departEnCours != null ? 'open' : ''}><summary>Départ</summary><div class="fiche-corps">
+
     <c:set var="d" value="${fiche.departEnCours}"/>
     <c:choose>
       <c:when test="${d != null}">
@@ -360,7 +395,7 @@
             <c:when test="${not d.effetAtteint}"><p class="texte-doux">La clôture sera possible à partir du <c:out value="${d.dateEffet}"/>.</p></c:when>
             <c:otherwise><p class="texte-doux">Déposez d’abord les pièces obligatoires manquantes.</p></c:otherwise>
           </c:choose>
-          <p class="texte-doux">La clôture rompt le contrat en cours, termine l’affectation et désactive le compte de connexion de l’employé.</p>
+          <p class="texte-doux">Clôture : fin du contrat et de l’affectation, compte désactivé.</p>
           <div class="rangee">
             <ui:formulaire action="/rh/employes/${fiche.dossierId}/departs/${d.id}/cloturer" cssClass="rangee">
               <ui:bouton label="Clôturer le départ" type="submit" style="btn-refuser"/>
@@ -372,7 +407,7 @@
         </c:if>
       </c:when>
       <c:when test="${rh and fiche.actif}">
-        <p class="texte-doux">Ouvrez un dossier de départ ; les pièces à réunir dépendent du type choisi.</p>
+        <p class="texte-doux">Choisissez le type de départ.</p>
         <details>
           <summary>Ouvrir un dossier de démission ou de renvoi</summary>
           <ui:formulaire action="/rh/employes/${fiche.dossierId}/departs">
@@ -412,12 +447,12 @@
         </c:forEach></c:forEach></ul>
       </c:if>
     </c:forEach>
-  </div></div>
+  </div></details>
   </c:if>
 
   <%-- ================= CARRIÈRE ================= --%>
-  <div class="fiche" style="margin-top:var(--e-6);"><div class="fiche-corps">
-    <h2>Historique de carrière (affectations)</h2>
+  <details class="fiche lecture-section" id="parcours" style="margin-top:var(--e-6);"><summary>Parcours</summary><div class="fiche-corps">
+
     <c:if test="${empty fiche.parcours}"><p class="texte-doux">Aucune affectation enregistrée.</p></c:if>
     <c:if test="${not empty fiche.parcours}">
       <div style="overflow-x:auto"><table class="tableau">
@@ -455,14 +490,14 @@
       <li><strong><c:out value="${x.intitule}"/></strong> — <c:out value="${x.entreprise}"/> (<c:out value="${x.periode}"/>)
         <c:if test="${not empty x.description}"><br><small class="texte-doux"><c:out value="${x.description}"/></small></c:if></li>
     </c:forEach></ul>
-  </div></div>
+  </div></details>
 
   <c:if test="${rh and fiche.actif}">
-    <div class="fiche" style="margin-top:var(--e-6);"><div class="fiche-corps">
-      <h2>Autres actions RH</h2>
+    <details class="fiche lecture-section" id="actions-rh" style="margin-top:var(--e-6);"><summary>Actions RH</summary><div class="fiche-corps">
+
       <div class="grille-2">
         <ui:formulaire action="/rh/employes/date-entree">
-          <h3>Renseigner ou corriger la date d’entrée</h3>
+          <h3>Corriger la date d’entrée</h3>
           <input type="hidden" name="dossierId" value="${fiche.dossierId}">
           <input type="hidden" name="depuisFiche" value="true">
           <label for="entree-fiche">Date réelle d’entrée</label>
@@ -477,14 +512,14 @@
           <ui:bouton label="Appliquer la promotion" type="submit" style="btn-principal"/>
         </ui:formulaire>
       </div>
-    </div></div>
+    </div></details>
   </c:if>
 
   <%-- ================= JOURNAL D'AUDIT ================= --%>
   <c:if test="${h.audit}">
-    <div class="fiche" id="audit" style="margin-top:var(--e-6);"><div class="fiche-corps">
-      <h2>Journal d’audit</h2>
-      <p class="texte-doux">Consultations et modifications du dossier (100 dernières). Le journal ne peut pas être modifié depuis l’application.</p>
+    <details class="fiche lecture-section" id="audit" style="margin-top:var(--e-6);"><summary>Journal d’audit</summary><div class="fiche-corps">
+
+      <p class="texte-doux">100 dernières actions. Journal en lecture seule.</p>
       <c:if test="${empty fiche.audit}"><p>Aucune entrée.</p></c:if>
       <c:if test="${not empty fiche.audit}">
         <div style="overflow-x:auto"><table class="tableau">
@@ -496,6 +531,6 @@
           </tr></c:forEach></tbody>
         </table></div>
       </c:if>
-    </div></div>
+    </div></details>
   </c:if>
 </ui:layout>

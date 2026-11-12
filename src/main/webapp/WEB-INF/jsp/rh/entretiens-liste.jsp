@@ -5,7 +5,7 @@
   <div class="offre-espace">
     <header class="offre-entete"><div><h1>Entretiens</h1><p class="offre-metier">Retrouvez les rendez-vous et les décisions liées aux candidatures.</p></div><ui:bouton label="Consulter les candidatures" href="/rh/candidatures" style="btn-secondaire"/></header>
     <section class="offre-carte">
-      <c:choose><c:when test="${empty entretiens}"><div class="offre-etat-vide"><h2>Aucun entretien planifié</h2><p>Ouvrez un dossier, retenez le candidat pour entretien, puis renseignez la date et le lieu depuis sa candidature.</p><ui:bouton label="Choisir une candidature" href="/rh/candidatures" style="btn-principal"/></div></c:when><c:otherwise>
+      <c:choose><c:when test="${empty entretiens}"><div class="offre-etat-vide"><h2>Aucun entretien planifié</h2><p>Planifiez les entretiens depuis les candidatures.</p><ui:bouton label="Choisir une candidature" href="/rh/candidatures" style="btn-principal"/></div></c:when><c:otherwise>
         <div class="champ rh-recherche"><label class="champ-libelle" for="recherche-entretiens">Rechercher un candidat, une offre ou un lieu</label><input class="saisie" type="search" id="recherche-entretiens" data-recherche-liste="entretiens"/></div>
         <p class="offre-texte-secondaire" data-resultats="entretiens" role="status">${entretiens.size()} entretien(s)</p>
         <div class="offre-table-scroll" role="region" aria-label="Liste des entretiens" tabindex="0"><table class="offre-table">

@@ -3,7 +3,7 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <ui:layout title="Demandes" activeMenu="demandes">
   <h1>Demandes à valider</h1>
-  <p>Les transferts vous sont adressés directement. Votre acceptation suffit pour autoriser leur réalisation, sans validation du chef, de la direction ou du DG.</p>
+  <p>Validez les transferts avant leur exécution.</p>
   <c:choose>
     <c:when test="${empty aValider}"><div class="vide"><p>Aucune demande en attente de validation RH.</p></div></c:when>
     <c:otherwise>
@@ -12,6 +12,7 @@
           <div class="fiche"><div class="fiche-corps">
             <h3><c:out value="${d.type}"/> — <c:out value="${d.auteurEmail}"/></h3>
             <p class="texte-doux"><c:out value="${d.description}"/></p>
+            <ui:besoin demande="${d}"/>
             <c:if test="${d.affectationOrigine != null}"><p>Poste actuel : <strong><c:out value="${d.affectationOrigine.posteLibelle}"/></strong></p></c:if>
             <c:if test="${d.posteCible != null}"><p>Poste demandé : <strong><c:out value="${d.posteCible.intitule}"/></strong></p></c:if>
             <div class="rangee" style="margin-top:var(--e-3);">
@@ -25,7 +26,7 @@
               </ui:formulaire>
               <ui:formulaire action="/rh/demandes/${d.id}/valider" cssClass="rangee">
                 <input type="hidden" name="decision" value="REJETE"/>
-                <input type="text" class="saisie" name="commentaire" placeholder="Motif du rejet" style="width:220px;"/>
+                <input type="text" class="saisie" name="commentaire" placeholder="Motif du rejet" aria-label="Motif du rejet" required style="width:220px;"/>
                 <ui:bouton label="Rejeter" type="submit" style="btn-refuser btn-petit"/>
               </ui:formulaire>
             </div>
@@ -35,7 +36,7 @@
     </c:otherwise>
   </c:choose>
 
-  <h1 style="margin-top:var(--e-8);">Demandes à exécuter</h1>
+  <h2 style="margin-top:var(--e-8);">Demandes à exécuter</h2>
   <c:choose>
     <c:when test="${empty aExecuter}"><div class="vide"><p>Aucune demande validée en attente d'exécution.</p></div></c:when>
     <c:otherwise>
@@ -44,6 +45,7 @@
           <div class="fiche"><div class="fiche-corps">
             <h3><c:out value="${d.type}"/> — <c:out value="${d.auteurEmail}"/></h3>
             <p class="texte-doux"><c:out value="${d.description}"/></p>
+            <ui:besoin demande="${d}"/>
             <p class="texte-petit texte-doux">À exécuter avant le <c:out value="${d.dateLimiteExecution}"/></p>
             <ui:formulaire action="/rh/demandes/${d.id}/executer">
               <ui:bouton label="Marquer en cours d'exécution" type="submit" style="btn-principal btn-petit"/>
@@ -62,6 +64,7 @@
           <div class="fiche"><div class="fiche-corps">
             <h3><c:out value="${d.type}"/> — <c:out value="${d.auteurEmail}"/></h3>
             <p><c:out value="${d.description}"/></p>
+            <ui:besoin demande="${d}"/>
             <c:if test="${d.posteCible != null}"><p>Poste demandé : <strong><c:out value="${d.posteCible.intitule}"/></strong></p></c:if>
             <ui:bouton label="Ouvrir et confirmer la réalisation" href="/rh/demandes/${d.id}" style="btn-principal"/>
           </div></div>

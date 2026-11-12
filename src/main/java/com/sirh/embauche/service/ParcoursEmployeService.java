@@ -24,14 +24,32 @@ public class ParcoursEmployeService {
     private final PosteRepository postes;
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     * Crée le dossier salarié (matricule attribué par la base) et l'affectation au poste de l'offre.
+     * L'identité et les coordonnées saisies par le candidat sont reprises ; un numéro de CIN déjà
+     * enregistré dans un autre dossier n'est pas repris (à vérifier par les RH).
+     */
     @Transactional
-    public void embaucher(Candidature c, com.sirh.organisation.entity.Service service) {
-        var utilisateur = c.getCandidat().getUtilisateur();
+    public DossierEmploye embaucher(Candidature c, com.sirh.organisation.entity.Service service) {
+        var candidat = c.getCandidat();
+        var utilisateur = candidat.getUtilisateur();
         if (dossiers.findByUtilisateurId(utilisateur.getId()).isPresent())
             throw new BusinessException("Cet utilisateur possède déjà un dossier employé. Utilisez un mouvement interne.");
+        String cin = limiter(candidat.getCin(), 30);
+        if (cin != null && dossiers.existsByCin(cin)) cin = null;
         var dossier = dossiers.save(DossierEmploye.builder().utilisateur(utilisateur)
-                .nom(c.getCandidat().getNom()).prenom(c.getCandidat().getPrenom()).dateEntree(c.getDateEntree()).build());
+                .nom(candidat.getNom()).prenom(candidat.getPrenom()).dateEntree(c.getDateEntree())
+                .telephone(limiter(candidat.getTelephone(), 30)).dateNaissance(candidat.getDateNaissance())
+                .lieuNaissance(limiter(candidat.getLieuNaissance(), 150)).cin(cin)
+                .adresse(limiter(candidat.getAdresse(), 255)).build());
         enregistrer(dossier, c.getOffre().getPoste(), service, c.getDateEntree(), "EMBAUCHE", c.getId());
+        return dossier;
+    }
+
+    private static String limiter(String valeur, int longueur) {
+        if (valeur == null || valeur.isBlank()) return null;
+        var v = valeur.trim();
+        return v.length() > longueur ? v.substring(0, longueur) : v;
     }
 
     @Transactional

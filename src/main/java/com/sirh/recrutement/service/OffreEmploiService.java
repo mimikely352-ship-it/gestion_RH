@@ -30,12 +30,33 @@ public class OffreEmploiService {
     private final DiplomeRepository diplomeRepository;
     private final DemandeService demandeService;
 
+    /** Offres ouvertes : une offre dont la date limite est passée n'est plus proposée, même avant sa clôture planifiée. */
     public List<OffreEmploi> listerPubliees() {
-        return offreEmploiRepository.findByStatut(StatutOffre.PUBLIEE);
+        var aujourdHui = LocalDate.now();
+        return offreEmploiRepository.findByStatut(StatutOffre.PUBLIEE).stream()
+                .filter(o -> o.getDateLimite() == null || !o.getDateLimite().isBefore(aujourdHui))
+                .toList();
+    }
+
+    /** Clôture les offres publiées dont la date limite (incluse) est dépassée ; renvoie les offres clôturées. */
+    @Transactional
+    public List<OffreEmploi> cloturerOffresExpirees() {
+        var expirees = offreEmploiRepository.findByStatutAndDateLimiteBefore(StatutOffre.PUBLIEE, LocalDate.now());
+        expirees.forEach(o -> o.setStatut(StatutOffre.CLOTUREE));
+        return offreEmploiRepository.saveAll(expirees);
     }
 
     public List<OffreEmploi> listerToutes() {
         return offreEmploiRepository.findAll();
+    }
+
+    public Demande obtenirBesoinValide(Long id) {
+        var demande = demandeService.obtenir(id);
+        if (demande.getType() != com.sirh.commun.enums.TypeDemande.RECRUTEMENT
+                || (demande.getStatut() != com.sirh.commun.enums.StatutDemande.VALIDEE_DG
+                && demande.getStatut() != com.sirh.commun.enums.StatutDemande.EN_EXECUTION))
+            throw new BusinessException("Ce besoin n’est pas approuvé ou a déjà été exécuté.");
+        return demande;
     }
 
     public OffreEmploi obtenir(Long id) {
@@ -80,11 +101,13 @@ public class OffreEmploiService {
         Set<Long> idsDiplomes = normaliserDiplomes(diplomeIds);
         Set<Diplome> diplomes = new HashSet<>(diplomeRepository.findAllById(idsDiplomes));
         if (diplomes.size() != idsDiplomes.size()) throw new BusinessException("Un diplôme sélectionné n'existe plus.");
-        Demande demandeOrigine = demandeOrigineId == null ? null : demandeService.obtenir(demandeOrigineId);
-        if (demandeOrigine != null && (demandeOrigine.getType() != com.sirh.commun.enums.TypeDemande.RECRUTEMENT
-                || (demandeOrigine.getStatut() != com.sirh.commun.enums.StatutDemande.VALIDEE_DG
-                && demandeOrigine.getStatut() != com.sirh.commun.enums.StatutDemande.EN_EXECUTION)))
-            throw new BusinessException("L’offre doit provenir d’une demande de recrutement approuvée et non encore exécutée.");
+        Demande demandeOrigine = demandeOrigineId == null ? null : obtenirBesoinValide(demandeOrigineId);
+        if (demandeOrigine != null && demandeOrigine.getEffectifDemande() != null) {
+            if (nbPostes != demandeOrigine.getEffectifDemande())
+                throw new BusinessException("Le nombre de postes doit correspondre à l’effectif approuvé.");
+            if (demandeOrigine.getPosteCible() == null || !posteId.equals(demandeOrigine.getPosteCible().getId()))
+                throw new BusinessException("Le poste doit correspondre au besoin approuvé.");
+        }
         OffreEmploi offre = OffreEmploi.builder()
                 .poste(poste)
                 .demandeOrigine(demandeOrigine)
@@ -126,6 +149,9 @@ public class OffreEmploiService {
             Integer experienceMinMois, LocalDate dateLimite, Set<Long> diplomeIds) {
         OffreEmploi offre = obtenir(id);
         verifierBrouillon(offre);
+        if (offre.getDemandeOrigine() != null && offre.getDemandeOrigine().getEffectifDemande() != null
+                && nbPostes != offre.getDemandeOrigine().getEffectifDemande())
+            throw new BusinessException("Le nombre de postes doit correspondre à l’effectif approuvé.");
         titre = titre == null || titre.isBlank() ? offre.getPosteIntitule() : titre.trim();
         if (titre.length() > 150) throw new BusinessException("Le titre est limité à 150 caractères.");
         if (description == null || description.isBlank()) throw new BusinessException("Décrivez les missions du poste.");

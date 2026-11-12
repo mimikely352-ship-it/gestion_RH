@@ -59,6 +59,16 @@ public class AuthService {
         poserCookie(response,jwtService.generer(utilisateur.getId(),utilisateur.getEmail(),utilisateur.getRole().name()));
     }
 
+    /**
+     * Après un changement de rôle validé (embauche à l'acceptation de la proposition), remplace le jeton de
+     * session : l'ancien jeton, émis pour le rôle candidat, n'est plus accepté par le filtre JWT.
+     */
+    public void renouvelerSession(HttpServletResponse response, com.sirh.utilisateur.entity.Utilisateur utilisateur) {
+        if (utilisateur == null || utilisateur.getId() == null || !utilisateur.isActif())
+            throw new IllegalArgumentException("Compte invalide.");
+        poserCookie(response, jwtService.generer(utilisateur.getId(), utilisateur.getEmail(), utilisateur.getRole().name()));
+    }
+
     public void supprimerCookie(HttpServletResponse response) {
         Cookie cookie = new Cookie(cookieName, "");
         cookie.setHttpOnly(true);

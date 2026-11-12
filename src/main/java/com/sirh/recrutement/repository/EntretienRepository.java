@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface EntretienRepository extends JpaRepository<Entretien, Long> {
     List<Entretien> findByCandidature_Id(Long candidatureId);
+    List<Entretien> findByCandidature_IdOrderByDateHeureAscIdAsc(Long candidatureId);
 }

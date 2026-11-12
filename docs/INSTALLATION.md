@@ -44,7 +44,11 @@ psql -U <utilisateur> -d sirh -f sql/02_seed.sql
 - `01_schema.sql` : création de toutes les tables.
 - `02_seed.sql` : référentiel diplômes + organisation de démonstration (direction, départements, services, sections, postes).
 
-Les **comptes de démonstration** (un par rôle) sont créés automatiquement au premier démarrage de l'application par `com.sirh.config.DataInitializer` (pas dans le SQL, car le mot de passe doit être haché par l'encodeur de l'application) :
+La création des **comptes de démonstration** est désactivée par défaut. Elle peut
+être activée explicitement dans une base de test avec
+`SIRH_DEMO_DATA_ENABLED=true` ; `com.sirh.config.DataInitializer` crée alors un
+compte par rôle. Les migrations sont également manuelles par défaut : consulter
+[la mise en service des blocs 1 à 7](VALIDATION_BLOCS_1_A_7.md) avant de démarrer.
 
 | Rôle | Email | Mot de passe |
 |---|---|---|

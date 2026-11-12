@@ -8,6 +8,7 @@
   <h1><c:out value="${demande.type}"/> — <c:out value="${demande.auteurEmail}"/></h1>
   <p class="texte-doux"><c:out value="${demande.description}"/></p>
   <ui:statut valeur="${demande.statut}"/>
+  <ui:besoin demande="${demande}"/>
   <c:if test="${demande.affectationOrigine != null}"><p>Poste avant le mouvement : <strong><c:out value="${demande.affectationOrigine.posteLibelle}"/></strong></p></c:if>
 
   <c:if test="${demande.posteCible != null}"><p>Poste demandé : <strong><c:out value="${demande.posteCible.intitule}"/></strong></p></c:if>
@@ -16,8 +17,8 @@
       <h3>Exécution</h3>
       <p class="texte-doux">
         <c:choose>
-          <c:when test="${demande.type == 'TRANSFERT' or demande.type == 'PROMOTION'}">Confirmez lorsque le changement de poste est effectif. Cette action met à jour le poste affiché dans l’effectif, le service et le parcours de l’employé.</c:when>
-          <c:otherwise>Confirmez lorsque la formation ou la prestation demandée a réellement été réalisée. Le poste de l’employé reste inchangé.</c:otherwise>
+          <c:when test="${demande.type == 'TRANSFERT' or demande.type == 'PROMOTION'}">Confirmez le changement effectif : poste, service et parcours mis à jour.</c:when>
+          <c:otherwise>Confirmez la prestation réalisée. Poste inchangé.</c:otherwise>
         </c:choose>
       </p>
       <ui:formulaire action="/rh/demandes/${demande.id}/cloturer-execution">

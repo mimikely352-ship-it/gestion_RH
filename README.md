@@ -194,6 +194,10 @@ Ne lancer qu'une instance sur le port 8080. Après une remise à zéro, redémar
 
 ## 5. Comptes de démonstration et test
 
+Les migrations et la création automatique des comptes de démonstration sont
+désactivées par défaut. Les comptes ci-dessous doivent donc déjà exister dans
+la base importée. Voir [la mise en service des blocs 1 à 7](docs/VALIDATION_BLOCS_1_A_7.md).
+
 Le mot de passe commun est exactement `password123` (11 caractères, sans espace ni point-virgule).
 
 | Rôle | Adresse e-mail | Mot de passe |
@@ -259,14 +263,17 @@ Cette comparaison repose sur la lecture du code actuel et les éléments lisible
 
 | Élément du support | Présence dans l'application et écarts |
 |---|---|
-| Bloc 1 — Expression du besoin | Demande de type `RECRUTEMENT`, poste cible, motif en description et historique des décisions. Le poste existe indépendamment de son occupant. Le budget, la date souhaitée et la distinction création/remplacement n'ont pas de champs dédiés ; le nombre de postes est renseigné dans l'offre. |
+| Bloc 1 — Expression du besoin | Poste, effectif demandé, motif création/remplacement, salaire mensuel par poste, budget annuel et date souhaitée ; validations historisées et motif de rejet obligatoire. |
 | Circuit Manager → RH → Direction | Circuit différent : auteur → chef de service → Direction → RH → DG, puis exécution par les RH. |
 | Bloc 2 — Demande validée transformée en offre | Une offre peut être liée à une demande de recrutement approuvée par le DG. La demande est exécutée à la publication de l'offre. Les RH peuvent aussi créer une offre sans demande préalable. |
 | Publication et candidatures | Brouillon, publication, clôture, date limite et plusieurs candidats par offre. Chaque offre est liée à une entreprise. Un candidat choisit un seul poste par entreprise ; il peut candidater dans des entreprises différentes. |
-| Présélection, entretiens, tests et décision | Présélection RH, entretiens, tests QCM, évaluations et décision RH conservés. Un score de correspondance aide l'examen ; il ne remplace pas la décision RH. |
-| Bloc 3 — Sélection et embauche | Les RH finalisent une candidature retenue : dossier employé, date d'entrée et affectation au poste/service. Il manque une étape distincte de proposition puis d'acceptation par le candidat, ainsi qu'un matricule métier dédié. |
+| Présélection, entretiens, tests et décision | Entretiens successifs avec décision explicite, tests QCM, évaluations et suivi de la prochaine étape. Clôture des offres au quota et à l'échéance. |
+| Bloc 3 — Sélection et embauche | Proposition aux conditions complètes ; son acceptation crée automatiquement le dossier salarié, le matricule `EMP-AAAA-0001`, l'affectation, le contrat et l'intégration. |
 | Distinction candidat / employé | Profil candidat et dossier employé distincts, liés au même compte. Le compte reçoit un rôle interne à l'embauche et le dossier candidat reste conservé. |
-| Bloc 4 — Contrat et onboarding | Historique des affectations présent. Les contrats successifs, renouvellements, signatures et checklist d'intégration (badge, compte, matériel, formation, inscription paie) ne sont pas implémentés comme module d'onboarding. |
+| Bloc 4 — Contrat et onboarding | Contrats successifs reliés, renouvellements à venir, signature PDF et checklist d'intégration en sept tâches avec responsables. |
+| Bloc 5 — Dossier administratif | Identité, coordonnées, carrière, rémunérations, documents et versions conservées ; habilitations et journal de consultation. |
+| Bloc 6 — Temps et pointage | Régimes datés, planning, entrées/sorties, pause, retards, anomalies, heures supplémentaires validées et export CSV. |
+| Bloc 7 — Congés et absences | Types, droits, soldes réservés/acceptés, justificatifs, responsable puis RH, historique des décisions et annulations, planning et variables de paie. |
 | Vue générale — Évolution et rupture | Transferts, promotions et demandes de formation présents. La gestion complète des ruptures de contrat et des départs n'est pas implémentée. |
 | Architecture applicative | Interface web JSP avec styles adaptatifs, API REST, services Java/Spring, circuits de validation et authentification par rôles. Aucune application mobile native ni moteur de workflow configurable n'est fourni. |
 | Données et intégration | PostgreSQL, stockage local des documents, notifications internes et traces métier ciblées : validations, affectations et corrections de date. Une GED complète, un audit généralisé et une solution de reporting/BI ne sont pas fournis. |
@@ -284,13 +291,14 @@ Ces ajouts étendent les blocs détaillés du support et font volontairement par
 - **Aide à la sélection** : score de correspondance candidat/offre, tests QCM et évaluations avec réponses conservées et contrôles de progression.
 - **Espaces par rôle et notifications internes** : candidat, employé, chef de service, Direction, RH et DG, avec les actions autorisées pour chaque rôle.
 
-### Éléments restant à développer pour couvrir tout le support
+### Réception des blocs 1 à 7 et suites du projet
 
-- Champs structurés du besoin : budget, date souhaitée et création/remplacement.
-- Proposition d'embauche et acceptation explicite par le candidat, matricule métier.
-- Contrats successifs, renouvellements et documents contractuels signés.
-- Checklist d'onboarding avec tâches, responsables et suivi de l'intégration.
-- Départs/ruptures, intégration paie, GED complète et reporting/BI.
+La couverture, les règles conservées, les scripts SQL à appliquer manuellement
+et les parcours de réception sont détaillés dans
+[VALIDATION_BLOCS_1_A_7.md](docs/VALIDATION_BLOCS_1_A_7.md).
+Les étapes à terminer sur la base de l'utilisateur sont les migrations et la
+réception avec plusieurs comptes. La paie complète (bulletins et montants),
+une GED généraliste et le reporting/BI restent hors de cette couverture.
 
 Références dans le code :
 [demandes](src/main/java/com/sirh/demande/service/DemandeService.java),
@@ -301,3 +309,9 @@ Références dans le code :
 [ordres du DG](src/main/java/com/sirh/ordre/service/OrdreService.java).
 
 NB : corrigeo amin vscode anareo raha sanatria tsy mandeha le config de demarrage svp!
+
+## Temps de travail, conges et absences
+
+Les blocs 6 et 7 sont accessibles dans le menu **Temps et conges**.
+Voir le [guide de configuration et d'utilisation](docs/BLOCS_6_7.md) pour les
+horaires, pointages, droits annuels, validations, justificatifs et exports CSV.

@@ -15,6 +15,7 @@
               <div>
                 <h3><c:out value="${d.type}"/> — <c:out value="${d.auteurEmail}"/></h3>
                 <p class="texte-doux"><c:out value="${d.description}"/></p>
+            <ui:besoin demande="${d}"/>
               </div>
             </div>
             <div class="rangee" style="margin-top:var(--e-3);">
@@ -24,7 +25,7 @@
               </ui:formulaire>
               <ui:formulaire action="/chef-service/demandes/${d.id}/valider" cssClass="rangee">
                 <input type="hidden" name="decision" value="REJETE"/>
-                <input type="text" class="saisie" name="commentaire" placeholder="Motif du rejet" style="width:220px;"/>
+                <input type="text" class="saisie" name="commentaire" placeholder="Motif du rejet" aria-label="Motif du rejet" required style="width:220px;"/>
                 <ui:bouton label="Rejeter" type="submit" style="btn-refuser btn-petit"/>
               </ui:formulaire>
             </div>

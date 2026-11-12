@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 /**
  * Démission ou renvoi d'un employé. Le dossier est ouvert (EN_COURS), les pièces y sont déposées,
  * puis la clôture — possible à la date d'effet, pièces obligatoires réunies — rompt le contrat en cours,
- * termine l'affectation et désactive le compte de connexion.
+ * annule le contrat à venir éventuel, termine l'affectation et désactive le compte de connexion.
  */
 @Service
 @RequiredArgsConstructor
@@ -40,6 +40,7 @@ public class DepartService {
     private final UtilisateurRepository utilisateurs;
     private final DocumentRepository documentsRepository;
     private final DocumentEmployeService documents;
+    private final ContratService contratService;
 
     @Transactional
     public Depart ouvrir(Long dossierId, TypeDepart type, String motif, String description,
@@ -94,6 +95,7 @@ public class DepartService {
             c.setMotifFin(libelle);
             contrats.save(c);
         });
+        contratService.annulerContratAVenir(dossierId, "Annulé : " + libelle);
         affectations.findByDossierIdAndActuelleTrue(dossierId).ifPresent(a -> {
             a.setActuelle(false);
             a.setDateFin(a.getDateDebut() != null && depart.getDateEffet().isBefore(a.getDateDebut()) ? a.getDateDebut() : depart.getDateEffet());

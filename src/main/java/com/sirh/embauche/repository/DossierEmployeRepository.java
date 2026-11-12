@@ -8,8 +8,13 @@ public interface DossierEmployeRepository extends JpaRepository<DossierEmploye, 
     org.springframework.data.domain.Page<DossierEmploye> findByUtilisateurRoleAndUtilisateurActifTrue(
             com.sirh.commun.enums.Role role, org.springframework.data.domain.Pageable page);
     long countByUtilisateurRoleAndUtilisateurActifTrue(com.sirh.commun.enums.Role role);
+    /** Effectif complet en poste : employés, chefs de service et direction disposant d'un dossier. */
+    @EntityGraph(attributePaths = {"utilisateur"})
+    org.springframework.data.domain.Page<DossierEmploye> findByUtilisateurActifTrue(org.springframework.data.domain.Pageable page);
+    long countByUtilisateurActifTrue();
     Optional<DossierEmploye> findByUtilisateurId(Long id);
     boolean existsByCinAndIdNot(String cin, Long id);
+    boolean existsByCin(String cin);
     @EntityGraph(attributePaths = {"utilisateur"})
     java.util.List<DossierEmploye> findByUtilisateurActifTrueOrderByNomAscPrenomAsc();
     @Lock(LockModeType.PESSIMISTIC_WRITE)

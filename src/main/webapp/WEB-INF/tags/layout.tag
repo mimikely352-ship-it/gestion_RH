@@ -19,8 +19,9 @@
   <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/interface.css">
   <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/offre-assistant.css">
   <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css">
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/clarte.css">
 </head>
-<body>
+<body class="oria-interface">
 <a class="interface-evitement" href="#contenu-principal">Aller au contenu principal</a>
 <div class="app">
 
@@ -52,22 +53,25 @@
     </nav>
 
     <sec:authorize access="hasRole('RH')">
-      <nav class="lateral-groupe" aria-label="Recrutement">
-        <span class="lateral-titre">Recrutement</span>
+      <details class="menu-rubrique" ${activeMenu == 'offres' || activeMenu == 'candidatures' || activeMenu == 'entretiens' ? 'open' : ''}><summary>Recrutement</summary>
+        <nav aria-label="Recrutement">
         <a class="lateral-lien ${activeMenu == 'offres' ? 'actif' : ''}" href="${pageContext.request.contextPath}/rh/offres">Offres d'emploi</a>
         <a class="lateral-lien ${activeMenu == 'candidatures' ? 'actif' : ''}" href="${pageContext.request.contextPath}/rh/candidatures">Candidatures</a>
         <a class="lateral-lien ${activeMenu == 'entretiens' ? 'actif' : ''}" href="${pageContext.request.contextPath}/rh/entretiens">Entretiens</a>
-      </nav>
-      <nav class="lateral-groupe" aria-label="Organisation">
-        <span class="lateral-titre">Organisation</span>
-        <a class="lateral-lien ${activeMenu == 'organisation' ? 'actif' : ''}" href="${pageContext.request.contextPath}/rh/organisation">Direction / départements / services</a>
-        <a class="lateral-lien ${activeMenu == 'employe-nouveau' ? 'actif' : ''}" href="${pageContext.request.contextPath}/rh/employes/nouveau">Créer un employé</a>
-      </nav>
+        </nav>
+      </details>
+      <details class="menu-rubrique" ${activeMenu == 'organisation' || activeMenu == 'employes' || activeMenu == 'employe-nouveau' || activeMenu == 'mobilite' || activeMenu == 'rattachements' ? 'open' : ''}><summary>Personnel</summary>
+        <nav aria-label="Personnel">
+        <a class="lateral-lien ${activeMenu == 'organisation' ? 'actif' : ''}" href="${pageContext.request.contextPath}/rh/organisation">Structure</a>
+        <a class="lateral-lien ${activeMenu == 'employes' || activeMenu == 'employe-nouveau' ? 'actif' : ''}" href="${pageContext.request.contextPath}/rh/employes">Employés</a>
+        <a class="lateral-lien ${activeMenu == 'mobilite' ? 'actif' : ''}" href="${pageContext.request.contextPath}/rh/mobilite">Mobilité</a>
+        </nav>
+      </details>
     </sec:authorize>
 
     <sec:authorize access="hasAnyRole('EMPLOYE','CHEF_SERVICE','DIRECTION','RH','DG')">
       <nav class="lateral-groupe" aria-label="Demandes">
-        <span class="lateral-titre">Demandes internes</span>
+        <sec:authorize access="!hasRole('RH')"><span class="lateral-titre">Demandes</span></sec:authorize>
         <sec:authorize access="hasRole('EMPLOYE')">
           <a class="lateral-lien ${activeMenu == 'mes-demandes' ? 'actif' : ''}" href="${pageContext.request.contextPath}/employe/demandes">Mes demandes</a>
           <a class="lateral-lien" href="${pageContext.request.contextPath}/candidat/mes-candidatures">Mon dossier de recrutement</a>
@@ -76,6 +80,7 @@
           <a class="lateral-lien ${activeMenu == 'mon-dossier' ? 'actif' : ''}" href="${pageContext.request.contextPath}/mon-dossier">Mon dossier salarié</a>
         </sec:authorize>
         <sec:authorize access="hasRole('CHEF_SERVICE')">
+          <a class="lateral-lien ${activeMenu == 'besoins' ? 'actif' : ''}" href="${pageContext.request.contextPath}/besoins">Besoins de personnel</a>
           <a class="lateral-lien ${activeMenu == 'demandes' ? 'actif' : ''}" href="${pageContext.request.contextPath}/chef-service/demandes">Demandes à valider</a>
           <a class="lateral-lien ${activeMenu == 'dossiers' ? 'actif' : ''}" href="${pageContext.request.contextPath}/dossiers">Dossiers de mon équipe</a>
         </sec:authorize>
@@ -84,10 +89,10 @@
           <a class="lateral-lien ${activeMenu == 'dossiers' ? 'actif' : ''}" href="${pageContext.request.contextPath}/dossiers">Dossiers salariés</a>
         </sec:authorize>
         <sec:authorize access="hasRole('RH')">
-          <a class="lateral-lien ${activeMenu == 'employes' ? 'actif' : ''}" href="${pageContext.request.contextPath}/rh/employes">Employés et historique</a>
-          <a class="lateral-lien" href="${pageContext.request.contextPath}/rh/mobilite">Mobilité interne</a>
-          <a class="lateral-lien ${activeMenu == 'demandes' ? 'actif' : ''}" href="${pageContext.request.contextPath}/rh/demandes">Demandes à valider / exécuter</a>
-          <a class="lateral-lien ${activeMenu == 'ordres' ? 'actif' : ''}" href="${pageContext.request.contextPath}/rh/ordres">Ordres du DG</a>
+          <details class="menu-rubrique" ${activeMenu == 'demandes' || activeMenu == 'ordres' ? 'open' : ''}><summary>Suivi</summary>
+            <a class="lateral-lien ${activeMenu == 'demandes' ? 'actif' : ''}" href="${pageContext.request.contextPath}/rh/demandes">Demandes</a>
+            <a class="lateral-lien ${activeMenu == 'ordres' ? 'actif' : ''}" href="${pageContext.request.contextPath}/rh/ordres">Ordres</a>
+          </details>
         </sec:authorize>
         <sec:authorize access="hasRole('DG')">
           <a class="lateral-lien ${activeMenu == 'demandes' ? 'actif' : ''}" href="${pageContext.request.contextPath}/dg/demandes">Demandes à valider</a>
@@ -95,6 +100,22 @@
           <a class="lateral-lien ${activeMenu == 'dossiers' ? 'actif' : ''}" href="${pageContext.request.contextPath}/dossiers">Dossiers salariés</a>
         </sec:authorize>
       </nav>
+    </sec:authorize>
+
+    <sec:authorize access="hasAnyRole('EMPLOYE','CHEF_SERVICE','DIRECTION','RH')">
+      <details class="menu-rubrique" ${activeMenu == 'presence' || activeMenu == 'conges' || activeMenu == 'conges-validation' || activeMenu == 'conges-rh' ? 'open' : ''}><summary>Temps et congés</summary>
+        <nav aria-label="Temps et congés">
+          <sec:authorize access="hasAnyRole('EMPLOYE','CHEF_SERVICE','DIRECTION')">
+            <a class="lateral-lien ${activeMenu == 'presence' ? 'actif' : ''}" href="${pageContext.request.contextPath}/presence">Mon pointage</a>
+            <a class="lateral-lien ${activeMenu == 'conges' ? 'actif' : ''}" href="${pageContext.request.contextPath}/conges">Mes congés</a>
+          </sec:authorize>
+          <sec:authorize access="hasRole('CHEF_SERVICE')"><a class="lateral-lien ${activeMenu == 'conges-validation' ? 'actif' : ''}" href="${pageContext.request.contextPath}/conges/validations">Congés à valider</a></sec:authorize>
+          <sec:authorize access="hasRole('RH')">
+            <a class="lateral-lien ${activeMenu == 'presence' ? 'actif' : ''}" href="${pageContext.request.contextPath}/rh/presence">Pointages et planning</a>
+            <a class="lateral-lien ${activeMenu == 'conges-rh' ? 'actif' : ''}" href="${pageContext.request.contextPath}/rh/conges">Congés et absences</a>
+          </sec:authorize>
+        </nav>
+      </details>
     </sec:authorize>
 
     </div>

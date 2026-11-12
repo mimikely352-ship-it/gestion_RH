@@ -29,10 +29,24 @@ public class RhEntretienController {
         return "rh/entretiens-liste";
     }
 
+    /** {@code suite} (ENTRETIEN_SUIVANT, TESTS, REFUS) prime ; {@code decision} reste accepté pour l'API historique. */
     @PostMapping("/{id}/decider")
-    public String decider(@PathVariable Long id, @RequestParam Decision decision,
-                           @RequestParam(required = false) String commentaire) {
-        Entretien entretien = entretienService.decider(id, decision, commentaire);
-        return "redirect:/rh/candidatures/" + entretien.getCandidature().getId();
+    public String decider(@PathVariable Long id,
+                           @RequestParam(required = false) EntretienService.Suite suite,
+                           @RequestParam(required = false) Decision decision,
+                           @RequestParam(required = false) String commentaire,
+                           org.springframework.web.servlet.mvc.support.RedirectAttributes flash) {
+        Entretien entretien = entretienRepository.findById(id)
+                .orElseThrow(() -> new com.sirh.commun.exception.ResourceNotFoundException("Entretien introuvable : " + id));
+        Long candidatureId = entretien.getCandidature().getId();
+        try {
+            if (suite != null) entretienService.decider(id, suite, commentaire);
+            else entretienService.decider(id, decision, commentaire);
+            flash.addFlashAttribute("succes", suite == EntretienService.Suite.ENTRETIEN_SUIVANT
+                    ? "Décision enregistrée. Planifiez l’entretien suivant." : "Décision d’entretien enregistrée.");
+        } catch (com.sirh.commun.exception.BusinessException e) {
+            flash.addFlashAttribute("erreur", e.getMessage());
+        }
+        return "redirect:/rh/candidatures/" + candidatureId;
     }
 }

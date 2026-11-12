@@ -47,6 +47,19 @@ public class Demande {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "effectif_demande")
+    private Integer effectifDemande;
+    @Column(name = "salaire_mensuel_par_poste", precision = 19, scale = 2)
+    private java.math.BigDecimal salaireMensuelParPoste;
+    /** Enveloppe salariale annuelle allouée au besoin (toutes embauches confondues). */
+    @Column(name = "budget_global_recrutement", precision = 19, scale = 2)
+    private java.math.BigDecimal budgetGlobalRecrutement;
+    @Column(name = "date_souhaitee")
+    private java.time.LocalDate dateSouhaitee;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "motif_besoin", length = 20)
+    private com.sirh.commun.enums.MotifBesoin motifBesoin;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     @Builder.Default
@@ -66,6 +79,13 @@ public class Demande {
         if (dateCreation == null) {
             dateCreation = LocalDateTime.now();
         }
+    }
+
+    /** Coût annuel prévu : effectif × salaire mensuel × 12. */
+    @Transient
+    public java.math.BigDecimal getCoutAnnuelPrevu() {
+        return effectifDemande == null || salaireMensuelParPoste == null ? null
+                : salaireMensuelParPoste.multiply(java.math.BigDecimal.valueOf(12L * effectifDemande));
     }
 
     @Transient

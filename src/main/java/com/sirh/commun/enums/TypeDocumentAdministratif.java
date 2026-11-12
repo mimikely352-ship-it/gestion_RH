@@ -35,6 +35,11 @@ public enum TypeDocumentAdministratif {
     public boolean isObligatoire() { return obligatoire; }
     public boolean isAExpiration() { return aExpiration; }
     public int getValiditeMois() { return validiteMois; }
+    /**
+     * Pièce dont plusieurs exemplaires coexistent (plusieurs diplômes, documents divers) : un nouveau dépôt
+     * s'ajoute aux précédents. Pour les autres types, le dépôt le plus récent remplace le précédent (nouvelle version).
+     */
+    public boolean isPlusieursExemplaires() { return this == DIPLOME || this == AUTRE; }
 
     public static TypeDocumentAdministratif depuis(String code) {
         if (code == null) return null;

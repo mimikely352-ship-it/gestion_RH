@@ -16,7 +16,8 @@ public class DossierEmploye {
     @Column(name = "date_entree") private LocalDate dateEntree;
     @Version private Long version;
 
-    /** Attribué par la base (trigger) à la création du dossier. */
+    /** Attribué par la base (trigger, format EMP-AAAA-0001) à la création du dossier, puis relu par Hibernate. */
+    @org.hibernate.annotations.Generated
     @Column(length = 20, insertable = false, updatable = false) private String matricule;
 
     // ----- Identité -----

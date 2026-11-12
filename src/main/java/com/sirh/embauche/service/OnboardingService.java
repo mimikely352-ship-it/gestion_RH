@@ -22,11 +22,14 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Predicate;
 
 /**
- * Workflow d'intégration. L'onboarding est créé au premier enregistrement avec une tâche par
- * élément de la checklist ; il passe à TERMINE quand toutes les tâches sont faites et revient
- * à EN_COURS si l'une d'elles est décochée (ou si une tâche automatique n'est plus remplie).
+ * Workflow d'intégration (METIER.md, bloc 4). L'onboarding est créé avec le premier contrat, avec une tâche
+ * par élément de la checklist ; il passe à TERMINE quand toutes les tâches sont faites. « Signature du contrat »
+ * porte sur le contrat d'embauche (premier contrat du dossier). Une intégration terminée n'est pas rouverte
+ * par un recalcul automatique (renouvellement, nouveau contrat) : seule une tâche décochée explicitement la rouvre.
+ * Les tâches confiées au « Manager » peuvent être cochées par le chef du service de l'employé.
  */
 @Service
 @RequiredArgsConstructor
@@ -45,6 +48,7 @@ public class OnboardingService {
         public String getLibelle() { return tache.getLibelle(); }
         public String getResponsable() { return tache.getResponsable(); }
         public boolean isAutomatique() { return tache.isAutomatique(); }
+        public boolean isManager() { return tache.isManager(); }
         public boolean isFait() { return fait; }
         public String getDetail() { return detail; }
     }
@@ -63,8 +67,7 @@ public class OnboardingService {
     public Vue vue(DossierEmploye dossier) {
         var onboarding = onboardings.findByDossierId(dossier.getId()).orElse(null);
         var lignes = onboarding == null ? List.<OnboardingTache>of() : taches.findByOnboardingId(onboarding.getId());
-        var contrat = contrats.findFirstByDossierIdAndStatut(dossier.getId(), StatutContrat.EN_COURS).orElse(null);
-        return calculer(dossier, contrat, onboarding, lignes);
+        return calculer(dossier, contratEmbauche(dossier.getId()), onboarding, lignes);
     }
 
     /** Avancement « faits / total » pour la liste des employés. */
@@ -78,42 +81,70 @@ public class OnboardingService {
         if (!parDossier.isEmpty())
             taches.findByOnboardingIdIn(parDossier.values().stream().map(Onboarding::getId).toList())
                     .forEach(t -> tachesParOnboarding.computeIfAbsent(t.getOnboarding().getId(), k -> new ArrayList<>()).add(t));
-        var contratsEnCours = new HashMap<Long, Contrat>();
-        contrats.findByDossierIdInAndStatut(ids, StatutContrat.EN_COURS).forEach(c -> contratsEnCours.put(c.getDossierId(), c));
+        var contratsEmbauche = new HashMap<Long, Contrat>();
+        contrats.findByDossierIdInAndStatutNot(ids, StatutContrat.ANNULE)
+                .forEach(c -> contratsEmbauche.merge(c.getDossierId(), c, OnboardingService::plusAncien));
         var resultat = new HashMap<Long, String>();
         for (var dossier : dossiers.findAllById(ids)) {
             var onboarding = parDossier.get(dossier.getId());
-            var vue = calculer(dossier, contratsEnCours.get(dossier.getId()), onboarding,
+            var vue = calculer(dossier, contratsEmbauche.get(dossier.getId()), onboarding,
                     onboarding == null ? List.of() : tachesParOnboarding.getOrDefault(onboarding.getId(), List.of()));
             resultat.put(dossier.getId(), vue.getFaits() + " / " + vue.getTotal());
         }
         return resultat;
     }
 
-    /** Enregistre la checklist cochée par les RH (les tâches automatiques sont recalculées). */
+    /** Enregistre la checklist cochée par les RH (toutes les tâches manuelles ; les automatiques sont recalculées). */
     @Transactional
     public void enregistrer(Long dossierId, Set<TacheOnboarding> faites, String auteur) {
+        appliquer(verrouillerActif(dossierId), faites == null ? Set.of() : faites, auteur, code -> true);
+    }
+
+    /** Le chef du service coche les tâches qui lui sont confiées (matériel, formation) ; les autres restent inchangées. */
+    @Transactional
+    public void enregistrerParManager(Long dossierId, Set<TacheOnboarding> faites, String auteur) {
+        appliquer(verrouillerActif(dossierId), faites == null ? Set.of() : faites, auteur, TacheOnboarding::isManager);
+    }
+
+    /** Recalcule les tâches automatiques (après un contrat ou une signature) ; crée l'onboarding s'il n'existe pas. */
+    @Transactional
+    public void synchroniser(Long dossierId) {
+        dossiers.findById(dossierId).ifPresent(d -> appliquer(d, null, null, code -> false));
+    }
+
+    private DossierEmploye verrouillerActif(Long dossierId) {
         var dossier = dossiers.verrouillerParId(dossierId)
                 .orElseThrow(() -> new ResourceNotFoundException("Employé introuvable : " + dossierId));
         if (!dossier.getUtilisateur().isActif())
             throw new BusinessException("Cet employé a quitté l’entreprise : son intégration ne peut plus être modifiée.");
-        appliquer(dossier, faites == null ? Set.of() : faites, auteur);
+        return dossier;
     }
 
-    /** Recalcule les tâches automatiques (appelé après un changement de contrat, par exemple). */
-    @Transactional
-    public void synchroniser(Long dossierId) {
-        dossiers.findById(dossierId).ifPresent(d -> appliquer(d, null, null));
+    /** Contrat d'embauche : premier contrat du dossier, hors contrat annulé. */
+    private Contrat contratEmbauche(Long dossierId) {
+        return contrats.findFirstByDossierIdAndStatutNotOrderByDateDebutAscIdAsc(dossierId, StatutContrat.ANNULE).orElse(null);
     }
 
-    /** @param faites null = ne pas toucher aux tâches manuelles */
-    private void appliquer(DossierEmploye dossier, Set<TacheOnboarding> faites, String auteur) {
-        var onboarding = onboardings.findByDossierId(dossier.getId()).orElseGet(() -> onboardings.save(Onboarding.builder()
+    static Contrat plusAncien(Contrat a, Contrat b) {
+        int ordre = a.getDateDebut().compareTo(b.getDateDebut());
+        if (ordre == 0) ordre = Long.compare(a.getId() == null ? 0 : a.getId(), b.getId() == null ? 0 : b.getId());
+        return ordre <= 0 ? a : b;
+    }
+
+    /**
+     * @param faites     null = recalcul automatique : aucune tâche manuelle n'est modifiée
+     * @param modifiable tâches manuelles que l'auteur peut changer
+     */
+    private void appliquer(DossierEmploye dossier, Set<TacheOnboarding> faites, String auteur,
+                           Predicate<TacheOnboarding> modifiable) {
+        var existant = onboardings.findByDossierId(dossier.getId()).orElse(null);
+        if (existant != null && faites == null && existant.getStatut() == StatutOnboarding.TERMINE) return;
+        var onboarding = existant != null ? existant : onboardings.save(Onboarding.builder()
                 .dossierId(dossier.getId()).statut(StatutOnboarding.EN_COURS)
-                .dateDebut(dossier.getDateEntree() == null ? LocalDate.now() : dossier.getDateEntree()).build()));
+                .dateDebut(dossier.getDateEntree() == null ? LocalDate.now() : dossier.getDateEntree()).build());
         var existantes = new EnumMap<TacheOnboarding, OnboardingTache>(TacheOnboarding.class);
         taches.findByOnboardingId(onboarding.getId()).forEach(t -> existantes.put(t.getCode(), t));
-        var contrat = contrats.findFirstByDossierIdAndStatut(dossier.getId(), StatutContrat.EN_COURS).orElse(null);
+        var contrat = contratEmbauche(dossier.getId());
         var maintenant = LocalDateTime.now();
         boolean toutFait = true;
         for (var code : TacheOnboarding.values()) {
@@ -124,7 +155,7 @@ public class OnboardingService {
             if (code.isAutomatique()) {
                 fait = automatiqueFaite(code, dossier, contrat);
                 par = AUTOMATIQUE;
-            } else if (faites != null) {
+            } else if (faites != null && modifiable.test(code)) {
                 fait = faites.contains(code);
                 par = auteur;
             } else {
@@ -147,39 +178,49 @@ public class OnboardingService {
         onboardings.save(onboarding);
     }
 
-    static boolean automatiqueFaite(TacheOnboarding code, DossierEmploye dossier, Contrat contrat) {
+    static boolean automatiqueFaite(TacheOnboarding code, DossierEmploye dossier, Contrat contratEmbauche) {
         return switch (code) {
             case COMPTE -> dossier.getUtilisateur() != null && dossier.getUtilisateur().isActif();
-            case CONTRAT_SIGNE -> contrat != null && contrat.isSigne();
+            case CONTRAT_SIGNE -> contratEmbauche != null && contratEmbauche.isSigne();
             default -> false;
         };
     }
 
-    static Vue calculer(DossierEmploye dossier, Contrat contrat, Onboarding onboarding, List<OnboardingTache> lignes) {
+    /** @param contratEmbauche premier contrat du dossier (celui dont la signature fait partie de l'intégration) */
+    static Vue calculer(DossierEmploye dossier, Contrat contratEmbauche, Onboarding onboarding, List<OnboardingTache> lignes) {
         var parCode = new EnumMap<TacheOnboarding, OnboardingTache>(TacheOnboarding.class);
         lignes.forEach(t -> parCode.put(t.getCode(), t));
+        // Intégration close : l'état enregistré fait foi (le compte peut être désactivé plus tard, un contrat renouvelé...).
+        boolean close = onboarding != null && onboarding.getStatut() == StatutOnboarding.TERMINE;
         var etapes = new ArrayList<Etape>();
         for (var code : TacheOnboarding.values()) {
-            if (code.isAutomatique()) {
-                boolean fait = automatiqueFaite(code, dossier, contrat);
+            var t = parCode.get(code);
+            if (close) {
+                boolean fait = t == null || t.getStatut() == StatutTache.FAIT;
+                etapes.add(new Etape(code, fait, t == null ? "Tâche ajoutée après la fin de l’intégration" : suivi(t)));
+            } else if (code.isAutomatique()) {
+                boolean fait = automatiqueFaite(code, dossier, contratEmbauche);
                 String detail = switch (code) {
                     case COMPTE -> fait ? "Identifiant : " + dossier.getUtilisateur().getEmail() : "Compte absent ou désactivé";
-                    case CONTRAT_SIGNE -> contrat == null ? "Aucun contrat en cours : ajoutez-le ci-dessous"
-                            : fait ? contrat.getType().name() + " signé le " + contrat.getDateSignature().format(JOUR)
-                            : contrat.getType().name() + " en cours non signé : déposez l’exemplaire signé";
+                    case CONTRAT_SIGNE -> contratEmbauche == null ? "Aucun contrat enregistré : ajoutez-le dans la rubrique Contrats"
+                            : fait ? contratEmbauche.getType().name() + " signé le " + contratEmbauche.getDateSignature().format(JOUR)
+                            : contratEmbauche.getType().name() + " d’embauche non signé : déposez l’exemplaire signé";
                     default -> null;
                 };
                 etapes.add(new Etape(code, fait, detail));
             } else {
-                var t = parCode.get(code);
                 boolean fait = t != null && t.getStatut() == StatutTache.FAIT;
-                etapes.add(new Etape(code, fait, fait && t.getFaitLe() != null
-                        ? "Fait le " + t.getFaitLe().format(HORODATAGE) + (t.getFaitPar() == null ? "" : " par " + t.getFaitPar()) : null));
+                etapes.add(new Etape(code, fait, fait ? suivi(t) : null));
             }
         }
         boolean toutFait = etapes.stream().allMatch(Etape::fait);
-        String termineLe = toutFait && onboarding != null && onboarding.getTermineLe() != null
+        String termineLe = (close || toutFait) && onboarding != null && onboarding.getTermineLe() != null
                 ? onboarding.getTermineLe().format(HORODATAGE) : null;
-        return new Vue(toutFait ? StatutOnboarding.TERMINE : StatutOnboarding.EN_COURS, etapes, termineLe);
+        return new Vue(close || toutFait ? StatutOnboarding.TERMINE : StatutOnboarding.EN_COURS, etapes, termineLe);
+    }
+
+    private static String suivi(OnboardingTache t) {
+        return t.getFaitLe() == null ? null
+                : "Fait le " + t.getFaitLe().format(HORODATAGE) + (t.getFaitPar() == null ? "" : " par " + t.getFaitPar());
     }
 }

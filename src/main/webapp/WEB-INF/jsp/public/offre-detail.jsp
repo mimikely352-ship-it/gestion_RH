@@ -29,16 +29,16 @@
             <p>Les diplômes suivants sont acceptés comme alternatives :</p>
             <ul class="annonce-diplomes"><c:forEach var="d" items="${offre.diplomesRequis}"><li><c:out value="${d.libelle}"/></li></c:forEach></ul>
           </c:otherwise></c:choose>
-          <p class="annonce-note">Chaque dossier est examiné par les RH. Le score de correspondance n’entraîne pas de refus automatique.</p>
+          <p class="annonce-note">Examen RH, sans refus automatique lié au score.</p>
         </section>
         <c:if test="${not empty offre.piecesRequises}"><section class="annonce-section" aria-labelledby="pieces-titre"><h2 id="pieces-titre">Documents à préparer</h2><p>Prévoyez un fichier PDF de 5 Mo maximum pour chaque pièce demandée.</p><ul class="annonce-pieces"><c:forEach var="piece" items="${offre.listePiecesRequises}"><li><c:out value="${piece}"/></li></c:forEach></ul></section></c:if>
       </div>
       <aside class="annonce-depot" aria-labelledby="depot-titre">
         <h2 id="depot-titre">Votre candidature</h2>
-        <p class="annonce-aide">Un candidat peut choisir un seul poste par entreprise. Une candidature déjà déposée auprès de cette entreprise empêche un nouveau dépôt, même après un refus.</p>
+        <p class="annonce-aide">Une seule candidature par entreprise, même après refus.</p>
         <c:choose><c:when test="${not candidaturesOuvertes}"><p>Cette offre ne reçoit plus de candidatures ou n’est pas encore publiée.</p><a class="btn btn-secondaire" href="${pageContext.request.contextPath}/offres">Voir les offres ouvertes</a></c:when><c:otherwise>
           <sec:authorize access="hasRole('CANDIDAT')">
-            <p>Votre profil sera associé au dossier, ainsi que le CV enregistré sur votre compte, s’il est disponible.</p>
+            <p>Profil et CV disponible joints au dossier.</p>
             <ui:formulaire action="/candidat/candidatures" enctype="multipart/form-data" cssClass="annonce-formulaire">
               <input type="hidden" name="offreId" value="${offre.id}"/>
               <c:choose><c:when test="${not empty offre.piecesRequises}">
@@ -58,13 +58,13 @@
           <sec:authorize access="isAnonymous()"><p>Envoyez votre dossier pour cette offre. Votre compte de suivi sera créé au moment de l’envoi.</p><a class="btn btn-principal" href="${pageContext.request.contextPath}/offres/${offre.id}/postuler">Postuler</a><a class="annonce-lien" href="${pageContext.request.contextPath}/login?offreId=${offre.id}">J’ai déjà un compte</a></sec:authorize>
           <sec:authorize access="hasRole('EMPLOYE')">
             <c:choose><c:when test="${offre.poste.mobiliteOuverte and not empty offre.poste.section}">
-              <p>Vous êtes déjà employé. Demandez une mobilité interne vers ce poste ; les RH examineront votre demande.</p>
+              <p>Employé : utilisez la mobilité interne.</p>
               <a class="btn btn-principal" href="${pageContext.request.contextPath}/offres/${offre.id}/postuler">Demander une mobilité vers ce poste</a>
             </c:when><c:otherwise><p>Ce poste n’est pas ouvert à la mobilité interne.</p><a class="btn btn-secondaire" href="${pageContext.request.contextPath}/compte/accueil">Mon espace employé</a></c:otherwise></c:choose>
           </sec:authorize>
-          <sec:authorize access="isFullyAuthenticated() and !hasAnyRole('CANDIDAT','EMPLOYE')"><p>Vous consultez cette offre avec un compte interne. Pour déposer un dossier externe, utilisez un compte candidat.</p><a class="btn btn-secondaire" href="${pageContext.request.contextPath}/compte/accueil">Mon espace</a></sec:authorize>
+          <sec:authorize access="isFullyAuthenticated() and !hasAnyRole('CANDIDAT','EMPLOYE')"><p>Pour postuler, connectez-vous avec un compte candidat.</p><a class="btn btn-secondaire" href="${pageContext.request.contextPath}/compte/accueil">Mon espace</a></sec:authorize>
         </c:otherwise></c:choose>
-        <div class="annonce-suite"><h3>Après le dépôt</h3><p>Retrouvez votre dossier dans « Mes candidatures ». Les RH vous informeront de la suite du recrutement.</p></div>
+        <div class="annonce-suite"><h3>Après le dépôt</h3><p>Suivi dans « Mes candidatures ».</p></div>
       </aside>
     </div>
   </main>

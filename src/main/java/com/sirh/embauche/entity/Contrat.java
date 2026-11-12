@@ -9,7 +9,10 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-/** Un contrat de travail. Un employé en a plusieurs successifs ; un seul est EN_COURS. */
+/**
+ * Un contrat de travail. Un employé en a plusieurs successifs ; un seul est EN_COURS et au plus un
+ * est A_VENIR. Un renouvellement référence le contrat qu'il remplace ({@link #contratPrecedentId}).
+ */
 @Entity @Table(name = "contrat_employe")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class Contrat {
@@ -24,6 +27,8 @@ public class Contrat {
     @Column(name = "motif_fin", length = 255) private String motifFin;
     /** Renseignée quand l'exemplaire signé est déposé. */
     @Column(name = "date_signature") private LocalDate dateSignature;
+    /** Contrat remplacé par celui-ci (renouvellement, passage en CDI...). Null pour le premier contrat. */
+    @Column(name = "contrat_precedent_id") private Long contratPrecedentId;
     @Column(name = "cree_le", nullable = false) private LocalDateTime creeLe;
     @Column(name = "cree_par", nullable = false, length = 150) private String creePar;
     @Version private Long version;

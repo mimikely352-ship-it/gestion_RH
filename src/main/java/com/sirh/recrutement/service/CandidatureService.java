@@ -99,6 +99,11 @@ public class CandidatureService {
         return candidatureRepository.findByOffreId(offreId);
     }
 
+    public Candidature obtenirPourModification(Long candidatureId) {
+        return candidatureRepository.verrouiller(candidatureId)
+                .orElseThrow(() -> new ResourceNotFoundException("Candidature introuvable."));
+    }
+
     public Candidature obtenir(Long candidatureId) {
         return candidatureRepository.findById(candidatureId)
                 .orElseThrow(() -> new ResourceNotFoundException("Candidature introuvable : " + candidatureId));

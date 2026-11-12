@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface RemunerationRepository extends JpaRepository<Remuneration, Long> {
     List<Remuneration> findByDossierIdOrderByDateEffetDescIdDesc(Long dossierId);
+    /** Lignes d'un contrat annulé avant son début : elles n'ont jamais pris effet. */
+    List<Remuneration> findByContratIdAndDateEffetAfter(Long contratId, java.time.LocalDate date);
 }

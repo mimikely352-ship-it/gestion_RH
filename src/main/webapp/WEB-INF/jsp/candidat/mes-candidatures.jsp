@@ -43,6 +43,7 @@
                   </div>
                 </div>
                 <div class="candidature__actions">
+                  <c:if test="${c.propositionStatut != null}"><a class="btn btn-principal btn-petit" href="${pageContext.request.contextPath}/candidat/propositions/${c.id}">Proposition d’embauche</a></c:if>
                   <c:if test="${not empty c.piecesComplementaires}">
                     <details><summary>Mes pièces complémentaires</summary><ul>
                       <c:forEach var="piece" items="${c.piecesComplementaires}"><li><a href="${pageContext.request.contextPath}/documents/${piece.id}/telecharger" target="_blank" rel="noopener"><c:out value="${piece.libelle}"/></a></li></c:forEach>
@@ -69,7 +70,7 @@
               <div class="candidature__pied">
                 <c:choose>
                   <c:when test="${c.statut == 'RECUE'}"><p>Votre dossier a été reçu. L’équipe RH va l’examiner.</p></c:when>
-                  <c:when test="${c.statut == 'ACCEPTEE_ENTRETIEN'}"><p>Votre candidature est retenue pour un entretien. La date vous sera communiquée après sa planification.</p></c:when>
+                  <c:when test="${c.statut == 'ACCEPTEE_ENTRETIEN'}"><p>Entretien retenu. Date à venir.</p></c:when>
                   <c:when test="${c.statut == 'EN_ENTRETIEN'}"><div><p>Consultez les informations de votre entretien :</p><ul>
                     <c:forEach var="ent" items="${entretiensParCandidature[c.id]}"><li><ui:date valeur="${ent.dateHeure}" heure="true"/> — <c:out value="${ent.lieu}" default="Lieu à préciser"/></li></c:forEach>
                   </ul></div></c:when>

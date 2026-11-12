@@ -13,6 +13,7 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
  * local (cible Ant "run").
  */
 @SpringBootApplication
+@org.springframework.scheduling.annotation.EnableScheduling
 public class Application extends SpringBootServletInitializer {
 
     @Override

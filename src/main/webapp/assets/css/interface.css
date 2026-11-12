@@ -91,3 +91,12 @@
 .offre-apercu dd{font-size:14px;font-weight:600;margin:0}
 .offre-lien-dossier{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--interface-bord);padding-top:15px;min-height:44px;color:var(--interface-accent);font-size:14px;font-weight:600}
 @media(max-width:720px){.offre-catalogue,.offre-filtres{grid-template-columns:1fr}.offre-entete>.btn{margin-top:18px}}
+.organisation-niveau{margin-top:16px;overflow:hidden}
+.organisation-niveau>summary{padding:20px 26px;cursor:pointer;font-size:20px;font-weight:700;color:var(--interface-encre)}
+.organisation-niveau[open]>summary{border-bottom:1px solid var(--interface-bord)}
+.organisation-niveau .fiche-corps{overflow-x:auto}
+.organisation-ajout{margin-top:20px;border-top:1px solid var(--interface-bord);padding-top:16px}
+.organisation-ajout>summary,.organisation-modification>summary{cursor:pointer;color:var(--interface-accent);font-weight:600;padding:8px 0}
+.organisation-ajout[open]>summary{margin-bottom:12px}
+.organisation-modification .rangee{margin-top:8px;flex-wrap:wrap}
+@media(max-width:720px){.organisation-niveau>summary{padding:16px 18px;font-size:18px}}

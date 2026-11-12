@@ -70,6 +70,33 @@ public class Candidature {
     @Column(name = "date_entree")
     private java.time.LocalDate dateEntree;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "proposition_statut", length = 20)
+    private com.sirh.commun.enums.StatutProposition propositionStatut;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "proposition_type_contrat", length = 25)
+    private com.sirh.commun.enums.TypeContrat propositionTypeContrat;
+    @Column(name = "proposition_salaire", precision = 19, scale = 2)
+    private BigDecimal propositionSalaire;
+    @Column(name = "proposition_debut")
+    private java.time.LocalDate propositionDebut;
+    @Column(name = "proposition_fin")
+    private java.time.LocalDate propositionFin;
+    @Column(name = "proposition_envoyee_le")
+    private LocalDateTime propositionEnvoyeeLe;
+    @Column(name = "proposition_repondue_le")
+    private LocalDateTime propositionRepondueLe;
+    /** Rôle attribué à l'embauche (EMPLOYE, CHEF_SERVICE, DIRECTION), fixé dans la proposition. */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "proposition_role", length = 20)
+    private com.sirh.commun.enums.Role propositionRole;
+    /** Service d'accueil retenu dans la proposition (service du poste, ou choisi par les RH). */
+    @Column(name = "proposition_service_id")
+    private Long propositionServiceId;
+    /** Compte RH ayant envoyé la proposition : auteur du contrat créé à l'acceptation. */
+    @Column(name = "proposition_envoyee_par", length = 150)
+    private String propositionEnvoyeePar;
+
     @PrePersist
     void prePersist() {
         if (dateCandidature == null) {

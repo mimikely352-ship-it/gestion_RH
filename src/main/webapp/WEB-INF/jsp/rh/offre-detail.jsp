@@ -50,7 +50,7 @@
         <h2 id="actions-titre"><c:choose><c:when test="${offre.statut == 'BROUILLON'}">Préparer la publication</c:when><c:when test="${offre.statut == 'PUBLIEE'}">Suivre le recrutement</c:when><c:otherwise>Recrutement clôturé</c:otherwise></c:choose></h2>
         <c:choose>
           <c:when test="${offre.statut == 'BROUILLON'}">
-            <p>Cette offre n’est pas visible par les candidats. Vérifiez les missions et les critères avant de la publier.</p>
+            <p>Brouillon privé. Vérifiez avant publication.</p>
             <ui:formulaire action="/rh/offres/${offre.id}/publier"><ui:bouton label="Publier l’offre" type="submit" style="btn-principal"/></ui:formulaire>
             <ui:bouton label="Modifier le brouillon" href="/rh/offres/${offre.id}/modifier" style="btn-secondaire"/>
           </c:when>

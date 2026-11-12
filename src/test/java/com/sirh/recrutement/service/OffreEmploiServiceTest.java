@@ -12,6 +12,43 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class OffreEmploiServiceTest {
+    @Test void offresExpireesClotureesEtMasqueesDeLaListePublique() {
+        var repository = mock(OffreEmploiRepository.class);
+        var hier = java.time.LocalDate.now().minusDays(1);
+        var expiree = com.sirh.recrutement.entity.OffreEmploi.builder().id(1L).titre("A")
+                .statut(com.sirh.commun.enums.StatutOffre.PUBLIEE).dateLimite(hier).build();
+        var duJour = com.sirh.recrutement.entity.OffreEmploi.builder().id(2L).titre("B")
+                .statut(com.sirh.commun.enums.StatutOffre.PUBLIEE).dateLimite(java.time.LocalDate.now()).build();
+        when(repository.findByStatut(com.sirh.commun.enums.StatutOffre.PUBLIEE)).thenReturn(java.util.List.of(expiree, duJour));
+        when(repository.findByStatutAndDateLimiteBefore(com.sirh.commun.enums.StatutOffre.PUBLIEE, java.time.LocalDate.now()))
+                .thenReturn(java.util.List.of(expiree));
+        when(repository.saveAll(any())).thenAnswer(i -> i.getArgument(0));
+        var service = new OffreEmploiService(repository, mock(PosteRepository.class), mock(SectionRepository.class),
+                mock(DiplomeRepository.class), mock(DemandeService.class));
+        assertEquals(java.util.List.of(duJour), service.listerPubliees()); // la date limite est incluse
+        assertEquals(java.util.List.of(expiree), service.cloturerOffresExpirees());
+        assertEquals(com.sirh.commun.enums.StatutOffre.CLOTUREE, expiree.getStatut());
+        assertEquals(com.sirh.commun.enums.StatutOffre.PUBLIEE, duJour.getStatut());
+    }
+    @Test void offreRespectePosteEtEffectifDuBesoinApprouve() {
+        var offres = mock(OffreEmploiRepository.class);
+        var postes = mock(PosteRepository.class);
+        var demandes = mock(DemandeService.class);
+        var poste = com.sirh.organisation.entity.Poste.builder().id(9L).intitule("Développeur").build();
+        var autre = com.sirh.organisation.entity.Poste.builder().id(10L).intitule("Autre").build();
+        when(postes.findById(9L)).thenReturn(java.util.Optional.of(poste));
+        when(postes.findById(10L)).thenReturn(java.util.Optional.of(autre));
+        when(demandes.obtenir(1L)).thenReturn(com.sirh.demande.entity.Demande.builder()
+                .type(com.sirh.commun.enums.TypeDemande.RECRUTEMENT)
+                .statut(com.sirh.commun.enums.StatutDemande.VALIDEE_DG)
+                .effectifDemande(3).posteCible(poste).build());
+        var service = new OffreEmploiService(offres, postes, mock(SectionRepository.class), mock(DiplomeRepository.class), demandes);
+        assertThrows(BusinessException.class, () -> service.creer(9L, "Titre", "Description", 4, null, 60, null, Set.of(), 1L));
+        assertThrows(BusinessException.class, () -> service.creer(10L, "Titre", "Description", 3, null, 60, null, Set.of(), 1L));
+        verify(offres, never()).save(any());
+        when(offres.save(any())).thenAnswer(i -> i.getArgument(0));
+        assertEquals(3, service.creer(9L, "Titre", "Description", 3, null, 60, null, Set.of(), 1L).getNbPostes());
+    }
     @Test void interditLaPublicationSansEntreprise() {
         var repository = mock(OffreEmploiRepository.class);
         var offre = com.sirh.recrutement.entity.OffreEmploi.builder().id(7L).build();

@@ -398,7 +398,8 @@ textarea.saisie { min-height: 110px; resize: vertical; line-height: 1.5; }
 
 /* ---------- 15. RESPONSIVE ---------- */
 @media (max-width: 960px) {
-  .app { grid-template-columns: 1fr; }
+  /* Le menu garde sa hauteur naturelle ; le contenu occupe l'espace restant. */
+  .app { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
   .lateral { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; padding: var(--e-3) var(--e-4); gap: var(--e-3); }
   .lateral-groupe, .lateral-utilisateur, .lateral-role { display: none; }
   .grille-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }

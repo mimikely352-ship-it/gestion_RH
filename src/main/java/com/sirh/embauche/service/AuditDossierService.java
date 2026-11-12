@@ -27,4 +27,17 @@ public class AuditDossierService {
                 .detail(detail == null ? null : detail.length() > 500 ? detail.substring(0, 500) : detail)
                 .build());
     }
+
+    /**
+     * Inscription faite dans la transaction métier en cours (embauche, bascule automatique d'un contrat) :
+     * le dossier peut ne pas être encore validé en base, et l'entrée disparaît si l'opération est annulée.
+     */
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void journaliserDansTransaction(Long dossierId, String acteur, String role, ActionAudit action, String detail) {
+        if (dossierId == null) return;
+        journal.save(AuditDossier.builder().dossierId(dossierId).horodatage(LocalDateTime.now())
+                .acteur(acteur == null || acteur.isBlank() ? "système" : acteur).role(role).action(action)
+                .detail(detail == null ? null : detail.length() > 500 ? detail.substring(0, 500) : detail)
+                .build());
+    }
 }

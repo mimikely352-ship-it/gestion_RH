@@ -70,7 +70,7 @@
             <fileset dir="${resources.dir}" erroronmissingdir="false"/>
         </copy>
         <copy todir="${classes.dir}/db/migration">
-            <fileset dir="sql" includes="09_dates_parcours_employes.sql,10_fiabilisation_metier.sql,13_fix_candidature_version.sql,14_rh_admin.sql,16_contrats_onboarding_departs.sql,17_dossier_salarie.sql"/>
+            <fileset dir="sql" includes="09_dates_parcours_employes.sql,10_fiabilisation_metier.sql,13_fix_candidature_version.sql,14_rh_admin.sql,16_contrats_onboarding_departs.sql,17_dossier_salarie.sql,18_proposition_embauche.sql,19_besoin_personnel.sql,20_temps_conges_absences.sql,21_budget_recrutement.sql,22_embauche_contrats.sql,23_conges_annulation.sql,24_conges_commentaire_responsable.sql"/>
         </copy>
     </target>
 
@@ -88,6 +88,18 @@
             <classpath refid="test.classpath"/>
             <testclasses outputdir="${test.reports.dir}">
                 <fileset dir="${test.classes.dir}" includes="**/*Test.class"/>
+                <listener type="legacy-plain" sendSysOut="true"/>
+            </testclasses>
+        </junitlauncher>
+    </target>
+
+    <target name="test-presence" depends="compile-tests" description="Verifie les blocs temps de travail, conges et absences">
+        <mkdir dir="${test.reports.dir}"/>
+        <junitlauncher haltonfailure="true" printsummary="true">
+            <classpath refid="test.classpath"/>
+            <testclasses outputdir="${test.reports.dir}">
+                <fileset dir="${test.classes.dir}" includes="**/presence/**/*Test.class"/>
+                <fork dir="${basedir}"/>
                 <listener type="legacy-plain" sendSysOut="true"/>
             </testclasses>
         </junitlauncher>

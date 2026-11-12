@@ -23,15 +23,27 @@ class AffectationAutomatiqueServiceTest {
                 .candidat(com.sirh.candidat.entity.Candidat.builder().utilisateur(employe).build())
                 .offre(OffreEmploi.builder().poste(Poste.builder()
                         .section(Section.builder().service(transport).build()).build()).build()).build();
-        when(gestion.obtenir(3L)).thenReturn(c);
+        c.setPropositionStatut(StatutProposition.ACCEPTEE);
+        c.setPropositionDebut(java.time.LocalDate.now());
+        c.setPropositionTypeContrat(TypeContrat.CDI);
+        c.setPropositionSalaire(new java.math.BigDecimal("1000.00"));
+        when(gestion.obtenirPourModification(3L)).thenReturn(c);
         when(utilisateurs.verrouiller(1L)).thenReturn(java.util.Optional.of(employe));
         when(gestion.changerStatut(3L, StatutCandidature.EMBAUCHE)).thenReturn(c);
-        new EmbaucheService(gestion, utilisateurs, mock(com.sirh.organisation.repository.ServiceRepository.class), notifications, mock(ParcoursEmployeService.class))
-                .finaliser(3L, Role.EMPLOYE, null);
+        var parcours = mock(ParcoursEmployeService.class);
+        when(parcours.embaucher(c, transport)).thenReturn(com.sirh.embauche.entity.DossierEmploye.builder().id(8L).build());
+        var contrats = mock(ContratService.class);
+        when(contrats.ajouter(anyLong(), any(), any(), any(), any(), any(), any())).thenReturn(
+                com.sirh.embauche.entity.Contrat.builder().id(4L).type(TypeContrat.CDI).statut(StatutContrat.EN_COURS).build());
+        new EmbaucheService(gestion, utilisateurs, mock(com.sirh.organisation.repository.ServiceRepository.class), notifications,
+                parcours, contrats, mock(AuditDossierService.class))
+                .finaliser(3L, Role.EMPLOYE, null, "rh@sirh.local");
         assertSame(transport, employe.getService());
         assertEquals(Role.EMPLOYE, employe.getRole());
         assertNotNull(c.getDateEntree());
         verify(utilisateurs).save(employe);
+        // Le contrat est enregistré au nom du compte RH qui a réalisé l'embauche (plus « EMBAUCHE »).
+        verify(contrats).ajouter(8L, TypeContrat.CDI, c.getPropositionDebut(), null, c.getPropositionSalaire(), null, "rh@sirh.local");
     }
 
     private final com.sirh.embauche.repository.DossierEmployeRepository dossiers = mock(com.sirh.embauche.repository.DossierEmployeRepository.class);

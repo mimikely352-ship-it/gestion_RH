@@ -24,9 +24,15 @@ public class DemandeApiController {
     @PostMapping
     @PreAuthorize("hasAnyRole('EMPLOYE','CHEF_SERVICE','DIRECTION','RH','DG')")
     public DemandeDto creer(Authentication authentication, @RequestParam TypeDemande type,
-                             @RequestParam(required = false) Long posteCibleId, @RequestParam String description) {
+                             @RequestParam(required = false) Long posteCibleId, @RequestParam String description,
+                             @RequestParam(required = false) Integer effectifDemande,
+                             @RequestParam(required = false) java.math.BigDecimal salaireMensuelParPoste,
+                             @RequestParam(required = false) java.math.BigDecimal budgetGlobalRecrutement,
+                             @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate dateSouhaitee,
+                             @RequestParam(required = false) com.sirh.commun.enums.MotifBesoin motifBesoin) {
         Long auteurId = utilisateurId(authentication);
-        return new DemandeDto(demandeService.creer(auteurId, type, posteCibleId, description));
+        return new DemandeDto(demandeService.creer(auteurId, type, posteCibleId, description,
+                effectifDemande, salaireMensuelParPoste, budgetGlobalRecrutement, dateSouhaitee, motifBesoin));
     }
 
     @GetMapping("/moi")
